@@ -1,0 +1,81 @@
+description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apache HTTPD, Go, Java, Java Native Image, .NET, NGINX, Node.js, PHP, Procfile, Python, and Ruby"
+
+[[buildpacks]]
+  uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.2"
+  version = "0.2.0"
+
+[[buildpacks]]
+  uri = "../../buildpacks/kernel-installer"
+  version = "0.0.1"
+
+[[buildpacks]]
+  uri = "../../buildpacks/frontend-selector"
+  version = "0.0.1"
+
+[[buildpacks]]
+  uri = "../../buildpacks/jupyterlab"
+  version = "0.0.1"
+
+[[buildpacks]]
+  uri = "../../buildpacks/frontends"
+  version = "0.0.1"
+
+[[buildpacks]]
+  uri = "docker://gcr.io/paketo-buildpacks/go:4.13.11"
+  version = "4.13.11"
+
+[[buildpacks]]
+  uri = "docker://gcr.io/paketo-buildpacks/nodejs:7.4.0"
+  version = "7.4.0"
+
+[[buildpacks]]
+  uri = "docker://gcr.io/paketo-buildpacks/python:2.24.3"
+  version = "2.24.3"
+
+[lifecycle]
+  version = "0.20.6"
+
+[[order]]
+
+  [[order.group]]
+    id = "renku/frontends"
+    version = "0.0.1"
+  [[order.group]]
+    id = "paketo-buildpacks/go"
+    version = "4.13.11"
+  [[order.group]]
+    id = "renku/kernel-installer"
+    version = "0.0.1"
+    optional = true
+
+[[order]]
+
+  [[order.group]]
+    id = "renku/frontends"
+    version = "0.0.1"
+  [[order.group]]
+    id = "paketo-buildpacks/python"
+    version = "2.24.3"
+  [[order.group]]
+    id = "renku/kernel-installer"
+    version = "0.0.1"
+    optional = true
+
+[[order]]
+
+  [[order.group]]
+    id = "renku/frontends"
+    version = "0.0.1"
+  [[order.group]]
+    id = "paketo-buildpacks/nodejs"
+    version = "7.4.0"
+  [[order.group]]
+    id = "renku/kernel-installer"
+    version = "0.0.1"
+    optional = true
+
+[stack]
+  build-image = "docker.io/paketobuildpacks/build-jammy-full:0.1.76"
+  id = "io.buildpacks.stacks.jammy"
+  run-image = "index.docker.io/paketobuildpacks/run-jammy-full:latest"
+  run-image-mirrors = []
