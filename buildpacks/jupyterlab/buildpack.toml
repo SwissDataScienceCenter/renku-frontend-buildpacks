@@ -1,0 +1,10 @@
+api = "0.8"
+
+[buildpack]
+id = "renku/jupyterlab"
+name = "Jupyterlab frontend Buildpack"
+version = "0.0.1"
+
+[[targets]]
+  os = "linux"
+  arch = "amd64"

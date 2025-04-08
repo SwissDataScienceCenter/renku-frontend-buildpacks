@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "=== Renku Jupyterlab buildpack ===="
+
+layers_dir=$1
+cache_layer_dir=${layers_dir}/cache
+jupyter_layer_dir=${layers_dir}/jupyterlab
+launch_env_dir=${jupyter_layer_dir}/env.launch
+mkdir -p ${cache_layer_dir}
+mkdir -p ${launch_env_dir}
+
+conda config --add pkgs_dirs ${cache_layer_dir}
+conda create -c conda-forge -y -p ${jupyter_layer_dir} jupyterlab
+. $(dirname $(dirname $(which conda)))/etc/profile.d/conda.sh
+conda activate ${jupyter_layer_dir}
+jupyter kernelspec remove -f python3
+conda deactivate
+
+printf "0.0.0.0" > ${launch_env_dir}/RENKU_SESSION_IP
+printf "8000" > ${launch_env_dir}/RENKU_SESSION_PORT
+printf "/workspace" > ${launch_env_dir}/RENKU_MOUNT_DIR
+printf "/workspace" > ${launch_env_dir}/RENKU_WORKING_DIR
+printf "/" > ${launch_env_dir}/RENKU_BASE_URL_PATH
+
+cat >${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh<<EOL
+#!/usr/bin/env bash
+${jupyter_layer_dir}/bin/python -E ${jupyter_layer_dir}/bin/jupyter-lab \
+        --ip \${RENKU_SESSION_IP} \
+        --port \${RENKU_SESSION_PORT} \
+        --ServerApp.base_url \$RENKU_BASE_URL_PATH \
+        --ServerApp.token "" \
+        --ServerApp.password "" \
+        --ServerApp.allow_remote_access true \
+        --ContentsManager.allow_hidden true \
+        --ServerApp.root_dir \${RENKU_WORKING_DIR} \
+        --KernelSpecManager.ensure_native_kernel False
+EOL
+chmod ug+x ${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh
+
+# Write layer metadata (CNB requirement)
+cat >"${layers_dir}/jupyterlab.toml" <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "jupyterlab frontend for renku"
+version = "0.0.1"
+EOL
+
+# 4. SET DEFAULT START COMMAND
+cat > "${layers_dir}/launch.toml" << EOL
+[[processes]]
+type = "jupyterlab"
+command = "${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh"
+args = []
+default = true
+direct = false
+EOL
