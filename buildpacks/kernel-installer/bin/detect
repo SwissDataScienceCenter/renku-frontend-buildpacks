@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# 1. GET ARGS
+plan_path=$2
+
+# 2. DECLARE DEPENDENCIES (OPTIONAL)
+
+cat >>"${plan_path}" <<EOL
+[[requires]]
+name = "jupyterlab"
+
+[requires.metadata]
+launch = true
+
+[[requires]]
+name = "pip"
+
+[requires.metadata]
+build = true
+
+[[requires]]
+name = "site-packages"
+
+[requires.metadata]
+build = true
+launch = true
+
+[[or]]
+[[or.requires]]
+name = "conda-environment"
+
+[or.requires.metadata]
+build = true
+launch = true
+EOL
+
