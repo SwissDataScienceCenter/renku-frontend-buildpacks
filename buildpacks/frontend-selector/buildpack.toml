@@ -1,0 +1,17 @@
+# Buildpack API version
+api = "0.11"
+
+# Buildpack ID and metadata
+[buildpack]
+id = "renku/frontend-selector"
+version = "0.0.1"
+name = "Frontend selector buildpack"
+description = "A simple buildpack that provides a frontend."
+
+# Targets the buildpack will work with
+[[targets]]
+os = "linux"
+
+# Stacks (deprecated) the buildpack will work with
+[[stacks]]
+id = "*"

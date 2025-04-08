@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "=== Renku frontend buildpack ===="
+
+layers_dir=$1
+frontend_layer_dir=${layers_dir}/frontend
+launch_env_dir=${frontend_layer_dir}/env.launch
+mkdir -p ${launch_env_dir}
+
+printf "0.0.0.0" > ${launch_env_dir}/RENKU_SESSION_IP
+printf "8000" > ${launch_env_dir}/RENKU_SESSION_PORT
+printf "/workspace" > ${launch_env_dir}/RENKU_MOUNT_DIR
+printf "/workspace" > ${launch_env_dir}/RENKU_WORKING_DIR
+printf "/" > ${launch_env_dir}/RENKU_BASE_URL_PATH
+
+cat > "${frontend_layer_dir}.toml" <<EOL
+[types]
+launch = true
+EOL
