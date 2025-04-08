@@ -1,0 +1,14 @@
+[buildpack]
+  uri = "."
+
+[[dependencies]]
+  uri = "../frontend-selector"
+
+[[dependencies]]
+  uri = "../jupyterlab"
+
+[[dependencies]]
+  uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.2"
+
+[[dependencies]]
+  uri = "urn:cnb:registry:paketo-buildpacks/miniconda@0.10.4"
