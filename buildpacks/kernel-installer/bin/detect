@@ -28,6 +28,12 @@ launch = true
 
 [[or]]
 [[or.requires]]
+name = "jupyterlab"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
 name = "conda-environment"
 
 [or.requires.metadata]
