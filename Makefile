@@ -13,8 +13,11 @@ BUILDERS := $(shell find builders -maxdepth 1 -type d -not -path "builders" -pri
 # Define the builder image to use
 BUILDER_IMAGE ?= $(word 1, $(BUILDERS))
 
+# Define the allowed frontends
+FRONTENDS := jupyterlab vscodium
+
 # Define the frontend image to use
-FRONTEND ?= jupyterlab
+FRONTEND ?= $(word 1, $(FRONTENDS))
 
 SAMPLE_IMAGE ?= $(word 1, $(SAMPLE_IMAGES))
 
@@ -26,7 +29,7 @@ buildpacks:
 	@echo "Building buildpacks..."
 	@for bp in $(BUILDPACKS); do \
 		echo "  Building buildpack: $$bp"; \
-		pack buildpack package $$bp --config buildpacks/$$bp/package.toml --target "linux"; \
+		pack buildpack package $$bp --config buildpacks/$$bp/package.toml --target "linux/amd64"; \
 	done
 
 builders:
