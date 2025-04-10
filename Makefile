@@ -33,16 +33,16 @@ builders:
 	@echo "Building builders..."
 	@for builder in $(BUILDERS); do \
 		echo "  Building builder: $$builder"; \
-		pack builder create $$builder --config builders/$$builder/builder.toml --target "linux"; \
+		pack builder create $$builder --config builders/$$builder/builder.toml --target "linux/amd64"; \
 	done
 
 samples:
 	@echo "Building sample images..."
 	@for image in $(SAMPLE_IMAGES); do \
 		echo "  Building image: $$image with $(BUILDER_IMAGE)"; \
-		pack build $$image --path samples/$$image --env BP_REQUIRES=$(FRONTEND) --builder $(BUILDER_IMAGE) --platform "linux"; \
+		pack build $$image-$(FRONTEND) --path samples/$$image --env BP_REQUIRES=$(FRONTEND) --builder $(BUILDER_IMAGE) --platform "linux"; \
 	done
 
 run:
-	@echo "Running sample image : $(SAMPLE_IMAGE)"
-	docker run -it --rm --publish 8000:8000 --entrypoint $(FRONTEND) $(SAMPLE_IMAGE):latest
+	@echo "Running sample image : $(SAMPLE_IMAGE)-$(FRONTEND)"
+	docker run -it --rm --publish 8000:8000 --entrypoint $(FRONTEND) $(SAMPLE_IMAGE)-$(FRONTEND):latest
