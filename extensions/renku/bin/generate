@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# 1. GET ARGS
+output_dir=$CNB_OUTPUT_DIR
+
+context_dir=${output_dir}/context
+mkdir -p ${context_dir}
+cat >>"${context_dir}/.bashrc" <<EOL
+# Setup git user
+if [[ -z "\$(git config --global --get user.name)" && -v GIT_AUTHOR_NAME ]]; then
+    git config --global user.name "\$GIT_AUTHOR_NAME"
+fi
+if [[ -z "\$(git config --global --get user.email)" && -v EMAIL ]]; then
+    git config --global user.email "\$EMAIL"
+fi
+
+function _update_ps1() {
+    PS1="\$(/usr/local/bin/powerline-shell -error \$? -jobs \$(jobs -p | wc -l) -mode compatible -modules ssh,venv,cwd,git,root)"
+}
+
+if [ "\$TERM" != "linux" ] && [ -f "/usr/local/bin/powerline-shell" ]; then
+    PROMPT_COMMAND="_update_ps1; \$PROMPT_COMMAND"
+fi
+
+export RENKU_DISABLE_VERSION_CHECK=1
+EOL
+
+
+# 2. GENERATE run.Dockerfile
+cat >>"${output_dir}/run.Dockerfile" <<EOL
+ARG base_image
+FROM \${base_image}
+
+ARG user_id
+ARG group_id
+ARG build_id=0
+
+LABEL maintainer="Swiss Data Science Center <info@datascience.ch>"
+LABEL io.buildpacks.rebasable=false
+
+USER root
+
+RUN usermod -s /bin/bash \$(id -nu \$(user_id))
+
+SHELL [ "/bin/bash", "-c", "-o", "pipefail" ]
+
+# Install additional dependencies and nice-to-have packages
+RUN apt-get update && apt-get install -yq --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    gnupg \
+    graphviz \
+    jq \
+    less \
+    libsm6 \
+    libxext-dev \
+    libxrender1 \
+    libyaml-0-2 \
+    libyaml-dev \
+    lmodern \
+    musl-dev \
+    nano \
+    netcat-traditional \
+    rclone \
+    unzip \
+    vim && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1 && \
+    wget -q https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-"\$(dpkg --print-architecture)"-v3.3.0.tar.gz -P /tmp && \
+    wget -q  https://github.com/justjanne/powerline-go/releases/download/v1.24/powerline-go-linux-"\$(dpkg --print-architecture)" -O /usr/local/bin/powerline-shell && \
+    chmod a+x /usr/local/bin/powerline-shell && \
+    tar -zxvf /tmp/git-lfs-linux-"\$(dpkg --print-architecture)"-v3.3.0.tar.gz -C /tmp && \
+    /tmp/git-lfs-3.3.0/install.sh && \
+    rm -rf /tmp/git-lfs*
+
+RUN echo \$build_id
+
+USER \$user_id
+
+COPY .bashrc /etc/skel
+RUN cp /etc/skel/.bashrc \$HOME/
+
+EOL
+
