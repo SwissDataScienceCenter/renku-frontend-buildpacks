@@ -13,6 +13,13 @@ name = "frontend"
 
 [requires.metadata]
 launch = true
+
+[[requires]]
+name = "renku-extensions"
+
+[requires.metadata]
+launch = true
+
 EOL
 
 # 2. DECLARE DEPENDENCIES (OPTIONAL)
