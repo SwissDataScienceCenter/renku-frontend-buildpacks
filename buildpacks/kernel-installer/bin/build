@@ -13,7 +13,8 @@ mkdir -p ${cache_layer_dir}
 mkdir -p ${env_dir}
 
 python -m pip install --prefix=${kernel_layer_dir} --cache-dir=${cache_layer_dir} ipykernel
-site_packages=$(find $kernel_layer_dir/lib -type d -name site-packages)
+python_version=python$(python --version|cut -d' ' -f2)
+site_packages=$kernel_layer_dir/lib/${python_version%.*}/site-packages
 export PYTHONPATH=$site_packages:$PYTHONPATH
 export JUPYTER_PATH=${kernel_layer_dir}/share/jupyter/
 python -m ipykernel install --prefix=${kernel_layer_dir} --name=custom_env
