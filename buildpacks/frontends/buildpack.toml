@@ -5,8 +5,8 @@ api = "0.11"
 [buildpack]
 id = "renku/frontends"
 version = "0.0.1"
-name = "Frontend selector buildpack"
-description = "A simple buildpack that requires a frontend."
+name = "Frontend composite buildpack"
+description = "The composite buildpack that defines build orders"
 
 [[order]]
                                                      
