@@ -52,8 +52,7 @@ EOL
 cat > "${layers_dir}/launch.toml" << EOL
 [[processes]]
 type = "jupyterlab"
-command = "${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh"
+command = ["${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh"]
 args = []
 default = true
-direct = false
 EOL
