@@ -17,11 +17,11 @@ conda activate ${jupyter_layer_dir}
 jupyter kernelspec remove -f python3
 conda deactivate
 
-printf "0.0.0.0" > ${launch_env_dir}/RENKU_SESSION_IP
-printf "8000" > ${launch_env_dir}/RENKU_SESSION_PORT
-printf "/workspace" > ${launch_env_dir}/RENKU_MOUNT_DIR
-printf "/workspace" > ${launch_env_dir}/RENKU_WORKING_DIR
-printf "/" > ${launch_env_dir}/RENKU_BASE_URL_PATH
+printf "0.0.0.0" > ${launch_env_dir}/RENKU_SESSION_IP.default
+printf "8000" > ${launch_env_dir}/RENKU_SESSION_PORT.default
+printf "/workspace" > ${launch_env_dir}/RENKU_MOUNT_DIR.default
+printf "/workspace" > ${launch_env_dir}/RENKU_WORKING_DIR.default
+printf "/" > ${launch_env_dir}/RENKU_BASE_URL_PATH.default
 
 cat >${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh<<EOL
 #!/usr/bin/env bash
