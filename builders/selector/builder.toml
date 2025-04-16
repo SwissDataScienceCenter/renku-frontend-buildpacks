@@ -80,9 +80,10 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
     optional = true
 
 [[order-extensions]]
-[[order-extensions.group]]
-  id = "renku/renku"
-  version = "0.0.1"
+
+  [[order-extensions.group]]
+    id = "renku/renku"
+    version = "0.0.1"
 
 [stack]
   build-image = "docker.io/paketobuildpacks/build-jammy-full:0.1.76"
