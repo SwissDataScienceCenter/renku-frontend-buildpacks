@@ -10,8 +10,9 @@ launch_env_dir=${jupyter_layer_dir}/env.launch
 mkdir -p ${cache_layer_dir}
 mkdir -p ${launch_env_dir}
 
+conda config --remove channels defaults
 conda config --add pkgs_dirs ${cache_layer_dir}
-conda create -c conda-forge -y -p ${jupyter_layer_dir} \
+conda create -c conda-forge -c nodefaults -y -p ${jupyter_layer_dir} \
   "jupyterlab>=4.4,<4.5" \
   "jupyter-server-proxy==4.3.0" \
   "bleach>5.0.0" \
