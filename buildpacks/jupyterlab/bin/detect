@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+cat > "${CNB_BUILD_PLAN_PATH}" << EOL
+[[requires]]
+  name = "conda"
+
+[requires.metadata]
+  build = true
+
+[[provides]]
+  name = "jupyterlab"
+
+[[requires]]
+  name = "jupyterlab"
+
+[requires.metadata]
+  launch = true
+EOL
