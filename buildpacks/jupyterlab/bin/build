@@ -11,9 +11,25 @@ mkdir -p ${cache_layer_dir}
 mkdir -p ${launch_env_dir}
 
 conda config --add pkgs_dirs ${cache_layer_dir}
-conda create -c conda-forge -y -p ${jupyter_layer_dir} jupyterlab
+conda create -c conda-forge -y -p ${jupyter_layer_dir} \
+  "jupyterlab>=4.4,<4.5" \
+  "jupyter-server-proxy==4.3.0" \
+  "bleach>5.0.0" \
+  "certifi>=2022.12.7" \
+  "Jinja2<3.1" \
+  "jupyterlab-git==0.50.1" \
+  "jupyter_server==2.6.0" \
+  "mistune>=2.0.1" \
+  "papermill~=2.6.0" \
+  "requests>=2.20.0" \
+  "setuptools>=65.5.1" \
+  "virtualenv>=20.7.2" \
+  "ipython>=8.10.0" \
+  "tornado>=6.3.3" \
+  "packaging>=22.0"
 . $(dirname $(dirname $(which conda)))/etc/profile.d/conda.sh
 conda activate ${jupyter_layer_dir}
+pip install backports.tarfile # beacuse of https://github.com/SwissDataScienceCenter/renkulab-docker/issues/471
 jupyter kernelspec remove -f python3
 conda deactivate
 
@@ -25,11 +41,11 @@ printf "/" > ${launch_env_dir}/RENKU_BASE_URL_PATH.default
 
 cat >${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh<<EOL
 #!/usr/bin/env bash
-${jupyter_layer_dir}/bin/python -E ${jupyter_layer_dir}/bin/jupyter-lab \
+SHELL=/bin/bash ${jupyter_layer_dir}/bin/python -E ${jupyter_layer_dir}/bin/jupyter-lab \
         --ip \${RENKU_SESSION_IP} \
         --port \${RENKU_SESSION_PORT} \
         --ServerApp.base_url \$RENKU_BASE_URL_PATH \
-        --ServerApp.token "" \
+        --IdentityProvider.token "" \
         --ServerApp.password "" \
         --ServerApp.allow_remote_access true \
         --ContentsManager.allow_hidden true \

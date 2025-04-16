@@ -1,0 +1,9 @@
+# Buildpack API version
+api = "0.10"
+
+# Extension ID and metadata
+[extension]
+id = "renku/renku"
+version = "0.0.1"
+name = "Renku Extension"
+description = "A simple extension that enables Renku additions to a base debian image"
