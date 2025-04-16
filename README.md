@@ -32,6 +32,14 @@ The `Makefile` provides several targets for building and running the project:
 
 ## Building the Project
 
+Note you have to have experimental features enabled on the `pack` CLI in order
+to be able to use and build image extensions.
+
+```bash
+pack config experimental true
+
+```
+
 To build the project, run:
 
 ```bash
