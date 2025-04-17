@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "=== Renku micromamba installer buildpack: DETECT ==="
+
+# 1. GET ARGS
+plan_path=$2
+
+echo "Looking for curl..."
+curl_bin=$(which curl)
+if [[ -z "$curl_bin" ]]; then
+	echo "Could not find curl"
+	exit 100
+fi
+echo "Found at ${curl_bin}"
+
+echo "Looking for tar..."
+tar_bin=$(which curl)
+if [[ -z "$tar_bin" ]]; then
+	echo "Could not find tar"
+	exit 100
+fi
+echo "Found at ${tar_bin}"
+
+# 2. DECLARE DEPENDENCIES (OPTIONAL)
+
+cat >>"${plan_path}" <<EOL
+[[requires]]
+name = "micromamba"
+
+[requires.metadata]
+build = true
+
+[[provides]]
+name = "micromamba"
+EOL

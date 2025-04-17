@@ -1,0 +1,16 @@
+# Buildpack API version
+api = "0.11"
+
+# Buildpack ID and metadata
+[buildpack]
+id = "renku/micromamba"
+version = "0.0.1"
+name = "Micromamba installer"
+
+# Targets the buildpack will work with
+[[targets]]
+os = "linux"
+
+# Stacks (deprecated) the buildpack will work with
+[[stacks]]
+id = "*"
