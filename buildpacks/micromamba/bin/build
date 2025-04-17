@@ -4,28 +4,22 @@ set -eo pipefail
 echo "=== Renku micromamba installer buildpack: BUILD ==="
 
 # TODO: Handle installing a specific version of micromamba
+# TODO: Once you can install a specific version of micromamba then handle caching
 
 layers_dir=$1
 mamba_layer_dir=${layers_dir}/micromamba
-cache_layer_dir=${layers_dir}/cache
 mkdir -p "${mamba_layer_dir}"
-mkdir -p "${cache_layer_dir}"
 env_dir=${mamba_layer_dir}/env.build
 mkdir -p "${env_dir}"
 
-curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest -o ${cache_layer_dir}/micromamba
-tar -xvjf "${cache_layer_dir}/micromamba" -C "${mamba_layer_dir}"
+curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest -o "${mamba_layer_dir}/micromamba.bzip2"
+tar -xvjf "${mamba_layer_dir}/micromamba.bzip2" -C "${mamba_layer_dir}"
+rm "${mamba_layer_dir}/micromamba.bzip2"
 
 printf ':' >"${env_dir}/PATH.delim"
 printf '%s' "${mamba_layer_dir}/bin" >"${env_dir}/PATH.prepend"
 
 cat >"${mamba_layer_dir}.toml" <<EOL
 [types]
-cache = true
 build = true
-EOL
-
-cat >"${cache_layer_dir}.toml" <<EOL
-[types]
-cache = true
 EOL
