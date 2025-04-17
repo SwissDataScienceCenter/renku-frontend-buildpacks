@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-echo "=== Renku kernel installer buildpack ===="
+echo "=== Renku kernel installer buildpack ==="
 
 env
 
@@ -9,29 +9,31 @@ layers_dir=$1
 cache_layer_dir=${layers_dir}/cache
 kernel_layer_dir=${layers_dir}/kernel
 env_dir=${kernel_layer_dir}/env
-mkdir -p ${cache_layer_dir}
-mkdir -p ${env_dir}
+mkdir -p "${cache_layer_dir}"
+mkdir -p "${env_dir}"
 
-python -m pip install --prefix=${kernel_layer_dir} --cache-dir=${cache_layer_dir} ipykernel
-python_version=python$(python --version|cut -d' ' -f2)
+echo "Installing ipykernel in ${kernel_layer_dir}"
+python -m pip install --prefix="${kernel_layer_dir}" --cache-dir="${cache_layer_dir}" ipykernel
+python_version=python$(python --version | cut -d' ' -f2)
 site_packages=$kernel_layer_dir/lib/${python_version%.*}/site-packages
 export PYTHONPATH=$site_packages:$PYTHONPATH
 export JUPYTER_PATH=${kernel_layer_dir}/share/jupyter/
-python -m ipykernel install --prefix=${kernel_layer_dir} --name=custom_env
-${kernel_layer_dir}/bin/jupyter-kernelspec remove -f python3
+echo "Installing kernel custom_env with prefix ${kernel_layer_dir}"
+python -m ipykernel install --prefix="${kernel_layer_dir}" --name=custom_env
+echo "Removing python3 kernelspec with jupyter-kernelspec"
+"${kernel_layer_dir}"/bin/jupyter-kernelspec remove -f python3 || echo "Could not find python3 kernelpsec to remove"
 
-printf "${JUPYTER_PATH}"> ${env_dir}/JUPYTER_PATH
-printf ':'> ${env_dir}/PYTHONPATH.delim
-printf "${site_packages}"> ${env_dir}/PYTHONPATH.prepend
+printf '%s' "${JUPYTER_PATH}" >"${env_dir}/JUPYTER_PATH"
+printf ':' >"${env_dir}/PYTHONPATH.delim"
+printf '%s' "${site_packages}" >"${env_dir}/PYTHONPATH.prepend"
 
-cat > "${cache_layer_dir}.toml" <<EOL
+cat >"${cache_layer_dir}.toml" <<EOL
 [types]
 cache = true
 EOL
 
-cat > "${kernel_layer_dir}.toml" <<EOL
+cat >"${kernel_layer_dir}.toml" <<EOL
 [types]
 cache = true
 launch = true
 EOL
-
