@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "sample-poetry"
+version = "0.0.1"
+description = "sample test for buildpacks"
+authors = ["Salim Kayal <salim.kayal@idiap.ch>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+python-cowsay = "^1.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
