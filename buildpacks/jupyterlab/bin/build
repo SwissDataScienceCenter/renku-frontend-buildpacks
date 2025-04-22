@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-echo "=== Renku Jupyterlab buildpack ===="
+echo "=== Renku Jupyterlab buildpack ==="
 
 layers_dir=$1
 cache_layer_dir=${layers_dir}/cache
-jupyter_layer_dir=${layers_dir}/jupyterlab
+jupyter_layer_dir=${layers_dir}/jupyterlab/env
 launch_env_dir=${jupyter_layer_dir}/env.launch
 mkdir -p ${cache_layer_dir}
 mkdir -p ${launch_env_dir}
@@ -34,11 +34,11 @@ pip install backports.tarfile # beacuse of https://github.com/SwissDataScienceCe
 jupyter kernelspec remove -f python3
 conda deactivate
 
-printf "0.0.0.0" > ${launch_env_dir}/RENKU_SESSION_IP.default
-printf "8000" > ${launch_env_dir}/RENKU_SESSION_PORT.default
-printf "/workspace" > ${launch_env_dir}/RENKU_MOUNT_DIR.default
-printf "/workspace" > ${launch_env_dir}/RENKU_WORKING_DIR.default
-printf "/" > ${launch_env_dir}/RENKU_BASE_URL_PATH.default
+printf "0.0.0.0" >${launch_env_dir}/RENKU_SESSION_IP.default
+printf "8000" >${launch_env_dir}/RENKU_SESSION_PORT.default
+printf "/workspace" >${launch_env_dir}/RENKU_MOUNT_DIR.default
+printf "/workspace" >${launch_env_dir}/RENKU_WORKING_DIR.default
+printf "/" >${launch_env_dir}/RENKU_BASE_URL_PATH.default
 
 cat >${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh<<EOL
 #!/usr/bin/env bash
@@ -66,7 +66,7 @@ version = "0.0.1"
 EOL
 
 # 4. SET DEFAULT START COMMAND
-cat > "${layers_dir}/launch.toml" << EOL
+cat >"${layers_dir}/launch.toml" << EOL
 [[processes]]
 type = "jupyterlab"
 command = ["${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh"]
