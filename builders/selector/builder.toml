@@ -21,6 +21,10 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
   version = "0.0.1"
 
 [[buildpacks]]
+  uri = "../../buildpacks/dependency-manager"
+  version = "0.0.1"
+
+[[buildpacks]]
   uri = "docker://gcr.io/paketo-buildpacks/go:4.13.11"
   version = "4.13.11"
 
@@ -61,6 +65,9 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
   [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.24.3"
+  [[order.group]]
+    id = "renku/dependency-manager"
+    version = "0.0.1"
   [[order.group]]
     id = "renku/kernel-installer"
     version = "0.0.1"
