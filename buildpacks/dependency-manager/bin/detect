@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# 1. GET ARGS
+plan_path=$2
+
+cat >>"${plan_path}" <<EOL
+[[requires]]
+name = "site-packages"
+
+[requires.metadata]
+launch = true
+
+[[requires]]
+name = "pip"
+
+[requires.metadata]
+launch = true
+
+[[or]]
+[[or.requires]]
+name = "conda-environment"
+
+[or.requires.metadata]
+launch = true
+
+EOL
