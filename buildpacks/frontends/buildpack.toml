@@ -9,10 +9,10 @@ name = "Frontend composite buildpack"
 description = "The composite buildpack that defines build orders"
 
 [[order]]
-                                                     
+
   [[order.group]]
     id = "paketo-buildpacks/miniconda"
-    version = "0.10.4"                   
+    version = "0.10.4"
 
   [[order.group]]
     id = "renku/jupyterlab"
@@ -31,4 +31,3 @@ description = "The composite buildpack that defines build orders"
   [[order.group]]
     id = "renku/frontend-selector"
     version = "0.0.1"
-

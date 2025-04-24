@@ -3,19 +3,16 @@ set -eo pipefail
 
 echo "=== Renku Jupyterlab buildpack ==="
 
-layers_dir=$1
-cache_layer_dir=${layers_dir}/cache
-jupyter_layer_dir=${layers_dir}/jupyterlab
-jupyter_environment_dir=${layers_dir}/jupyterlab/jupyterlab_env
-launch_env_dir=${jupyter_layer_dir}/env.launch
-mkdir -p ${jupyter_environment_dir}
-mkdir -p ${jupyter_layer_dir}/bin
-mkdir -p ${cache_layer_dir}
-mkdir -p ${launch_env_dir}
+layers_dir="$1"
+cache_layer_dir="${layers_dir}"/cache
+jupyter_layer_dir="${layers_dir}"/jupyterlab
+launch_env_dir="${jupyter_layer_dir}"/env.launch
+mkdir -p "${cache_layer_dir}"
+mkdir -p "${launch_env_dir}"
 
 conda config --remove channels defaults
-conda config --add pkgs_dirs ${cache_layer_dir}
-conda create -c conda-forge -c nodefaults -y -p ${jupyter_environment_dir} \
+conda config --add pkgs_dirs "${cache_layer_dir}"
+conda create -c conda-forge -c nodefaults -y -p "${jupyter_layer_dir}" \
   "jupyterlab>=4.4,<4.5" \
   "jupyter-server-proxy==4.3.0" \
   "bleach>5.0.0" \
@@ -31,21 +28,22 @@ conda create -c conda-forge -c nodefaults -y -p ${jupyter_environment_dir} \
   "ipython>=8.10.0" \
   "tornado>=6.3.3" \
   "packaging>=22.0"
-. $(dirname $(dirname $(which conda)))/etc/profile.d/conda.sh
-conda activate ${jupyter_environment_dir}
+# shellcheck source=/dev/null
+. "$(dirname "$(dirname "$(which conda)")")"/etc/profile.d/conda.sh
+conda activate "${jupyter_layer_dir}"
 pip install backports.tarfile # beacuse of https://github.com/SwissDataScienceCenter/renkulab-docker/issues/471
 jupyter kernelspec remove -f python3
 conda deactivate
 
-printf "0.0.0.0" >${launch_env_dir}/RENKU_SESSION_IP.default
-printf "8000" >${launch_env_dir}/RENKU_SESSION_PORT.default
-printf "/workspace" >${launch_env_dir}/RENKU_MOUNT_DIR.default
-printf "/workspace" >${launch_env_dir}/RENKU_WORKING_DIR.default
-printf "/" >${launch_env_dir}/RENKU_BASE_URL_PATH.default
+printf "0.0.0.0" > "${launch_env_dir}"/RENKU_SESSION_IP.default
+printf "8000" > "${launch_env_dir}"/RENKU_SESSION_PORT.default
+printf "/workspace" > "${launch_env_dir}"/RENKU_MOUNT_DIR.default
+printf "/workspace" > "${launch_env_dir}"/RENKU_WORKING_DIR.default
+printf "/" > "${launch_env_dir}"/RENKU_BASE_URL_PATH.default
 
-cat >${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh<<EOL
+cat >"${jupyter_layer_dir}"/bin/jupyterlab-entrypoint.sh<<EOL
 #!/usr/bin/env bash
-SHELL=/bin/bash ${jupyter_environment_dir}/bin/python -E ${jupyter_environment_dir}/bin/jupyter-lab \
+SHELL=/bin/bash "${jupyter_layer_dir}"/bin/python -E "${jupyter_layer_dir}"/bin/jupyter-lab \
         --ip \${RENKU_SESSION_IP} \
         --port \${RENKU_SESSION_PORT} \
         --ServerApp.base_url \$RENKU_BASE_URL_PATH \
@@ -56,7 +54,7 @@ SHELL=/bin/bash ${jupyter_environment_dir}/bin/python -E ${jupyter_environment_d
         --ServerApp.root_dir \${RENKU_WORKING_DIR} \
         --KernelSpecManager.ensure_native_kernel False
 EOL
-chmod ug+x ${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh
+chmod ug+x "${jupyter_layer_dir}"/bin/jupyterlab-entrypoint.sh
 
 # Write layer metadata (CNB requirement)
 cat >"${layers_dir}/jupyterlab.toml" <<EOL
