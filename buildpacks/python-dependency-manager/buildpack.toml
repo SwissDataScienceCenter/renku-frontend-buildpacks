@@ -15,4 +15,3 @@ os = "linux"
 # Stacks (deprecated) the buildpack will work with
 [[stacks]]
 id = "*"
-

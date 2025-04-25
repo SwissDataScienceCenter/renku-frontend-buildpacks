@@ -6,7 +6,7 @@ process.
 
 ## Directory Structure
 
-*   **builders**: Contains builder definitions. A builder defines the environment and buildpacks 
+*   **builders**: Contains builder definitions. A builder defines the environment and buildpacks
     used to build an application. For now we only maintain the selector builder.
 *   **buildpacks**: Contains individual buildpacks for different frontend frameworks. Each buildpack
     provides the necessary scripts and configurations to detect and build applications.
