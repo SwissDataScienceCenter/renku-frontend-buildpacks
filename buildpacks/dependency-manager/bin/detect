@@ -24,4 +24,11 @@ name = "conda-environment"
 [or.requires.metadata]
 launch = true
 
+[[or]]
+[[or.requires]]
+name = "poetry-venv"
+
+[or.requires.metadata]
+launch = true
+
 EOL
