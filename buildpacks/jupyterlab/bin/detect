@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
-cat > "${CNB_BUILD_PLAN_PATH}" << EOL
+echo "Checking if jupyuterlab frontend should be installed..."
+if [[ "${RENKU_FRONTEND}" == "jupyterlab" ]]; then
+  echo "The RENKU_FRONTEND environment variable was found and the buildpack will be applied"
+else
+  echo "The RENKU_FRONTEND environment variable is not set or not equal to jupyterlab, will not apply this buildpack"
+  exit 100
+fi
+
+cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
 [[requires]]
   name = "conda"
 

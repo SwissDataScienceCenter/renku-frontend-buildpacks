@@ -11,7 +11,6 @@ process.
 *   **buildpacks**: Contains individual buildpacks for different frontend frameworks. Each buildpack
     provides the necessary scripts and configurations to detect and build applications.
   *   **frontends**: composite buildpack for frontends.
-  *   **frontend-selector**: Buildpack for selecting the appropriate frontend.
   *   **jupyterlab**: Buildpack for JupyterLab frontend.
   *   **kernel-installer**: Buildpack for installing the correct kernel for the environment.
 *   **samples**: Contains sample applications for different frontend frameworks. These samples can

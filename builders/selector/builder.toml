@@ -2,6 +2,7 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
 
 [[buildpacks]]
   uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.2"
+  id = "vscodium"
   version = "0.2.0"
 
 [[buildpacks]]
@@ -9,15 +10,7 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
   version = "0.0.1"
 
 [[buildpacks]]
-  uri = "../../buildpacks/frontend-selector"
-  version = "0.0.1"
-
-[[buildpacks]]
   uri = "../../buildpacks/jupyterlab"
-  version = "0.0.1"
-
-[[buildpacks]]
-  uri = "../../buildpacks/frontends"
   version = "0.0.1"
 
 [[buildpacks]]
@@ -36,6 +29,11 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
   uri = "docker://gcr.io/paketo-buildpacks/python:2.24.3"
   version = "2.24.3"
 
+[[buildpacks]]
+  id = "paketo-buildpacks/miniconda"
+  uri = "docker://gcr.io/paketo-buildpacks/miniconda:0.10.4"
+  version = "0.10.4"
+
 [[extensions]]
   id = "renku/renku"
   version = "0.0.1"
@@ -47,7 +45,7 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
 [[order]]
 
   [[order.group]]
-    id = "renku/frontends"
+    id = "renku/jupyterlab"
     version = "0.0.1"
   [[order.group]]
     id = "paketo-buildpacks/go"
@@ -59,8 +57,11 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
 
 [[order]]
 
+ [[order.group]]
+   id = "paketo-buildpacks/miniconda"
+   version = "0.10.4"
   [[order.group]]
-    id = "renku/frontends"
+    id = "renku/jupyterlab"
     version = "0.0.1"
   [[order.group]]
     id = "paketo-buildpacks/python"
@@ -76,7 +77,7 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
 [[order]]
 
   [[order.group]]
-    id = "renku/frontends"
+    id = "renku/jupyterlab"
     version = "0.0.1"
   [[order.group]]
     id = "paketo-buildpacks/nodejs"
