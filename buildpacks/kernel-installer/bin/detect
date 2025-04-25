@@ -39,5 +39,19 @@ name = "conda-environment"
 [or.requires.metadata]
 build = true
 launch = true
+
+[[or]]
+[[or.requires]]
+name = "jupyterlab"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
+name = "poetry-venv"
+
+[or.requires.metadata]
+build = true
+launch = true
 EOL
 
