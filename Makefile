@@ -2,16 +2,16 @@
 # Makefile
 
 # Define the sample images to build (assuming each subdirectory in samples is an app)
-SAMPLE_IMAGES := $(shell find samples -maxdepth 1 -type d -not -path "samples" -printf "%P ")
+SAMPLE_IMAGES := $(shell cd samples && ls -d *)
 
 # Buildpacks directory (assuming each subdirectory contains a buildpack)
-BUILDPACKS := $(shell find buildpacks -maxdepth 1 -type d -not -path "buildpacks" -printf "%P ")
+BUILDPACKS := $(shell cd buildpacks && ls -d *)
 
 # Buildpacks directory (assuming each subdirectory contains a buildpack)
-EXTENSIONS := $(shell find extensions -maxdepth 1 -type d -not -path "extensions" -printf "%P ")
+EXTENSIONS := $(shell cd extensions && ls -d *)
 
 # Builders directory (assuming each subdirectory contains a builder definition)
-BUILDERS := $(shell find builders -maxdepth 1 -type d -not -path "builders" -printf "%P ")
+BUILDERS := $(shell cd builders && ls -d *)
 
 # Define the builder image to use
 BUILDER_IMAGE ?= $(word 1, $(BUILDERS))
