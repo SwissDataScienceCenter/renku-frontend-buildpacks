@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 echo "Checking if jupyuterlab frontend should be installed..."
-if [[ "${RENKU_FRONTENDS}" =~ "jupyterlab" ]]; then
-  echo "The RENKU_FRONTENDS environment variable was found to contain jupyterlab and the buildpack will be applied"
+if [[ "${BP_RENKU_FRONTENDS}" =~ "jupyterlab" ]]; then
+  echo "The BP_RENKU_FRONTENDS environment variable was found to contain jupyterlab and the buildpack will be applied"
 else
-  echo "The RENKU_FRONTENDS environment variable is not set or does not contain jupyterlab, will not apply this buildpack"
+  echo "The BP_RENKU_FRONTENDS environment variable is not set or does not contain jupyterlab, will not apply this buildpack"
   exit 100
 fi
 

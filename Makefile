@@ -53,7 +53,7 @@ samples:
 	@echo "Building sample images..."
 	@for image in $(SAMPLE_IMAGES); do \
 		echo "  Building image: $$image with $(BUILDER_IMAGE)"; \
-		pack build $$image-$(FRONTEND) --clear-cache --path samples/$$image --env RENKU_FRONTENDS=$(FRONTEND) --builder $(BUILDER_IMAGE) --platform "linux"; \
+		pack build $$image-$(FRONTEND) --clear-cache --path samples/$$image --env BP_RENKU_FRONTENDS=$(FRONTEND) --builder $(BUILDER_IMAGE) --platform "linux"; \
 	done
 
 run:
