@@ -24,7 +24,7 @@ FRONTEND ?= $(word 1, $(FRONTENDS))
 
 SAMPLE_IMAGE ?= $(word 1, $(SAMPLE_IMAGES))
 
-.PHONY: all buildpacks extensions builders samples
+.PHONY: all buildpacks extensions builders samples run_image
 
 all: buildpacks extensions builders samples
 
@@ -59,3 +59,7 @@ samples:
 run:
 	@echo "Running sample image : $(SAMPLE_IMAGE)-$(FRONTEND)"
 	docker run -it --rm --publish 8000:8000 --entrypoint $(FRONTEND) $(SAMPLE_IMAGE)-$(FRONTEND):latest
+
+run_image:
+	# TODO: Upgrade to properly tag based on commit/tag
+	docker build -t ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.1 -f ./extensions/renku/generate/run.Dockerfile ./extensions/renku/generate/context/

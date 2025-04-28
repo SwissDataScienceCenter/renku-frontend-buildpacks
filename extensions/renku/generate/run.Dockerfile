@@ -1,8 +1,8 @@
-ARG base_image
+ARG base_image=index.docker.io/paketobuildpacks/run-jammy-full:latest
 FROM ${base_image}
 
-ARG user_id
-ARG group_id
+ARG user_id=1000
+ARG group_id=1000
 ARG build_id=0
 
 LABEL maintainer="Swiss Data Science Center <info@datascience.ch>"
@@ -41,7 +41,9 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     chmod a+x /usr/local/bin/powerline-shell && \
     tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -C /tmp && \
     /tmp/git-lfs-3.3.0/install.sh && \
-    rm -rf /tmp/git-lfs*
+    rm -rf /tmp/git-lfs* && \
+    groupadd -f --gid ${group_id} renku && \
+    useradd --gid ${group_id} --uid ${user_id} --create-home renku
 
 RUN echo $build_id
 
