@@ -1,3 +1,28 @@
 #!/usr/bin/env bash
 set -eo pipefail
-exit 0
+
+layer_dir="${CNB_LAYERS_DIR}/deps"
+execd_dir="${layer_dir}"/exec.d
+mkdir -p "${execd_dir}"
+
+cat >"${execd_dir}"/setup.sh <<EOL
+#!/usr/bin/env bash
+set -eo pipefail
+python -m venv --system-site-packages \${RENKU_MOUNT_DIR}/.venv
+printf 'source \${RENKU_MOUNT_DIR}/.venv/bin/activate' >>  \${HOME}/.bashrc
+source \${RENKU_MOUNT_DIR}/.venv/bin/activate
+if python -c "import ipykernel" >/dev/null 2>&1;then
+  python -m ipykernel install --user --name mutable_env
+fi
+EOL
+
+chmod +x "${execd_dir}"/setup.sh
+
+cat >"${layer_dir}".toml <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "set dependency management for run sessions"
+version = "0.0.1"
+EOL
