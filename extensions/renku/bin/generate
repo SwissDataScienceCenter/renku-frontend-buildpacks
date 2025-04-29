@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-set -eo pipefail
-
-cp -r "${CNB_EXTENSION_DIR}/generate/." "${CNB_OUTPUT_DIR}"
