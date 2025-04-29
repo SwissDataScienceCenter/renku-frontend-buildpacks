@@ -3,10 +3,11 @@ FROM ${base_image}
 
 ARG user_id=1000
 ARG group_id=1000
-ARG build_id=0
 
 LABEL maintainer="Swiss Data Science Center <info@datascience.ch>"
 LABEL io.buildpacks.rebasable=false
+LABEL org.opencontainers.image.source="https://github.com/SwissDataScienceCenter/renku-frontend-buildpacks"
+LABEL org.opencontainers.image.description="Base image for Renku sessions built with buildpacks"
 
 USER root
 
@@ -45,8 +46,6 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     groupadd -f --gid ${group_id} renku && \
     useradd --gid ${group_id} --uid ${user_id} --create-home renku && \
     chsh -s /bin/bash renku
-
-RUN echo $build_id
 
 USER $user_id
 WORKDIR /home/renku
