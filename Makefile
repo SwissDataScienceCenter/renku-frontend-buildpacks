@@ -17,7 +17,7 @@ BUILDERS := $(shell cd builders && ls -d *)
 BUILDER_IMAGE ?= $(word 1, $(BUILDERS))
 
 # Define the allowed frontends
-FRONTENDS := jupyterlab vscodium
+FRONTENDS := jupyterlab
 
 # Define the frontend image to use
 FRONTEND ?= $(word 1, $(FRONTENDS))
@@ -53,7 +53,7 @@ samples:
 	@echo "Building sample images..."
 	@for image in $(SAMPLE_IMAGES); do \
 		echo "  Building image: $$image with $(BUILDER_IMAGE)"; \
-		pack build $$image-$(FRONTEND) --clear-cache --path samples/$$image --env BP_REQUIRES=$(FRONTEND) --builder $(BUILDER_IMAGE) --platform "linux"; \
+		pack build $$image-$(FRONTEND) --clear-cache --path samples/$$image --env BP_RENKU_FRONTENDS=$(FRONTEND) --builder $(BUILDER_IMAGE) --platform "linux"; \
 	done
 
 run:
