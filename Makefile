@@ -95,7 +95,6 @@ run_image:
 
 REGISTRY_HOST=ghcr.io
 REGISTRY_REPO=swissdatasciencecenter/renku-frontend-buildpacks
-
 .PHONY: publish_buildpacks
 publish_buildpacks:
 	@for bp in $(BUILDPACKS); do \
