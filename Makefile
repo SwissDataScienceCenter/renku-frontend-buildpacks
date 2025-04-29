@@ -101,3 +101,11 @@ publish_buildpacks:
 		echo "Publishing buildpack: $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$bp"; \
 		./scripts/publish_buildpack.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$bp buildpacks/$$bp --publish; \
 	done
+
+.PHONY: publish_builders
+publish_builders:
+	@echo "Publishing builders..."
+	@for builder in $(BUILDERS); do \
+		echo "Publishing builder: $$builder"; \
+		./scripts/publish_builder.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$builder builders/$$builder --publish; \
+	done
