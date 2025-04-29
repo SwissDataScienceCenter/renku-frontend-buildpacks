@@ -7,15 +7,15 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
 
 [[buildpacks]]
   uri = "../../buildpacks/kernel-installer"
-  version = "0.0.1"
+  version = "0.0.2"
 
 [[buildpacks]]
   uri = "../../buildpacks/jupyterlab"
-  version = "0.0.1"
+  version = "0.0.2"
 
 [[buildpacks]]
   uri = "../../buildpacks/python-dependency-manager"
-  version = "0.0.1"
+  version = "0.0.2"
 
 [[buildpacks]]
   uri = "docker://gcr.io/paketo-buildpacks/python:2.24.3"
@@ -39,13 +39,13 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
     version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.0.1"
+    version = "0.0.2"
   [[order.group]]
     id = "renku/jupyterlab"
-    version = "0.0.1"
+    version = "0.0.2"
   [[order.group]]
     id = "renku/kernel-installer"
-    version = "0.0.1"
+    version = "0.0.2"
 
 [[order]]
 
@@ -54,7 +54,7 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
     version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.0.1"
+    version = "0.0.2"
   [[order.group]]
     id = "vscodium"
     version = "0.3.0"
@@ -62,5 +62,5 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
 [stack]
   build-image = "docker.io/paketobuildpacks/builder-jammy-buildpackless-full:0.0.256"
   id = "io.buildpacks.stacks.jammy"
-  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.1"
+  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.2"
   run-image-mirrors = []
