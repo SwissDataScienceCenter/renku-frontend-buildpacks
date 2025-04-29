@@ -7,9 +7,6 @@ SAMPLE_IMAGES := $(shell cd samples && ls -d *)
 # Buildpacks directory (assuming each subdirectory contains a buildpack)
 BUILDPACKS := $(shell cd buildpacks && ls -d *)
 
-# Buildpacks directory (assuming each subdirectory contains a buildpack)
-EXTENSIONS := $(shell cd extensions && ls -d *)
-
 # Builders directory (assuming each subdirectory contains a builder definition)
 BUILDERS := $(shell cd builders && ls -d *)
 
@@ -44,7 +41,7 @@ mv $(1) $(1)-$(3) ;\
 ln -sf $(1)-$(3) $(1)
 endef
 
-.PHONY: all buildpacks extensions builders samples run_image
+.PHONY: all buildpacks builders samples run_image
 
 ## Tools
 YQ = $(LOCALBIN)/yq
@@ -55,20 +52,13 @@ yq: $(YQ)
 $(YQ): $(LOCALBIN)
 	$(call go-install-tool,$(YQ),github.com/mikefarah/yq/v4,$(YQ_VERSION))
 
-all: buildpacks extensions builders samples
+all: buildpacks builders samples
 
 buildpacks:
 	@echo "Building buildpacks..."
 	@for bp in $(BUILDPACKS); do \
 		echo "  Building buildpack: $$bp"; \
 		pack buildpack package $$bp --config buildpacks/$$bp/package.toml --target "linux/amd64"; \
-	done
-
-extensions:
-	@echo "Building extensions..."
-	@for extension in $(EXTENSIONS); do \
-		echo "  Building extension: $$extension"; \
-		pack extension package $$extension --config extensions/$$extension/package.toml; \
 	done
 
 builders:
@@ -89,12 +79,16 @@ run:
 	@echo "Running sample image : $(SAMPLE_IMAGE)-$(FRONTEND)"
 	docker run -it --rm --publish 8000:8000 --entrypoint $(FRONTEND) $(SAMPLE_IMAGE)-$(FRONTEND):latest
 
-run_image:
-	# TODO: Upgrade to properly tag based on commit/tag
-	docker build -t ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.1 -f ./extensions/renku/generate/run.Dockerfile ./extensions/renku/generate/context/
-
 REGISTRY_HOST=ghcr.io
 REGISTRY_REPO=swissdatasciencecenter/renku-frontend-buildpacks
+
+run_image:
+	bash ./scripts/publish_run_image.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image
+
+.PHONY: publish_run_image
+publish_run_image: run_image
+	bash ./scripts/publish_run_image.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image --publish
+
 .PHONY: publish_buildpacks
 publish_buildpacks:
 	@for bp in $(BUILDPACKS); do \
