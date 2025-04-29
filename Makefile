@@ -24,7 +24,36 @@ FRONTEND ?= $(word 1, $(FRONTENDS))
 
 SAMPLE_IMAGE ?= $(word 1, $(SAMPLE_IMAGES))
 
+LOCALBIN ?= $(shell pwd)/bin
+$(LOCALBIN):
+	mkdir -p $(LOCALBIN)
+
+# go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
+# $1 - target path with name of binary
+# $2 - package url which can be installed
+# $3 - specific version of package
+define go-install-tool
+@[ -f "$(1)-$(3)" ] || { \
+set -e; \
+package=$(2)@$(3) ;\
+echo "Downloading $${package}" ;\
+rm -f $(1) || true ;\
+GOBIN=$(LOCALBIN) go install $${package} ;\
+mv $(1) $(1)-$(3) ;\
+} ;\
+ln -sf $(1)-$(3) $(1)
+endef
+
 .PHONY: all buildpacks extensions builders samples run_image
+
+## Tools
+YQ = $(LOCALBIN)/yq
+YQ_VERSION ?= v4.45.1
+
+.PHONY: yq
+yq: $(YQ)
+$(YQ): $(LOCALBIN)
+	$(call go-install-tool,$(YQ),github.com/mikefarah/yq/v4,$(YQ_VERSION))
 
 all: buildpacks extensions builders samples
 
@@ -63,3 +92,12 @@ run:
 run_image:
 	# TODO: Upgrade to properly tag based on commit/tag
 	docker build -t ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.1 -f ./extensions/renku/generate/run.Dockerfile ./extensions/renku/generate/context/
+
+REGISTRY_HOST=ghcr.io
+REGISTRY_REPO=swissdatasciencecenter/renku-frontend-buildpacks
+.PHONY: publish_buildpacks
+publish_buildpacks:
+	@for bp in $(BUILDPACKS); do \
+		echo "Publishing buildpack: $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$bp"; \
+		./scripts/publish_buildpack.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$bp buildpacks/$$bp --publish; \
+	done
