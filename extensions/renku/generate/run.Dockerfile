@@ -49,6 +49,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 RUN echo $build_id
 
 USER $user_id
+WORKDIR /home/renku
 
 COPY .bashrc /etc/skel
 RUN cp /etc/skel/.bashrc $HOME/
