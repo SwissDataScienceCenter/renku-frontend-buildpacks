@@ -43,7 +43,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     /tmp/git-lfs-3.3.0/install.sh && \
     rm -rf /tmp/git-lfs* && \
     groupadd -f --gid ${group_id} renku && \
-    useradd --gid ${group_id} --uid ${user_id} --create-home renku
+    useradd --gid ${group_id} --uid ${user_id} --create-home renku && \
+    chsh -s /bin/bash renku
 
 RUN echo $build_id
 
