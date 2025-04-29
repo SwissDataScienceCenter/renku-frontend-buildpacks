@@ -26,11 +26,6 @@ description = "Ubuntu 22.04 Jammy Jellyfish full image with buildpacks for Apach
   uri = "docker://gcr.io/paketo-buildpacks/miniconda:0.10.4"
   version = "0.10.4"
 
-[[extensions]]
-  id = "renku/renku"
-  version = "0.0.1"
-  uri = "../../extensions/renku"
-
 [lifecycle]
   version = "0.20.6"
 
