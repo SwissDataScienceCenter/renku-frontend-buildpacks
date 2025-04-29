@@ -20,6 +20,7 @@ conda env create -y -p "${jupyter_environment_dir}" -f "${buildpack_dir}/bin/jup
 . "$(dirname "$(dirname "$(which conda)")")"/etc/profile.d/conda.sh
 conda activate "${jupyter_environment_dir}"
 jupyter kernelspec remove -f python3
+jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 conda deactivate
 
 mkdir -p "${launch_env_dir}"
