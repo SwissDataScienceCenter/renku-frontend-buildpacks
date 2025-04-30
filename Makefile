@@ -60,7 +60,7 @@ ginkgo: $(GINKGO)
 $(GINKGO): $(LOCALBIN)
 	$(call go-install-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo,$(GINKGO_VERSION))
 
-all: buildpacks extensions builders samples
+all: buildpacks builders samples
 
 buildpacks:
 	@echo "Building buildpacks..."
@@ -113,5 +113,5 @@ publish_builders:
 	done
 
 .PHONY: tests
-tests:
-	$(GINKGO) -r -vv
+tests: ginkgo
+	$(GINKGO) -r -v

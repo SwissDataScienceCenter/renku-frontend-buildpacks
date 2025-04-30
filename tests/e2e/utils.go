@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net"
@@ -98,14 +99,32 @@ func runImage(ctx context.Context, client docker.ContainerAPIClient, image strin
 	return cont.ID, nil
 }
 
-func execInContainer(ctx context.Context, client docker.ContainerAPIClient, containerID string) error {
+func execInContainer(ctx context.Context, client docker.ContainerAPIClient, containerID string, cmd []string) (string, error) {
 	execOpts := container.ExecOptions{
-		Cmd:          []string{},
+		Cmd:          cmd,
 		AttachStderr: true,
 		AttachStdout: true,
 	}
-	_, err := client.ContainerExecCreate(ctx, containerID, execOpts)
-	return err
+	ex, err := client.ContainerExecCreate(ctx, containerID, execOpts)
+	if err != nil {
+		return "", err
+	}
+	attOpts := container.ExecAttachOptions{}
+	res, err := client.ContainerExecAttach(ctx, ex.ID, attOpts)
+	defer res.Close()
+	if err != nil {
+		return "", err
+	}
+	startOpts := container.ExecStartOptions{}
+	err = client.ContainerExecStart(ctx, ex.ID, startOpts)
+	if err != nil {
+		return "", err
+	}
+	cont, err := io.ReadAll(res.Reader)
+	if err != nil {
+		return "", err
+	}
+	return string(cont), nil
 }
 
 func removeContainer(ctx context.Context, client docker.ContainerAPIClient, containerID string) error {
