@@ -47,10 +47,18 @@ endef
 YQ = $(LOCALBIN)/yq
 YQ_VERSION ?= v4.45.1
 
+GINKGO = $(LOCALBIN)/ginkgo
+GINKGO_VERSION ?= "v2.23.4"
+
 .PHONY: yq
 yq: $(YQ)
 $(YQ): $(LOCALBIN)
 	$(call go-install-tool,$(YQ),github.com/mikefarah/yq/v4,$(YQ_VERSION))
+
+.PHONY: ginkgo
+ginkgo: $(GINKGO)
+$(GINKGO): $(LOCALBIN)
+	$(call go-install-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo,$(GINKGO_VERSION))
 
 all: buildpacks builders samples
 
@@ -103,3 +111,7 @@ publish_builders:
 		echo "Publishing builder: $$builder"; \
 		./scripts/publish_builder.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$builder builders/$$builder --publish; \
 	done
+
+.PHONY: tests
+tests: ginkgo
+	$(GINKGO) -r -v
