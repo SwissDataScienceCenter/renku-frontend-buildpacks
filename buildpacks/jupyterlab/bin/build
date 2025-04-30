@@ -24,13 +24,13 @@ jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 conda deactivate
 
 mkdir -p "${launch_env_dir}"
-printf "0.0.0.0" > "${launch_env_dir}/RENKU_SESSION_IP.default"
-printf "8000" > "${launch_env_dir}/RENKU_SESSION_PORT.default"
-printf "/workspace" > "${launch_env_dir}/RENKU_MOUNT_DIR.default"
-printf "/workspace" > "${launch_env_dir}/RENKU_WORKING_DIR.default"
-printf "/" > "${launch_env_dir}/RENKU_BASE_URL_PATH.default"
+printf "0.0.0.0" >"${launch_env_dir}/RENKU_SESSION_IP.default"
+printf "8000" >"${launch_env_dir}/RENKU_SESSION_PORT.default"
+printf "/workspace" >"${launch_env_dir}/RENKU_MOUNT_DIR.default"
+printf "/workspace" >"${launch_env_dir}/RENKU_WORKING_DIR.default"
+printf "/" >"${launch_env_dir}/RENKU_BASE_URL_PATH.default"
 
-cat >"${jupyter_layer_dir}"/bin/jupyterlab-entrypoint.sh<<EOL
+cat >"${jupyter_layer_dir}"/bin/jupyterlab-entrypoint.sh <<EOL
 #!/usr/bin/env bash
 SHELL=/bin/bash "${jupyter_environment_dir}/bin/python" -E "${jupyter_environment_dir}/bin/jupyter-lab" \
         --ip "\${RENKU_SESSION_IP}" \
@@ -52,11 +52,11 @@ launch = true
 
 [metadata]
 description = "jupyterlab frontend for renku"
-version = "0.0.1"
+version = "0.0.2"
 EOL
 
 # 4. SET DEFAULT START COMMAND
-cat >"${layers_dir}/launch.toml" << EOL
+cat >"${layers_dir}/launch.toml" <<EOL
 [[processes]]
 type = "jupyterlab"
 command = ["jupyterlab-entrypoint.sh"]
