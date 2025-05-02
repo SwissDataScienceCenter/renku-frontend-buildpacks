@@ -19,7 +19,8 @@ fi
 ALREADY_EXISTS=$(which shellcheck)
 if [ -n "$ALREADY_EXISTS" ]; then
 	echo "Already found shellcheck installed elsewhere not in local bin"
-	ln -s "$LOCATION/shellcheck" "$ALREADY_EXISTS"
+	ln -s "$ALREADY_EXISTS" "$LOCATION/shellcheck"
+	exit 0
 fi
 
 if [ -d "$LOCATION/shellcheck-$VERSION" ] && [ -f "$LOCATION/shellcheck" ]; then
