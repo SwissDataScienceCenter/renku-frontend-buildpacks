@@ -50,6 +50,12 @@ YQ_VERSION ?= v4.45.1
 GINKGO = $(LOCALBIN)/ginkgo
 GINKGO_VERSION ?= "v2.23.4"
 
+SHELLCHECK = $(LOCALBIN)/shellcheck
+SHELLCHECK_VERSION ?= "v0.10.0"
+
+GOLANG_CI_LINT = $(LOCALBIN)/golangci-lint
+GOLANG_CI_LINT_VERSION ?= "v2.1.5"
+
 .PHONY: yq
 yq: $(YQ)
 $(YQ): $(LOCALBIN)
@@ -59,6 +65,16 @@ $(YQ): $(LOCALBIN)
 ginkgo: $(GINKGO)
 $(GINKGO): $(LOCALBIN)
 	$(call go-install-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo,$(GINKGO_VERSION))
+
+.PHONY: shellcheck
+shellcheck: $(SHELLCHECK)
+$(SHELLCHECK): $(LOCALBIN)
+	bash ./scripts/install_shellcheck.sh $(SHELLCHECK_VERSION) $(LOCALBIN)
+
+.PHONY: golang_ci_lint
+golang_ci_lint: $(GOLANG_CI_LINT)
+$(GOLANG_CI_LINT): $(LOCALBIN)
+	$(call go-install-tool,$(GOLANG_CI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint,$(GOLANG_CI_LINT_VERSION))
 
 all: buildpacks builders samples
 
@@ -114,4 +130,17 @@ publish_builders:
 
 .PHONY: tests
 tests: ginkgo
+	go vet ./...
 	$(GINKGO) -r -v
+
+.PHONY: lint
+lint: shellcheck golang_ci_lint
+	@echo "\n\n"
+	@echo "===Running shellcheck==="
+	@$(SHELLCHECK) -V
+	@echo "Files to test"
+	@git ls-files | egrep '.*.sh$$|build$$|detect$$'
+	git ls-files | egrep '.*.sh$$|build$$|detect$$' | xargs $(SHELLCHECK)
+	@echo "\n\n"
+	@echo "===Running golang ci lint==="
+	$(GOLANG_CI_LINT) run
