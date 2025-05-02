@@ -144,3 +144,6 @@ lint: shellcheck golang_ci_lint
 	@echo "\n\n"
 	@echo "===Running golang ci lint==="
 	$(GOLANG_CI_LINT) run
+	@echo "\n\n"
+	@echo "===Running gofmt==="
+	gofmt -l -e -d .

@@ -16,9 +16,14 @@ if [[ -z $LOCATION ]]; then
 	LOCATION="./bin"
 fi
 
+if [ -f "$LOCATION/shellcheck" ]; then
+	echo "Already found shellcheck installed in $LOCALBIN"
+	exit 0
+fi
+
 ALREADY_EXISTS=$(which shellcheck)
 if [ -n "$ALREADY_EXISTS" ]; then
-	echo "Already found shellcheck installed elsewhere not in local bin"
+	echo "Already found shellcheck installed elsewhere, linking in $LOCALBIN"
 	ln -s "$ALREADY_EXISTS" "$LOCATION/shellcheck"
 	exit 0
 fi
