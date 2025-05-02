@@ -4,6 +4,7 @@
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers/features/go:1": {},
+        "ghcr.io/azutake/devcontainer-features/go-packages-install:0": {},
         "ghcr.io/devcontainers/features/docker-in-docker:2": {},
         "ghcr.io/devcontainers-contrib/features/gh-release:1.0.24": {
             "repo": "buildpacks/pack",
