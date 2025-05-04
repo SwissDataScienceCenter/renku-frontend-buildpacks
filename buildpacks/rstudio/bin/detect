@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+echo "Checking if rstudio frontend should be installed..."
+if [[ "${BP_RENKU_FRONTENDS}" =~ "rstudio" ]]; then
+  echo "The BP_RENKU_FRONTENDS environment variable was found to contain rstudio and the buildpack will be applied"
+else
+  echo "The BP_RENKU_FRONTENDS environment variable is not set or does not contain rstudio, will not apply this buildpack"
+  exit 100
+fi
+
+cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
+[[provides]]
+  name = "rstudio"
+
+[[requires]]
+  name = "rstudio"
+
+[requires.metadata]
+  launch = true
+EOL

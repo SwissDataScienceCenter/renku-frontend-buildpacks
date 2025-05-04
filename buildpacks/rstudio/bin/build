@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "=== Renku RStudio buildpack ==="
+
+layers_dir="${CNB_LAYERS_DIR}"
+buildpack_dir="${CNB_BUILDPACK_DIR}"
+cache_layer_dir="${layers_dir}"/cache
+rstudio_layer_dir="${layers_dir}"/rstudio
+r_layer_dir="${layers_dir}"/r
+launch_env_dir="${rstudio_layer_dir}"/env.launch
+mkdir -p "${rstudio_layer_dir}"/bin
+mkdir -p "${cache_layer_dir}"
+mkdir -p "${launch_env_dir}"
+
+RSTUDIO_VERSION="2024.12.1-563"
+OS_CODENAME=$(lsb_release -c --short)
+FNAME="rstudio-$RSTUDIO_VERSION.deb"
+if [ -f "$cache_layer_dir/$FNAME" ]; then
+	echo "Found rstudio $RSTUDIO_VERSION in $cache_layer_dir skipping download"
+else
+	echo "Downloading rstudio $RSTUDIO_VERSION in $cache_layer_dir"
+	curl -sSL "https://download2.rstudio.org/server/$OS_CODENAME/amd64/rstudio-server-$RSTUDIO_VERSION-amd64.deb" -o "$cache_layer_dir/$FNAME"
+fi
+
+echo "Unpacking $cache_layer_dir/$FNAME in /tmp/rstudio"
+mkdir -p /tmp/rstudio
+dpkg -x "$cache_layer_dir/$FNAME" "/tmp/rstudio"
+cp -r /tmp/rstudio/usr/lib/rstudio-server/* "$rstudio_layer_dir/"
+
+TINI_VERSION="v0.19.0"
+if [ -f "$cache_layer_dir/tini-$TINI_VERSION" ]; then
+	echo "Found tini $TINI_VERSION in $cache_layer_dir skipping download"
+else
+	echo "Downloading tini $TINI_VERSION in $cache_layer_dir"
+	curl -sSL "https://github.com/krallin/tini/releases/download/$TINI_VERSION/tini-amd64" -o "$cache_layer_dir/tini-$TINI_VERSION"
+fi
+
+echo "Installing tini $TINI_VERSION to $rstudio_layer_dir/bin"
+cp "$cache_layer_dir/tini-$TINI_VERSION" "$rstudio_layer_dir/bin/tini"
+chmod a+x "$rstudio_layer_dir/bin/tini"
+
+echo "Setting up launch environment variables"
+mkdir -p "${launch_env_dir}"
+printf "0.0.0.0" >"${launch_env_dir}/RENKU_SESSION_IP.default"
+printf "8000" >"${launch_env_dir}/RENKU_SESSION_PORT.default"
+printf "/workspace" >"${launch_env_dir}/RENKU_MOUNT_DIR.default"
+printf "/workspace" >"${launch_env_dir}/RENKU_WORKING_DIR.default"
+printf "/" >"${launch_env_dir}/RENKU_BASE_URL_PATH.default"
+
+cp "${buildpack_dir}/bin/rstudio-entrypoint.sh" "${rstudio_layer_dir}"/bin/rstudio-entrypoint.sh
+
+# Rstudio needs R to run, use micromamba to install it
+# NOTE: That the latest R version may not be immediately available through micromamba
+MICROMAMBA_VERSION=2.1.0
+R_VERSION=4.4.3
+if [ -f "$cache_layer_dir/micromamba-$MICROMAMBA_VERSION" ]; then
+	echo "Found micromamba in $cache_layer_dir skipping download"
+else
+	echo "Downloading micromamba $MICROMAMBA_VERSION in $cache_layer_dir"
+	curl -LSs "https://micro.mamba.pm/api/micromamba/linux-64/$MICROMAMBA_VERSION" | tar -xj bin/micromamba
+	mv bin/micromamba "$cache_layer_dir/micromamba-$MICROMAMBA_VERSION"
+	rm -rf bin
+fi
+
+mkdir -p "$cache_layer_dir/pkgs_dir"
+"$cache_layer_dir/micromamba-$MICROMAMBA_VERSION" config append pkgs_dirs "$cache_layer_dir/pkgs_dir"
+"$cache_layer_dir/micromamba-$MICROMAMBA_VERSION" create --prefix "${r_layer_dir}" r-base="$R_VERSION"
+
+# Write layer metadata (CNB requirement)
+cat >"${layers_dir}/rstudio.toml" <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "rstudio frontend for renku"
+version = "0.0.2"
+EOL
+
+cat >"${layers_dir}/r.toml" <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "r"
+version = "0.0.2"
+EOL
+
+cat >"${layers_dir}/cache.toml" <<EOL
+[types]
+cache = true
+EOL
+
+# 4. SET DEFAULT START COMMAND
+cat >"${layers_dir}/launch.toml" <<EOL
+[[processes]]
+type = "rstudio"
+command = ["tini", "-g", "--"]
+args = ["bash", "rstudio-entrypoint.sh"]
+default = true
+[[processes]]
+type = "bash"
+command = ["bash"]
+default = false
+EOL
