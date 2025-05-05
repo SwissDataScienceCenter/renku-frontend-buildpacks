@@ -35,7 +35,8 @@ func buildBuilder(ctx context.Context, builderLoc, image string) error {
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		errors.Join(err, fmt.Errorf("The command failed with output %s", string(output)))
+		err = errors.Join(err, fmt.Errorf("the command failed with output %s", string(output)))
+		return err
 	}
 	log.Println("Builder was successfully built")
 	log.Println(string(output))
@@ -65,7 +66,8 @@ func buildImage(ctx context.Context, builderImg, source, image string, envs map[
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		errors.Join(err, fmt.Errorf("The command failed with output %s", string(output)))
+		err = errors.Join(err, fmt.Errorf("the command failed with output %s", string(output)))
+		return err
 	}
 	log.Println("Image was successfully built")
 	log.Println(string(output))
@@ -96,6 +98,9 @@ func runImage(ctx context.Context, client docker.ContainerAPIClient, image strin
 		return "", err
 	}
 	err = client.ContainerStart(ctx, cont.ID, container.StartOptions{})
+	if err != nil {
+		return "", err
+	}
 	return cont.ID, nil
 }
 
@@ -111,10 +116,10 @@ func execInContainer(ctx context.Context, client docker.ContainerAPIClient, cont
 	}
 	attOpts := container.ExecAttachOptions{}
 	res, err := client.ContainerExecAttach(ctx, ex.ID, attOpts)
-	defer res.Close()
 	if err != nil {
 		return "", err
 	}
+	defer res.Close()
 	startOpts := container.ExecStartOptions{}
 	err = client.ContainerExecStart(ctx, ex.ID, startOpts)
 	if err != nil {
@@ -153,7 +158,12 @@ func getFreePortOrDie() int {
 	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
 		var l *net.TCPListener
 		if l, err = net.ListenTCP("tcp", a); err == nil {
-			defer l.Close()
+			defer func() {
+				err := l.Close()
+				if err != nil {
+					panic(err)
+				}
+			}()
 			return l.Addr().(*net.TCPAddr).Port
 		}
 		panic(err)
