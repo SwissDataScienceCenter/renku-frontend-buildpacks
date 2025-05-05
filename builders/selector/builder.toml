@@ -22,6 +22,10 @@ description = "Builder for Renku frontends and environments."
   version = "0.0.2"
 
 [[buildpacks]]
+  uri = "https://github.com/paketo-buildpacks/tini/releases/download/v0.3.2/tini-0.3.2.cnb"
+  version = "0.3.2"
+
+[[buildpacks]]
   uri = "docker://gcr.io/paketo-buildpacks/python:2.24.3"
   version = "2.24.3"
 
@@ -35,6 +39,9 @@ description = "Builder for Renku frontends and environments."
 
 [[order]]
 
+  [[order.group]]
+    id = "paketo-buildpacks/tini"
+    version = "0.3.2"
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
    version = "0.10.4"
@@ -65,6 +72,9 @@ description = "Builder for Renku frontends and environments."
 
 [[order]]
 
+  [[order.group]]
+    id = "paketo-buildpacks/tini"
+    version = "0.3.2"
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
    version = "0.10.4"
