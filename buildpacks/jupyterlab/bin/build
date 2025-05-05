@@ -59,7 +59,7 @@ EOL
 cat >"${layers_dir}/launch.toml" <<EOL
 [[processes]]
 type = "jupyterlab"
-command = ["jupyterlab-entrypoint.sh"]
-args = []
+command = ["tini", "-g", "--"]
+args = ["bash", "jupyterlab-entrypoint.sh"]
 default = true
 EOL
