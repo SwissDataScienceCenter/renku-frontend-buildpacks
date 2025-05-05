@@ -50,22 +50,12 @@ printf "/" >"${launch_env_dir}/RENKU_BASE_URL_PATH.default"
 
 cp "${buildpack_dir}/bin/rstudio-entrypoint.sh" "${rstudio_layer_dir}"/bin/rstudio-entrypoint.sh
 
-# Rstudio needs R to run, use micromamba to install it
-# NOTE: That the latest R version may not be immediately available through micromamba
-MICROMAMBA_VERSION=2.1.0
-R_VERSION=4.4.3
-if [ -f "$cache_layer_dir/micromamba-$MICROMAMBA_VERSION" ]; then
-	echo "Found micromamba in $cache_layer_dir skipping download"
-else
-	echo "Downloading micromamba $MICROMAMBA_VERSION in $cache_layer_dir"
-	curl -LSs "https://micro.mamba.pm/api/micromamba/linux-64/$MICROMAMBA_VERSION" | tar -xj bin/micromamba
-	mv bin/micromamba "$cache_layer_dir/micromamba-$MICROMAMBA_VERSION"
-	rm -rf bin
-fi
+# Rstudio needs R to run, use conda to install it
+# NOTE: That the latest R version may not be immediately available through conda
 
 mkdir -p "$cache_layer_dir/pkgs_dir"
-"$cache_layer_dir/micromamba-$MICROMAMBA_VERSION" config append pkgs_dirs "$cache_layer_dir/pkgs_dir"
-"$cache_layer_dir/micromamba-$MICROMAMBA_VERSION" create --prefix "${r_layer_dir}" r-base="$R_VERSION"
+conda config append pkgs_dirs "$cache_layer_dir/pkgs_dir"
+conda create --prefix "${r_layer_dir}" r-base="$R_VERSION"
 
 # Write layer metadata (CNB requirement)
 cat >"${layers_dir}/rstudio.toml" <<EOL
