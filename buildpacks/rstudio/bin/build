@@ -54,8 +54,9 @@ cp "${buildpack_dir}/bin/rstudio-entrypoint.sh" "${rstudio_layer_dir}"/bin/rstud
 # NOTE: That the latest R version may not be immediately available through conda
 
 mkdir -p "$cache_layer_dir/pkgs_dir"
-conda config append pkgs_dirs "$cache_layer_dir/pkgs_dir"
-conda create --prefix "${r_layer_dir}" r-base="$R_VERSION"
+conda config --add pkgs_dirs "$cache_layer_dir/pkgs_dir"
+conda config --remove channels defaults
+conda create --prefix "${r_layer_dir}" -c conda-forge r-base="$R_VERSION"
 
 # Write layer metadata (CNB requirement)
 cat >"${layers_dir}/rstudio.toml" <<EOL
