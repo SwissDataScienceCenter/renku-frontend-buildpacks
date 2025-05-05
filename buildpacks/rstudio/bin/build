@@ -28,18 +28,6 @@ mkdir -p /tmp/rstudio
 dpkg -x "$cache_layer_dir/$FNAME" "/tmp/rstudio"
 cp -r /tmp/rstudio/usr/lib/rstudio-server/* "$rstudio_layer_dir/"
 
-TINI_VERSION="v0.19.0"
-if [ -f "$cache_layer_dir/tini-$TINI_VERSION" ]; then
-	echo "Found tini $TINI_VERSION in $cache_layer_dir skipping download"
-else
-	echo "Downloading tini $TINI_VERSION in $cache_layer_dir"
-	curl -sSL "https://github.com/krallin/tini/releases/download/$TINI_VERSION/tini-amd64" -o "$cache_layer_dir/tini-$TINI_VERSION"
-fi
-
-echo "Installing tini $TINI_VERSION to $rstudio_layer_dir/bin"
-cp "$cache_layer_dir/tini-$TINI_VERSION" "$rstudio_layer_dir/bin/tini"
-chmod a+x "$rstudio_layer_dir/bin/tini"
-
 echo "Setting up launch environment variables"
 mkdir -p "${launch_env_dir}"
 printf "0.0.0.0" >"${launch_env_dir}/RENKU_SESSION_IP.default"
