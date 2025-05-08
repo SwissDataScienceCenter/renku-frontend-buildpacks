@@ -114,7 +114,7 @@ publish_run_image: run_image
 	bash ./scripts/publish_run_image.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image --publish
 
 .PHONY: publish_buildpacks
-publish_buildpacks:
+publish_buildpacks: yq
 	@for bp in $(BUILDPACKS); do \
 		echo "Publishing buildpack: $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$bp"; \
 		./scripts/publish_buildpack.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$bp buildpacks/$$bp --publish; \
