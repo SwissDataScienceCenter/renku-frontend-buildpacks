@@ -7,19 +7,19 @@ description = "Builder for Renku frontends and environments."
 
 [[buildpacks]]
   uri = "../../buildpacks/kernel-installer"
-  version = "0.0.2"
+  version = "0.0.4"
 
 [[buildpacks]]
   uri = "../../buildpacks/jupyterlab"
-  version = "0.0.2"
+  version = "0.0.4"
 
 [[buildpacks]]
   uri = "../../buildpacks/python-dependency-manager"
-  version = "0.0.2"
+  version = "0.0.4"
 
 [[buildpacks]]
   uri = "../../buildpacks/rstudio"
-  version = "0.0.2"
+  version = "0.0.4"
 
 [[buildpacks]]
   uri = "https://github.com/paketo-buildpacks/tini/releases/download/v0.3.2/tini-0.3.2.cnb"
@@ -50,13 +50,13 @@ description = "Builder for Renku frontends and environments."
     version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.0.2"
+    version = "0.0.4"
   [[order.group]]
     id = "renku/jupyterlab"
-    version = "0.0.2"
+    version = "0.0.4"
   [[order.group]]
     id = "renku/kernel-installer"
-    version = "0.0.2"
+    version = "0.0.4"
 
 [[order]]
 
@@ -65,7 +65,7 @@ description = "Builder for Renku frontends and environments."
     version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.0.2"
+    version = "0.0.4"
   [[order.group]]
     id = "vscodium"
     version = "0.3.0"
@@ -80,10 +80,10 @@ description = "Builder for Renku frontends and environments."
    version = "0.10.4"
   [[order.group]]
     id = "renku/rstudio"
-    version = "0.0.2"
+    version = "0.0.4"
 
 [stack]
-  build-image = "docker.io/paketobuildpacks/builder-jammy-buildpackless-full:0.0.256"
+  build-image = "docker.io/paketobuildpacks/builder-jammy-buildpackless-full:0.0.456"
   id = "io.buildpacks.stacks.jammy"
-  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.2"
+  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.4"
   run-image-mirrors = []
