@@ -13,6 +13,7 @@ mkdir -p "${jupyter_layer_dir}"/bin
 mkdir -p "${cache_layer_dir}"
 mkdir -p "${launch_env_dir}"
 
+unset PYTHONPATH
 conda config --remove channels defaults
 conda config --add pkgs_dirs "${cache_layer_dir}"
 conda env create -y -p "${jupyter_environment_dir}" -f "${buildpack_dir}/bin/jupyter-environment.yml"
