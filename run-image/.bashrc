@@ -1,4 +1,13 @@
 # shellcheck shell=bash
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+      # shellcheck source=/dev/null
+      . /etc/bash_completion
+fi
+
 # Setup git user
 if [[ -z "$(git config --global --get user.name)" && -v GIT_AUTHOR_NAME ]]; then
     git config --global user.name "$GIT_AUTHOR_NAME"
