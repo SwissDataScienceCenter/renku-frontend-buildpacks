@@ -25,6 +25,7 @@ jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 conda deactivate
 
 mkdir -p "${launch_env_dir}"
+printf "/bin/bash" >"${launch_env_dir}/SHELL.default"
 printf "0.0.0.0" >"${launch_env_dir}/RENKU_SESSION_IP.default"
 printf "8000" >"${launch_env_dir}/RENKU_SESSION_PORT.default"
 printf "/workspace" >"${launch_env_dir}/RENKU_MOUNT_DIR.default"
