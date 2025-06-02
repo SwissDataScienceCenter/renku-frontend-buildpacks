@@ -26,12 +26,12 @@ description = "Builder for Renku frontends and environments."
   version = "0.3.2"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/python:2.24.3"
+  uri = "docker://docker.io/paketobuildpacks/python:2.24.3"
   version = "2.24.3"
 
 [[buildpacks]]
   id = "paketo-buildpacks/miniconda"
-  uri = "docker://gcr.io/paketo-buildpacks/miniconda:0.10.4"
+  uri = "docker://docker.io/paketobuildpacks/miniconda:0.10.4"
   version = "0.10.4"
 
 [lifecycle]

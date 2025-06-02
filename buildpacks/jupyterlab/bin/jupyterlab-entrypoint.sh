@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+#ensure bashrc is sourced
+# shellcheck source=/dev/null
+source "${HOME}"/.bashrc
+
 JUPYTER_ENV_DIR=$1
 
 if [ -z "$JUPYTER_ENV_DIR" ]; then
