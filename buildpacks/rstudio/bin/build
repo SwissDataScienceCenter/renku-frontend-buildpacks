@@ -53,7 +53,7 @@ launch = true
 
 [metadata]
 description = "rstudio frontend for renku"
-version = "0.0.5"
+version = "0.0.6"
 EOL
 
 cat >"${layers_dir}/r.toml" <<EOL
@@ -62,7 +62,7 @@ launch = true
 
 [metadata]
 description = "r"
-version = "0.0.5"
+version = "0.0.6"
 EOL
 
 cat >"${layers_dir}/cache.toml" <<EOL
