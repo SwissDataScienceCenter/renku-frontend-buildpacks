@@ -42,7 +42,7 @@ launch = true
 
 [metadata]
 description = "jupyterlab frontend for renku"
-version = "0.0.5"
+version = "0.0.6"
 EOL
 
 # 4. SET DEFAULT START COMMAND

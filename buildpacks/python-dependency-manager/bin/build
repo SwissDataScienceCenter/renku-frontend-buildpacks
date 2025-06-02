@@ -24,5 +24,5 @@ launch = true
 
 [metadata]
 description = "set dependency management for run sessions"
-version = "0.0.5"
+version = "0.0.6"
 EOL
