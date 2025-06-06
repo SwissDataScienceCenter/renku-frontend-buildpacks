@@ -85,5 +85,5 @@ description = "Builder for Renku frontends and environments."
 [stack]
   build-image = "docker.io/paketobuildpacks/builder-jammy-buildpackless-full:0.0.256"
   id = "io.buildpacks.stacks.jammy"
-  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.4"
+  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.6"
   run-image-mirrors = []
