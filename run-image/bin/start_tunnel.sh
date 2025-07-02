@@ -30,10 +30,8 @@ if [ "${INSTALL_CODE_CLI}" = "1" ]; then
         exit 1
     fi
 
-    TMP="/tmp/code-$(LC_ALL=C tr -dc "A-Za-z0-9" </dev/urandom 2>/dev/null | head -c 6)"
-
+    TMP="$(mktemp -d)"
     mkdir -p "${BIN_FOLDER}"
-    mkdir -p "${TMP}"
 
     echo "Downloading code CLI from ${DOWNLOAD_URL}..."
     curl "${DOWNLOAD_URL}" -Lo "${TMP}/code_cli.tar.gz"
