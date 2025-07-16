@@ -8,6 +8,7 @@ mkdir -p "${execd_dir}"
 cat >"${execd_dir}"/setup.sh <<EOL
 #!/usr/bin/env bash
 set -eo pipefail
+export HOME=\$(eval echo "~\$(id -nu)")
 python -m venv --system-site-packages \${RENKU_MOUNT_DIR}/.venv
 printf 'source \${RENKU_MOUNT_DIR}/.venv/bin/activate' >>  \${HOME}/.bashrc
 source \${RENKU_MOUNT_DIR}/.venv/bin/activate
