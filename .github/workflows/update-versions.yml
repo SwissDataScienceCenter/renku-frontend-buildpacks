@@ -1,0 +1,198 @@
+name: Update Buildpack and Run Image Versions
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}
+      repo_lower: ${{ steps.lowercase_repo.outputs.REPO }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get tag version
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+    - name: lowercase REPO
+      id: lowercase_repo
+      run: |
+        echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_OUTPUT}"
+
+    - name: Verify tag originates from main branch
+      id: check_branch
+      run: |
+        TAG_COMMIT=$(git rev-list -n 1 ${{ steps.get_version.outputs.VERSION }})
+        echo "Tag points to commit: $TAG_COMMIT"
+
+        if ! git merge-base --is-ancestor $TAG_COMMIT origin/main; then
+          echo "❌ Error: Tag ${{ steps.get_version.outputs.VERSION }} does not originate from main branch"
+          exit 1
+        fi
+
+        echo "✅ Tag ${{ steps.get_version.outputs.VERSION }} originates from main branch"
+
+  build-and-push-run-image:
+    runs-on: ubuntu-latest
+    needs: validate-tag
+    permissions:
+      contents: read
+      packages: write # Grant write permission for pushing to GHCR
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker-container
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push run-image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./run-image
+        file: ./run-image/Dockerfile
+        push: true
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/base-image:${{ needs.validate-tag.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  update-versions:
+    runs-on: ubuntu-latest
+    needs: validate-tag
+    permissions:
+      contents: write # Grant write permission to the GITHUB_TOKEN
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Switch to main branch
+      run: |
+        git checkout main
+        git pull origin main
+
+    - name: Update buildpack.toml versions
+      run: |
+        RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
+        find buildpacks -name "buildpack.toml" | while read file; do
+          sed -i "s|^version = \".*\"|version = \"${RELEASE_VERSION}\"|g" "$file"
+          echo "Updated $file to version $RELEASE_VERSION"
+        done
+
+    - name: Update builders/selector/builder.toml
+      run: |
+        RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
+        BUILDER_FILE="builders/selector/builder.toml"
+        REPO_LOWER="${{ needs.validate-tag.outputs.repo_lower }}"
+
+        # Create a temporary script to handle TOML section parsing
+        cat > update_builder.sh << 'EOF'
+        #!/bin/bash
+        RELEASE_VERSION="$1"
+        BUILDER_FILE="$2"
+        REPO_LOWER="$3"
+
+        # Use awk to properly handle TOML sections for buildpacks
+        awk -v version="$RELEASE_VERSION" '
+        /^\[\[buildpacks\]\]/ {
+            print
+            in_buildpack=1
+            local_buildpack=0
+            next
+        }
+        /^\[\[/ && !/^\[\[buildpacks\]\]/ {
+            in_buildpack=0
+            local_buildpack=0
+        }
+        in_buildpack && /^[[:space:]]*uri = "\.\.\/\.\.\/buildpacks\// {
+            local_buildpack=1
+        }
+        in_buildpack && local_buildpack && /^[[:space:]]*version = / {
+            gsub(/version = ".*"/, "version = \"" version "\"")
+        }
+        { print }
+        ' "$BUILDER_FILE" > "${BUILDER_FILE}.tmp" && mv "${BUILDER_FILE}.tmp" "$BUILDER_FILE"
+
+        # Update run-image tag
+        sed -i 's|run-image = ".*"|run-image = "ghcr.io/'"${REPO_LOWER}"'/base-image:'"${RELEASE_VERSION}"'"|' "$BUILDER_FILE"
+
+        # Use awk for order group updates - track previous line for renku buildpacks
+        awk -v version="$RELEASE_VERSION" '
+        /^\[\[order\]\]/ {
+            in_order=1
+        }
+        /^\[\[/ && !/^\[\[order\]\]/ && !/^\[\[order\.group\]\]/ {
+            in_order=0
+            prev_line_renku=0
+        }
+        in_order && /^[[:space:]]*id = "renku\// {
+            prev_line_renku=1
+            print
+            next
+        }
+        in_order && prev_line_renku && /^[[:space:]]*version = / {
+            gsub(/version = ".*"/, "version = \"" version "\"")
+            prev_line_renku=0
+        }
+        {
+            if (!/^[[:space:]]*id = "renku\//) {
+                prev_line_renku=0
+            }
+            print
+        }
+        ' "$BUILDER_FILE" > "${BUILDER_FILE}.tmp" && mv "${BUILDER_FILE}.tmp" "$BUILDER_FILE"
+        EOF
+
+        chmod +x update_builder.sh
+        ./update_builder.sh "$RELEASE_VERSION" "$BUILDER_FILE" "$REPO_LOWER"
+        rm update_builder.sh
+
+        echo "Updated local buildpack versions in $BUILDER_FILE to $RELEASE_VERSION"
+        echo "Updated run-image in $BUILDER_FILE to ghcr.io/${REPO_LOWER}/base-image:$RELEASE_VERSION"
+        echo "Updated local buildpack order group versions in $BUILDER_FILE to $RELEASE_VERSION"
+
+    - name: Commit version updates
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        if ! git diff --staged --quiet; then
+          git commit -m "chore(release): Update buildpack and run-image versions to ${{ needs.validate-tag.outputs.version }}"
+
+          # Move tag to new commit
+          git tag -f ${{ needs.validate-tag.outputs.version }}
+          git push origin main
+          git push origin ${{ needs.validate-tag.outputs.version }} --force
+        fi
+
+    - name: Create Release
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.repos.createRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: '${{ needs.validate-tag.outputs.version }}',
+            name: 'Release ${{ needs.validate-tag.outputs.version }}',
+            draft: false,
+            prerelease: false,
+          });
