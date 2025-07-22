@@ -14,6 +14,10 @@ description = "Builder for Renku frontends and environments."
   version = "0.0.6"
 
 [[buildpacks]]
+  uri = "../../buildpacks/ttyd"
+  version = "0.0.6"
+
+[[buildpacks]]
   uri = "../../buildpacks/python-dependency-manager"
   version = "0.0.6"
 
@@ -56,6 +60,21 @@ description = "Builder for Renku frontends and environments."
     version = "0.0.6"
   [[order.group]]
     id = "renku/kernel-installer"
+    version = "0.0.6"
+
+[[order]]
+
+  [[order.group]]
+    id = "paketo-buildpacks/tini"
+    version = "0.3.2"
+  [[order.group]]
+    id = "paketo-buildpacks/python"
+    version = "2.24.3"
+  [[order.group]]
+    id = "renku/python-dependency-manager"
+    version = "0.0.6"
+  [[order.group]]
+    id = "renku/ttyd"
     version = "0.0.6"
 
 [[order]]
