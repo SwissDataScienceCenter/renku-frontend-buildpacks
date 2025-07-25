@@ -162,4 +162,4 @@ update-builder-versions:
 	@for builder in $(BUILDERS); do \
 		FILE="builders/$$builder/builder.toml"; \
 	 ./scripts/update_builder_versions.sh "$(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image" "$(RELEASE_VERSION)" "$$FILE"; \
-  done
+	done
