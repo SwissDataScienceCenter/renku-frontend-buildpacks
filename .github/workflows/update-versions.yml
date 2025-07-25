@@ -110,6 +110,25 @@ jobs:
           git push origin ${{ needs.validate-tag.outputs.version }} --force
         fi
 
+  release:
+    runs-on: ubuntu-latest
+    needs: [validate-tag, build-and-push-run-image, update-versions]
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: publish buildpacks
+      run: make publish_buildpacks
+
+    - name: publish builders
+      run: make publish_builders
+
     - name: Create Release
       uses: actions/github-script@v7
       with:
