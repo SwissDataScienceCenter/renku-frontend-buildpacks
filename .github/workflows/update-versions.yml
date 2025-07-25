@@ -91,12 +91,7 @@ jobs:
         git pull origin main
 
     - name: Update buildpack.toml versions
-      run: |
-        RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
-        find buildpacks -name "buildpack.toml" | while read file; do
-          sed -i "s|^version = \".*\"|version = \"${RELEASE_VERSION}\"|g" "$file"
-          echo "Updated $file to version $RELEASE_VERSION"
-        done
+      run: make update-buildpack-versions RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
 
     - name: Update builders/selector/builder.toml
       run: |
