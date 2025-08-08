@@ -1,5 +1,9 @@
 description = "Builder for Renku frontends and environments."
 
+[[build.env]]
+name = "BP_RENKU_FRONTENDS"
+value = "vscodium"
+
 [[buildpacks]]
   uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.3.0"
   id = "vscodium"
