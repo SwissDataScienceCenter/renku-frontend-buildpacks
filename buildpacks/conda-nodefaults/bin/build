@@ -1,23 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo -e "🔧 \033[1mConda Channel Cleanup Buildpack\033[0m"
+
 ENV_FILE="environment.yml"
 
 # Exit silently if environment.yml is not present
 [[ -f "$ENV_FILE" ]] || exit 0
+
+# Save original version for diff
+TMPDIR=$(mktemp -d)
+cp environment.yml "$TMPDIR/original.yml"
 
 # Download latest yq binary (Go version)
 YQ_BIN="$(mktemp -d)/yq"
 curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o "$YQ_BIN"
 chmod +x "$YQ_BIN"
 
-# Step 1: Ensure 'channels' exists (set to empty if missing)
+# Ensure 'channels' exists (set to empty if missing)
 "$YQ_BIN" eval -i '.channels = (.channels // [])' $ENV_FILE
 
-# Step 2: Remove 'defaults'
-"$YQ_BIN" eval -i '.channels = (.channels - ["defaults"])' $ENV_FILE
+# Fail if "defaults" is in the channels list
+if "$YQ_BIN" '.channels | any_c(. == "defaults")' $ENV_FILE > /dev/null 2>&1; then
+    echo -e "\n\033[1m!!! defaults channel detected !!! \033[0m"
+    echo -e "Failing to avoid rate limits from Anaconda. Please remove the \033[1mdefaults\033[0m channel from \033[1menvironment.yml\033[1m from and rerun."
+    exit 100
+fi
 
-# Step 3: Add 'nodefaults' if not already present
+# Add 'nodefaults' if not already present
 "$YQ_BIN" -i '.channels |= (. + "nodefaults" | unique)' $ENV_FILE
 
-cat $ENV_FILE
+# Show diff if there are changes
+echo -e "\n\033[1mChanges to environment.yml:\033[0m"
+if diff -u "$TMPDIR/original.yml" environment.yml; then
+  echo "No changes made."
+else
+  echo -e "\n✅ environment.yml updated."
+fi
