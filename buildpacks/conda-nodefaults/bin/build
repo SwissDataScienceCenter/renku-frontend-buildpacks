@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENV_FILE="environment.yml"
+
+# Exit silently if environment.yml is not present
+[[ -f "$ENV_FILE" ]] || exit 0
+
+# Download latest yq binary (Go version)
+YQ_BIN="$(mktemp -d)/yq"
+curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o "$YQ_BIN"
+chmod +x "$YQ_BIN"
+
+# Step 1: Ensure 'channels' exists (set to empty if missing)
+"$YQ_BIN" eval -i '.channels = (.channels // [])' $ENV_FILE
+
+# Step 2: Remove 'defaults'
+"$YQ_BIN" eval -i '.channels = (.channels - ["defaults"])' $ENV_FILE
+
+# Step 3: Add 'nodefaults' if not already present
+"$YQ_BIN" -i '.channels |= (. + "nodefaults" | unique)' $ENV_FILE
+
+cat $ENV_FILE

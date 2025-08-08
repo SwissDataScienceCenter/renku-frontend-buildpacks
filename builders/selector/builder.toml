@@ -6,6 +6,10 @@ description = "Builder for Renku frontends and environments."
   version = "0.3.0"
 
 [[buildpacks]]
+  uri = "../../buildpacks/conda-nodefaults"
+  version = "0.0.1"
+
+[[buildpacks]]
   uri = "../../buildpacks/kernel-installer"
   version = "0.0.6"
 
@@ -44,6 +48,9 @@ description = "Builder for Renku frontends and environments."
 [[order]]
 
   [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.0.1"
+  [[order.group]]
     id = "paketo-buildpacks/tini"
     version = "0.3.2"
   [[order.group]]
@@ -68,6 +75,9 @@ description = "Builder for Renku frontends and environments."
     id = "paketo-buildpacks/tini"
     version = "0.3.2"
   [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.0.1"
+  [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.24.3"
   [[order.group]]
@@ -80,6 +90,9 @@ description = "Builder for Renku frontends and environments."
 [[order]]
 
   [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.0.1"
+  [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.24.3"
   [[order.group]]
@@ -91,6 +104,9 @@ description = "Builder for Renku frontends and environments."
 
 [[order]]
 
+  [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.0.1"
   [[order.group]]
     id = "paketo-buildpacks/tini"
     version = "0.3.2"
