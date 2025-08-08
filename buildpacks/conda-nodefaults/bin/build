@@ -12,16 +12,28 @@ ENV_FILE="environment.yml"
 TMPDIR=$(mktemp -d)
 cp environment.yml "$TMPDIR/original.yml"
 
-# Download latest yq binary (Go version)
-YQ_BIN="$(mktemp -d)/yq"
-curl -sSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o "$YQ_BIN"
+# Download latest yq binary
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+
+case "$ARCH" in
+  x86_64) ARCH=amd64 ;;
+  arm64|aarch64) ARCH=arm64 ;;
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
+
+YQ_FILENAME="yq_${OS}_${ARCH}"
+YQ_URL="https://github.com/mikefarah/yq/releases/latest/download/${YQ_FILENAME}"
+YQ_BIN="$TMPDIR/yq"
+
+curl -fsSL "$YQ_URL" -o "$YQ_BIN"
 chmod +x "$YQ_BIN"
 
 # Ensure 'channels' exists (set to empty if missing)
 "$YQ_BIN" eval -i '.channels = (.channels // [])' $ENV_FILE
 
 # Fail if "defaults" is in the channels list
-if "$YQ_BIN" '.channels | any_c(. == "defaults")' $ENV_FILE > /dev/null 2>&1; then
+if "$YQ_BIN" '.channels | any_c(. == "defaults")' $ENV_FILE | grep -q true; then
     echo -e "\n\033[1m!!! defaults channel detected !!! \033[0m"
     echo -e "Failing to avoid rate limits from Anaconda. Please remove the \033[1mdefaults\033[0m channel from \033[1menvironment.yml\033[1m from and rerun."
     exit 100
@@ -35,5 +47,5 @@ echo -e "\n\033[1mChanges to environment.yml:\033[0m"
 if diff -u "$TMPDIR/original.yml" environment.yml; then
   echo "No changes made."
 else
-  echo -e "\n✅ environment.yml updated."
+  echo -e "\n✅ environment.yml updated.\n\n"
 fi
