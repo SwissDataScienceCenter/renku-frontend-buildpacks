@@ -54,6 +54,7 @@ value = "vscodium"
   [[order.group]]
     id = "renku/conda-nodefaults"
     version = "0.0.1"
+    optional = true
   [[order.group]]
     id = "paketo-buildpacks/tini"
     version = "0.3.2"
@@ -81,6 +82,7 @@ value = "vscodium"
   [[order.group]]
     id = "renku/conda-nodefaults"
     version = "0.0.1"
+    optional = true
   [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.24.3"
@@ -96,6 +98,7 @@ value = "vscodium"
   [[order.group]]
     id = "renku/conda-nodefaults"
     version = "0.0.1"
+    optional = true
   [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.24.3"
@@ -111,6 +114,7 @@ value = "vscodium"
   [[order.group]]
     id = "renku/conda-nodefaults"
     version = "0.0.1"
+    optional = true
   [[order.group]]
     id = "paketo-buildpacks/tini"
     version = "0.3.2"
