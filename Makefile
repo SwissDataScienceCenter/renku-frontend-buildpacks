@@ -147,3 +147,19 @@ lint: shellcheck golang_ci_lint
 	@echo "\n\n"
 	@echo "===Running gofmt==="
 	gofmt -l -e -d .
+
+.PHONY: update-buildpack-versions
+update-buildpack-versions:
+	@echo "Updating buildpack versions to $(RELEASE_VERSION)..."
+	@for bp in $(BUILDPACKS); do \
+		FILE="buildpacks/$$bp/buildpack.toml"; \
+		./scripts/update_buildpack_versions.sh "$(RELEASE_VERSION)" "$$FILE"; \
+	done
+
+.PHONY: update-builder-versions
+update-builder-versions:
+	@echo "Updating builder versions to $(RELEASE_VERSION)..."
+	@for builder in $(BUILDERS); do \
+		FILE="builders/$$builder/builder.toml"; \
+	 ./scripts/update_builder_versions.sh "$(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image" "$(RELEASE_VERSION)" "$$FILE"; \
+	done
