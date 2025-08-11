@@ -5,8 +5,10 @@ echo -e "🔧 \033[1mConda Channel Cleanup Buildpack\033[0m"
 
 ENV_FILE="environment.yml"
 
-# Exit silently if environment.yml is not present
-[[ -f "$ENV_FILE" ]] || exit 0
+if [ ! -f "$ENV_FILE" ]; then
+  echo "Cannot find $ENV_FILE, exiting silently."
+  exit 0
+fi
 
 # Save original version for diff
 TMPDIR=$(mktemp -d)
