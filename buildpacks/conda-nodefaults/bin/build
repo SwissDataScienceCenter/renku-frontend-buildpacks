@@ -15,6 +15,9 @@ TMPDIR=$(mktemp -d)
 cp environment.yml "$TMPDIR/original.yml"
 
 # Download latest yq binary
+cache_layer_dir="${CNB_LAYERS_DIR}"/cache
+mkdir -p "${cache_layer_dir}"
+
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
 
@@ -25,17 +28,24 @@ case "$ARCH" in
 esac
 
 YQ_FILENAME="yq_${OS}_${ARCH}"
-YQ_URL="https://github.com/mikefarah/yq/releases/latest/download/${YQ_FILENAME}"
-YQ_BIN="$TMPDIR/yq"
+YQ_VERSION=v4.47.1
+YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_FILENAME}"
+YQ_BIN="${cache_layer_dir}/yq"
 
-curl -fsSL "$YQ_URL" -o "$YQ_BIN"
-chmod +x "$YQ_BIN"
+if [ -f "$cache_layer_dir/${YQ_FILENAME}" ]; then
+	echo "Found yq $YQ_VERSION in $cache_layer_dir skipping download"
+else
+	echo "Downloading yq $YQ_VERSION in $cache_layer_dir from $YQ_URL"
+
+	curl -fsSL "$YQ_URL" -o "${YQ_BIN}"
+  chmod +x "$YQ_BIN"
+fi
 
 # Ensure 'channels' exists (set to empty if missing)
 "$YQ_BIN" eval -i '.channels = (.channels // [])' $ENV_FILE
 
 # Fail if "defaults" is in the channels list
-if "$YQ_BIN" '.channels | any_c(. == "defaults")' $ENV_FILE | grep -q true; then
+if "$YQ_BIN" --exit-status '.channels | any_c(. == "defaults")' $ENV_FILE; then
     echo -e "\n\033[1m!!! defaults channel detected !!! \033[0m"
     echo -e "Failing to avoid rate limits from Anaconda. Please remove the \033[1mdefaults\033[0m channel from \033[1menvironment.yml\033[1m from and rerun."
     exit 100
