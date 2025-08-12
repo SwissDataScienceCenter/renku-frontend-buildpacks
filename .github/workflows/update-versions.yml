@@ -127,17 +127,30 @@ jobs:
           });
 
   release:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
     runs-on: ubuntu-latest
-    needs: [validate-tag, build-and-push-run-image, update-versions]
     permissions:
       contents: write
       packages: write
 
     steps:
+    - name: Extract version from branch name
+      id: extract_version
+      run: |
+        VERSION=${GITHUB_HEAD_REF#update-versions-}
+        echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
+    - name: Move tag to merged commit
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -f ${{ steps.extract_version.outputs.VERSION }}
+        git push origin ${{ steps.extract_version.outputs.VERSION }} --force
 
     - name: publish buildpacks
       run: make publish_buildpacks
@@ -152,8 +165,12 @@ jobs:
           await github.rest.repos.createRelease({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            tag_name: '${{ needs.validate-tag.outputs.version }}',
-            name: 'Release ${{ needs.validate-tag.outputs.version }}',
+            tag_name: '${{ steps.extract_version.outputs.VERSION }}',
+            name: 'Release ${{ steps.extract_version.outputs.VERSION }}',
             draft: false,
             prerelease: false,
           });
+
+    - name: Cleanup branch
+      run: |
+        git push origin --delete update-versions-${{ steps.extract_version.outputs.VERSION }}
