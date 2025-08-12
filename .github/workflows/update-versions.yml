@@ -92,39 +92,30 @@ jobs:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Create update branch
-      run: |
-        git checkout -b update-versions-${{ needs.validate-tag.outputs.version }}
-        git push origin update-versions-${{ needs.validate-tag.outputs.version }}
-
     - name: Update buildpack.toml versions
       run: make update-buildpack-versions RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
 
     - name: Update builder.toml
       run: make update-builder-versions RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
 
-    - name: Commit and push version updates
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add .
-        if ! git diff --staged --quiet; then
-          git commit -m "chore(release): Update buildpack and run-image versions to ${{ needs.validate-tag.outputs.version }}"
-          git push origin update-versions-${{ needs.validate-tag.outputs.version }}
-        fi
-
     - name: Create Pull Request
-      uses: actions/github-script@v7
+      uses: peter-evans/create-pull-request@v7
       with:
-        script: |
-          await github.rest.pulls.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: `chore(release): Update versions to ${{ needs.validate-tag.outputs.version }}`,
-            head: `update-versions-${{ needs.validate-tag.outputs.version }}`,
-            base: 'main',
-            body: `Automated version update for release ${{ needs.validate-tag.outputs.version }}\n\n- Updated buildpack.toml versions\n- Updated builder.toml versions\n\nThis PR was created automatically by the release workflow.\n\n**Please review and merge to complete the release process.**`
-          });
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore(release): Update buildpack and run-image versions to ${{ needs.validate-tag.outputs.version }}"
+        title: "chore(release): Update versions to ${{ needs.validate-tag.outputs.version }}"
+        body: |
+          Automated version update for release ${{ needs.validate-tag.outputs.version }}
+
+          - Updated buildpack.toml versions
+          - Updated builder.toml versions
+
+          This PR was created automatically by the release workflow.
+
+          **Please review and merge to complete the release process.**
+        branch: update-versions-${{ needs.validate-tag.outputs.version }}
+        base: main
+        delete-branch: true
 
   release:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
