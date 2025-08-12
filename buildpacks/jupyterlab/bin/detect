@@ -10,7 +10,7 @@ fi
 
 cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
 [[requires]]
-  name = "conda"
+  name = "pip"
 
 [requires.metadata]
   build = true
