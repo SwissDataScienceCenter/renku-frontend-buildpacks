@@ -15,23 +15,23 @@ value = "vscodium"
 
 [[buildpacks]]
   uri = "../../buildpacks/kernel-installer"
-  version = "0.0.6"
+  version = "0.0.7a"
 
 [[buildpacks]]
   uri = "../../buildpacks/jupyterlab"
-  version = "0.0.6"
+  version = "0.0.7a"
 
 [[buildpacks]]
   uri = "../../buildpacks/ttyd"
-  version = "0.0.6"
+  version = "0.0.7a"
 
 [[buildpacks]]
   uri = "../../buildpacks/python-dependency-manager"
-  version = "0.0.6"
+  version = "0.0.7a"
 
 [[buildpacks]]
   uri = "../../buildpacks/rstudio"
-  version = "0.0.6"
+  version = "0.0.7a"
 
 [[buildpacks]]
   uri = "https://github.com/paketo-buildpacks/tini/releases/download/v0.3.2/tini-0.3.2.cnb"
@@ -66,13 +66,13 @@ value = "vscodium"
     version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.0.6"
+    version = "0.0.7a"
   [[order.group]]
     id = "renku/jupyterlab"
-    version = "0.0.6"
+    version = "0.0.7a"
   [[order.group]]
     id = "renku/kernel-installer"
-    version = "0.0.6"
+    version = "0.0.7a"
 
 [[order]]
   [[order.group]]
@@ -87,10 +87,10 @@ value = "vscodium"
     version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.0.6"
+    version = "0.0.7a"
   [[order.group]]
     id = "renku/ttyd"
-    version = "0.0.6"
+    version = "0.0.7a"
 
 [[order]]
 
@@ -103,7 +103,7 @@ value = "vscodium"
     version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.0.6"
+    version = "0.0.7a"
   [[order.group]]
     id = "vscodium"
     version = "0.3.0"
@@ -122,10 +122,10 @@ value = "vscodium"
    version = "0.10.4"
   [[order.group]]
     id = "renku/rstudio"
-    version = "0.0.6"
+    version = "0.0.7a"
 
 [stack]
   build-image = "docker.io/paketobuildpacks/builder-jammy-buildpackless-full:0.0.256"
   id = "io.buildpacks.stacks.jammy"
-  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.6"
+  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.7a"
   run-image-mirrors = []
