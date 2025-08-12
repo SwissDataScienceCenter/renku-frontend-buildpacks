@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo -e "🔧 \033[1mConda Channel Cleanup Buildpack\033[0m"
+
+ENV_FILE="environment.yml"
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "Cannot find $ENV_FILE, exiting silently."
+  exit 0
+fi
+
+# Save original version for diff
+TMPDIR=$(mktemp -d)
+cp environment.yml "$TMPDIR/original.yml"
+
+# Download latest yq binary
+cache_layer_dir="${CNB_LAYERS_DIR}"/cache
+mkdir -p "${cache_layer_dir}"
+
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+
+case "$ARCH" in
+  x86_64) ARCH=amd64 ;;
+  arm64|aarch64) ARCH=arm64 ;;
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
+
+YQ_FILENAME="yq_${OS}_${ARCH}"
+YQ_VERSION=v4.47.1
+YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_FILENAME}"
+YQ_BIN="${cache_layer_dir}/yq"
+
+if [ -f "$cache_layer_dir/${YQ_FILENAME}" ]; then
+	echo "Found yq $YQ_VERSION in $cache_layer_dir skipping download"
+else
+	echo "Downloading yq $YQ_VERSION in $cache_layer_dir from $YQ_URL"
+
+	curl -fsSL "$YQ_URL" -o "${YQ_BIN}"
+  chmod +x "$YQ_BIN"
+fi
+
+# Ensure 'channels' exists (set to empty if missing)
+"$YQ_BIN" eval -i '.channels = (.channels // [])' $ENV_FILE
+
+# Fail if "defaults" is in the channels list
+if "$YQ_BIN" --exit-status '.channels | any_c(. == "defaults")' $ENV_FILE; then
+    echo -e "\n\033[1m!!! defaults channel detected !!! \033[0m"
+    echo -e "Failing to avoid rate limits from Anaconda. Please remove the \033[1mdefaults\033[0m channel from \033[1menvironment.yml\033[1m from and rerun."
+    exit 100
+fi
+
+# Add 'nodefaults' if not already present
+"$YQ_BIN" -i '.channels |= (. + "nodefaults" | unique)' $ENV_FILE
+
+# Show diff if there are changes
+echo -e "\n\033[1mChanges to environment.yml:\033[0m"
+if diff -u "$TMPDIR/original.yml" environment.yml; then
+  echo "No changes made."
+else
+  echo -e "\n✅ environment.yml updated.\n\n"
+fi

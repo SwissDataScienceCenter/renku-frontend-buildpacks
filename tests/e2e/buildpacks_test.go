@@ -172,4 +172,36 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 		},
 		Entry("using random sample", "../../samples/pip"),
 	)
+
+	DescribeTableSubtree(
+		"conda-nodefaults-fail",
+		func(source string) {
+			var image string
+
+			Context("image building", func() {
+				It("should fail when the defaults channel is included", func(ctx SpecContext) {
+				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
+				err = buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "vscodium"})
+				Expect(err).To(HaveOccurred())
+				})
+			})
+		},
+		Entry("using conda-defaults sample", "../../samples/conda-defaults"),
+	)
+
+	DescribeTableSubtree(
+		"conda-nodefaults-pass",
+		func(source string) {
+			var image string
+			Context("image building", func() {
+				It("should pass when the defaults channel is not included or conda is not used", func(ctx SpecContext) {
+				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
+				err = buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "vscodium"})
+				Expect(err).ToNot(HaveOccurred())
+				})
+			})
+		},
+		Entry("using conda sample", "../../samples/conda"),
+		Entry("using pip sample", "../../samples/pip"),
+	)
 })

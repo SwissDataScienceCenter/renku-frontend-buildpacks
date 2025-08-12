@@ -1,9 +1,17 @@
 description = "Builder for Renku frontends and environments."
 
+[[build.env]]
+name = "BP_RENKU_FRONTENDS"
+value = "vscodium"
+
 [[buildpacks]]
   uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.3.0"
   id = "vscodium"
   version = "0.3.0"
+
+[[buildpacks]]
+  uri = "../../buildpacks/conda-nodefaults"
+  version = "0.0.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/kernel-installer"
@@ -44,6 +52,10 @@ description = "Builder for Renku frontends and environments."
 [[order]]
 
   [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.0.1"
+    optional = true
+  [[order.group]]
     id = "paketo-buildpacks/tini"
     version = "0.3.2"
   [[order.group]]
@@ -63,7 +75,10 @@ description = "Builder for Renku frontends and environments."
     version = "0.0.6"
 
 [[order]]
-
+  [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.0.1"
+    optional = true
   [[order.group]]
     id = "paketo-buildpacks/tini"
     version = "0.3.2"
@@ -80,6 +95,10 @@ description = "Builder for Renku frontends and environments."
 [[order]]
 
   [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.0.1"
+    optional = true
+  [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.24.3"
   [[order.group]]
@@ -91,6 +110,10 @@ description = "Builder for Renku frontends and environments."
 
 [[order]]
 
+  [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.0.1"
+    optional = true
   [[order.group]]
     id = "paketo-buildpacks/tini"
     version = "0.3.2"

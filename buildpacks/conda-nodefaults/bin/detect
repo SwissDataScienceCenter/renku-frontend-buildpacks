@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+if [ -f "environment.yml" ]; then
+  exit 0  # pass
+else
+  exit 100  # opt-out
+fi
