@@ -4,9 +4,12 @@ on:
   push:
     tags:
       - '*'
+  pull_request:
+    types: [closed]
 
 jobs:
   validate-tag:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_version.outputs.VERSION }}
@@ -41,11 +44,12 @@ jobs:
         echo "✅ Tag ${{ steps.get_version.outputs.VERSION }} originates from main branch"
 
   build-and-push-run-image:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     needs: validate-tag
     permissions:
       contents: read
-      packages: write # Grant write permission for pushing to GHCR
+      packages: write
 
     steps:
     - name: Checkout code
@@ -73,22 +77,20 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-  update-versions:
+  create-version-update-pr:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    needs: validate-tag
+    needs: [validate-tag, build-and-push-run-image]
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-
-    - name: Switch to main branch
-      run: |
-        git checkout main
-        git pull origin main
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Update buildpack.toml versions
       run: make update-buildpack-versions RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
@@ -96,32 +98,50 @@ jobs:
     - name: Update builder.toml
       run: make update-builder-versions RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
 
-    - name: Commit version updates
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add .
-        if ! git diff --staged --quiet; then
-          git commit -m "chore(release): Update buildpack and run-image versions to ${{ needs.validate-tag.outputs.version }}"
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore(release): Update buildpack and run-image versions to ${{ needs.validate-tag.outputs.version }}"
+        title: "chore(release): Update versions to ${{ needs.validate-tag.outputs.version }}"
+        body: |
+          Automated version update for release ${{ needs.validate-tag.outputs.version }}
 
-          # Move tag to new commit
-          git tag -f ${{ needs.validate-tag.outputs.version }}
-          git push origin main
-          git push origin ${{ needs.validate-tag.outputs.version }} --force
-        fi
+          - Updated buildpack.toml versions
+          - Updated builder.toml versions
+
+          This PR was created automatically by the release workflow.
+
+          **Please review and merge to complete the release process.**
+        branch: update-versions-${{ needs.validate-tag.outputs.version }}
+        base: main
+        delete-branch: true
 
   release:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
     runs-on: ubuntu-latest
-    needs: [validate-tag, build-and-push-run-image, update-versions]
     permissions:
       contents: write
       packages: write
 
     steps:
+    - name: Extract version from branch name
+      id: extract_version
+      run: |
+        VERSION=${GITHUB_HEAD_REF#update-versions-}
+        echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
+    - name: Move tag to merged commit
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -f ${{ steps.extract_version.outputs.VERSION }}
+        git push origin ${{ steps.extract_version.outputs.VERSION }} --tags
 
     - name: publish buildpacks
       run: make publish_buildpacks
@@ -136,8 +156,12 @@ jobs:
           await github.rest.repos.createRelease({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            tag_name: '${{ needs.validate-tag.outputs.version }}',
-            name: 'Release ${{ needs.validate-tag.outputs.version }}',
+            tag_name: '${{ steps.extract_version.outputs.VERSION }}',
+            name: 'Release ${{ steps.extract_version.outputs.VERSION }}',
             draft: false,
             prerelease: false,
           });
+
+    - name: Cleanup branch
+      run: |
+        git push origin --delete update-versions-${{ steps.extract_version.outputs.VERSION }}
