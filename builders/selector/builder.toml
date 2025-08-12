@@ -62,6 +62,9 @@ value = "vscodium"
    id = "paketo-buildpacks/miniconda"
    version = "0.10.4"
   [[order.group]]
+   id = "paketo-buildpacks/pip"
+   version = "0.22.1"
+  [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.24.3"
   [[order.group]]

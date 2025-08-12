@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -eox pipefail
 
 echo "=== Renku Jupyterlab buildpack ==="
 
@@ -14,15 +14,21 @@ mkdir -p "${cache_layer_dir}"
 mkdir -p "${launch_env_dir}"
 
 unset PYTHONPATH
-conda config --remove channels defaults
-conda config --add pkgs_dirs "${cache_layer_dir}"
-conda env create -y -p "${jupyter_environment_dir}" -f "${buildpack_dir}/bin/jupyter-environment.yml"
-# shellcheck source=/dev/null
-. "$(dirname "$(dirname "$(which conda)")")"/etc/profile.d/conda.sh
-conda activate "${jupyter_environment_dir}"
+echo "python: " $(which python)
+
+# only initiate the virtualenv if it doesn't already exist
+pip install virtualenv
+if [[ ! -x "${jupyter_environment_dir}/bin/python" ]]; then
+    echo "Installing virtualenv in ${jupyter_environment_dir}"
+    virtualenv $jupyter_environment_dir
+fi
+
+source ${jupyter_environment_dir}/bin/activate
+pip install -r ${buildpack_dir}/requirements.txt
 jupyter kernelspec remove -f python3
 jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
-conda deactivate
+pip freeze
+deactivate
 
 mkdir -p "${launch_env_dir}"
 printf "/bin/bash" >"${launch_env_dir}/SHELL.default"
@@ -39,6 +45,7 @@ chmod ug+x "${jupyter_layer_dir}"/bin/jupyterlab-entrypoint.sh
 cat >"${layers_dir}/jupyterlab.toml" <<EOL
 [types]
 launch = true
+cache = true
 
 [metadata]
 description = "jupyterlab frontend for renku"
@@ -52,4 +59,10 @@ type = "jupyterlab"
 command = ["tini", "-g", "--"]
 args = ["bash", "${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh", "${jupyter_environment_dir}"]
 default = true
+EOL
+
+# Enable caching
+cat >"${cache_layer_dir}.toml" <<EOL
+[types]
+cache = true
 EOL
