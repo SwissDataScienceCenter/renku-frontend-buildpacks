@@ -87,6 +87,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
+            export PACK_VOLUME_KEY=$(openssl rand -hex 32)
             make tests
           push: never
           skipContainerUserIdUpdate: false
