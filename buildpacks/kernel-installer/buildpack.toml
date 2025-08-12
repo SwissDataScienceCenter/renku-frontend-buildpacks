@@ -4,7 +4,7 @@ api = "0.11"
 # Buildpack ID and metadata
 [buildpack]
 id = "renku/kernel-installer"
-version = "0.0.6"
+version = "0.0.7a1"
 name = "jupyter kernel installer"
 
 # Targets the buildpack will work with
