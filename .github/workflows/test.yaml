@@ -2,6 +2,8 @@ name: Run Tests
 
 on:
   push:
+  repository_dispatch:
+    types: [run-tests-for-release-pr]
 
 env:
   DEVCONTAINER_REGISTRY: ghcr.io
@@ -28,6 +30,8 @@ jobs:
       image_tag: ${{ steps.docker_image.outputs.image_tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.branch || github.head_ref || github.ref }}
       - name: Docker image metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -73,6 +77,8 @@ jobs:
       - build-devcontainer
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.branch || github.head_ref || github.ref }}
       - name: Run linting
         id: lint
         uses: devcontainers/ci@v0.3
