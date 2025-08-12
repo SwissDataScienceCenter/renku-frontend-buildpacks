@@ -4,9 +4,12 @@ on:
   push:
     tags:
       - '*'
+  pull_request:
+    types: [closed]
 
 jobs:
   validate-tag:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_version.outputs.VERSION }}
@@ -41,11 +44,12 @@ jobs:
         echo "✅ Tag ${{ steps.get_version.outputs.VERSION }} originates from main branch"
 
   build-and-push-run-image:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     needs: validate-tag
     permissions:
       contents: read
-      packages: write # Grant write permission for pushing to GHCR
+      packages: write
 
     steps:
     - name: Checkout code
@@ -74,8 +78,9 @@ jobs:
         cache-to: type=gha,mode=max
 
   update-versions:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    needs: validate-tag
+    needs: [validate-tag, build-and-push-run-image]
     permissions:
       contents: write
 
