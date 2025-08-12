@@ -141,7 +141,7 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git tag -f ${{ steps.extract_version.outputs.VERSION }}
-        git push origin ${{ steps.extract_version.outputs.VERSION }} --force
+        git push origin ${{ steps.extract_version.outputs.VERSION }} --tags
 
     - name: publish buildpacks
       run: make publish_buildpacks
