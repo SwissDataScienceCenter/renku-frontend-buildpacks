@@ -9,14 +9,23 @@ else
 fi
 
 cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
+[[provides]]
+  name = "jupyterlab"
+
 [[requires]]
-  name = "pip"
+  name = "cpython"
 
 [requires.metadata]
   build = true
+  launch = true
+  version = "3.12.*"
 
-[[provides]]
-  name = "jupyterlab"
+[[requires]]
+  name = "site-packages"
+
+[requires.metadata]
+  build = true
+  launch = true
 
 [[requires]]
   name = "tini"

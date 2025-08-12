@@ -46,6 +46,16 @@ value = "vscodium"
   uri = "docker://docker.io/paketobuildpacks/miniconda:0.10.4"
   version = "0.10.4"
 
+[[buildpacks]]
+  id = "paketo-buildpacks/pip"
+  uri = "docker://docker.io/paketobuildpacks/pip:0.22.1"
+  version = "0.22.1"
+
+[[buildpacks]]
+  id = "paketo-buildpacks/cpython"
+  uri = "docker://docker.io/paketobuildpacks/cpython:1.15.14"
+  version = "1.15.14"
+
 [lifecycle]
   version = "0.20.6"
 
@@ -59,12 +69,6 @@ value = "vscodium"
     id = "paketo-buildpacks/tini"
     version = "0.3.2"
   [[order.group]]
-   id = "paketo-buildpacks/miniconda"
-   version = "0.10.4"
-  [[order.group]]
-   id = "paketo-buildpacks/pip"
-   version = "0.22.1"
-  [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.24.3"
   [[order.group]]
@@ -75,56 +79,6 @@ value = "vscodium"
     version = "0.0.6"
   [[order.group]]
     id = "renku/kernel-installer"
-    version = "0.0.6"
-
-[[order]]
-  [[order.group]]
-    id = "renku/conda-nodefaults"
-    version = "0.0.1"
-    optional = true
-  [[order.group]]
-    id = "paketo-buildpacks/tini"
-    version = "0.3.2"
-  [[order.group]]
-    id = "paketo-buildpacks/python"
-    version = "2.24.3"
-  [[order.group]]
-    id = "renku/python-dependency-manager"
-    version = "0.0.6"
-  [[order.group]]
-    id = "renku/ttyd"
-    version = "0.0.6"
-
-[[order]]
-
-  [[order.group]]
-    id = "renku/conda-nodefaults"
-    version = "0.0.1"
-    optional = true
-  [[order.group]]
-    id = "paketo-buildpacks/python"
-    version = "2.24.3"
-  [[order.group]]
-    id = "renku/python-dependency-manager"
-    version = "0.0.6"
-  [[order.group]]
-    id = "vscodium"
-    version = "0.3.0"
-
-[[order]]
-
-  [[order.group]]
-    id = "renku/conda-nodefaults"
-    version = "0.0.1"
-    optional = true
-  [[order.group]]
-    id = "paketo-buildpacks/tini"
-    version = "0.3.2"
-  [[order.group]]
-   id = "paketo-buildpacks/miniconda"
-   version = "0.10.4"
-  [[order.group]]
-    id = "renku/rstudio"
     version = "0.0.6"
 
 [stack]
