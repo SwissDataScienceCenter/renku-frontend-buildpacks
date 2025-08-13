@@ -154,17 +154,14 @@ jobs:
       run: make publish_builders
 
     - name: Create Release
-      uses: actions/github-script@v7
+      uses: ncipollo/release-action@v1
       with:
-        script: |
-          await github.rest.repos.createRelease({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            tag_name: '${{ steps.extract_version.outputs.VERSION }}',
-            name: 'Release ${{ steps.extract_version.outputs.VERSION }}',
-            draft: false,
-            prerelease: false,
-          });
+        tag: ${{ steps.extract_version.outputs.VERSION }}
+        name: Release ${{ steps.extract_version.outputs.VERSION }}
+        generateReleaseNotes: true
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Cleanup branch
       run: |
