@@ -3,7 +3,7 @@ api = "0.11"
 [buildpack]
 id = "renku/jupyterlab"
 name = "Jupyterlab frontend Buildpack"
-version = "0.0.7"
+version = "0.0.6"
 
 [[targets]]
   os = "linux"
