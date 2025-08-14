@@ -1,50 +1,44 @@
 name: Update Buildpack and Run Image Versions
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: New release version (e.g. 0.46.0)
+        type: string
+        required: true
   pull_request:
     types: [closed]
 
 jobs:
   validate-tag:
-    if: github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get_version.outputs.VERSION }}
       repo_lower: ${{ steps.lowercase_repo.outputs.REPO }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Get tag version
-      id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+    - name: Check if tag exists
+      run: |
+        if git tag -l | grep -q "^${{ github.event.inputs.version }}$"; then
+          echo "Error: Tag ${{ github.event.inputs.version }} already exists"
+          exit 1
+        else
+          echo "Tag ${{ github.event.inputs.version }} does not exist - proceeding"
+        fi
 
     - name: lowercase REPO
       id: lowercase_repo
       run: |
         echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_OUTPUT}"
 
-    - name: Verify tag originates from main branch
-      id: check_branch
-      run: |
-        TAG_COMMIT=$(git rev-list -n 1 ${{ steps.get_version.outputs.VERSION }})
-        echo "Tag points to commit: $TAG_COMMIT"
-
-        if ! git merge-base --is-ancestor $TAG_COMMIT origin/main; then
-          echo "❌ Error: Tag ${{ steps.get_version.outputs.VERSION }} does not originate from main branch"
-          exit 1
-        fi
-
-        echo "✅ Tag ${{ steps.get_version.outputs.VERSION }} originates from main branch"
-
   build-and-push-run-image:
-    if: github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: validate-tag
     permissions:
@@ -73,12 +67,12 @@ jobs:
         context: ./run-image
         file: ./run-image/Dockerfile
         push: true
-        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/base-image:${{ needs.validate-tag.outputs.version }}
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/base-image:${{ github.event.inputs.version }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
   create-version-update-pr:
-    if: github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: [validate-tag, build-and-push-run-image]
     permissions:
@@ -93,19 +87,19 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Update buildpack.toml versions
-      run: make update-buildpack-versions RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
+      run: make update-buildpack-versions RELEASE_VERSION=${{ github.event.inputs.version }}
 
     - name: Update builder.toml
-      run: make update-builder-versions RELEASE_VERSION=${{ needs.validate-tag.outputs.version }}
+      run: make update-builder-versions RELEASE_VERSION=${{ github.event.inputs.version }}
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: "chore(release): Update buildpack and run-image versions to ${{ needs.validate-tag.outputs.version }}"
-        title: "chore(release): Update versions to ${{ needs.validate-tag.outputs.version }}"
+        commit-message: "chore(release): Update buildpack and run-image versions to ${{ github.event.inputs.version }}"
+        title: "chore(release): Update versions to ${{ github.event.inputs.version }}"
         body: |
-          Automated version update for release ${{ needs.validate-tag.outputs.version }}
+          Automated version update for release ${{ github.event.inputs.version }}
 
           - Updated buildpack.toml versions
           - Updated builder.toml versions
@@ -113,9 +107,19 @@ jobs:
           This PR was created automatically by the release workflow.
 
           **Please review and merge to complete the release process.**
-        branch: update-versions-${{ needs.validate-tag.outputs.version }}
+        branch: update-versions-${{ github.event.inputs.version }}
         base: main
         delete-branch: true
+
+    - name: Trigger tests
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: run-tests-for-release-pr
+        client-payload: |
+          {
+            "branch": "update-versions-${{ github.event.inputs.version }}"
+          }
 
   release:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
@@ -141,7 +145,7 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git tag -f ${{ steps.extract_version.outputs.VERSION }}
-        git push origin ${{ steps.extract_version.outputs.VERSION }} --tags
+        git push origin ${{ steps.extract_version.outputs.VERSION }} --force --tags
 
     - name: publish buildpacks
       run: make publish_buildpacks
@@ -150,17 +154,14 @@ jobs:
       run: make publish_builders
 
     - name: Create Release
-      uses: actions/github-script@v7
+      uses: ncipollo/release-action@v1
       with:
-        script: |
-          await github.rest.repos.createRelease({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            tag_name: '${{ steps.extract_version.outputs.VERSION }}',
-            name: 'Release ${{ steps.extract_version.outputs.VERSION }}',
-            draft: false,
-            prerelease: false,
-          });
+        tag: ${{ steps.extract_version.outputs.VERSION }}
+        name: Release ${{ steps.extract_version.outputs.VERSION }}
+        generateReleaseNotes: true
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Cleanup branch
       run: |
