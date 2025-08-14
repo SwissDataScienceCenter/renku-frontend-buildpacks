@@ -111,16 +111,6 @@ jobs:
         base: main
         delete-branch: true
 
-    - name: Trigger tests
-      uses: peter-evans/repository-dispatch@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        event-type: run-tests-for-release-pr
-        client-payload: |
-          {
-            "branch": "update-versions-${{ github.event.inputs.version }}"
-          }
-
   release:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
     runs-on: ubuntu-latest
