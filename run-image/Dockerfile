@@ -49,7 +49,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     chsh -s /bin/bash renku
 
 # Add the start_tunnel script
-COPY bin/start_tunnel.sh /user/local/bin/start_tunnel
+COPY bin/start_tunnel.sh /usr/local/bin/start_tunnel
 
 USER $user_id
 WORKDIR /home/renku
