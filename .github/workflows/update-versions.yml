@@ -147,6 +147,13 @@ jobs:
         git tag -f ${{ steps.extract_version.outputs.VERSION }}
         git push origin ${{ steps.extract_version.outputs.VERSION }} --force --tags
 
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - uses: buildpacks/github-actions/setup-pack@v5.9.3
 
     - name: publish buildpacks
