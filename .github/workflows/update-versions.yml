@@ -147,6 +147,8 @@ jobs:
         git tag -f ${{ steps.extract_version.outputs.VERSION }}
         git push origin ${{ steps.extract_version.outputs.VERSION }} --force --tags
 
+    - uses: buildpacks/github-actions/setup-pack@v5.0.0
+
     - name: publish buildpacks
       run: make publish_buildpacks
 
