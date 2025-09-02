@@ -44,7 +44,7 @@ jobs:
         uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image
 ```
 
-You can specify the frontend and automatically provide tags using the [docker meta](https://github.com/docker/metadata-action):
+You can specify the frontend and automatically provide tags using the [docker metadata action](https://github.com/docker/metadata-action):
 
 ```yaml
 name: build image
