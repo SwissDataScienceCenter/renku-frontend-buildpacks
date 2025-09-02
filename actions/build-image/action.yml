@@ -7,7 +7,8 @@ inputs:
     default: vscodium
   tags:
     description: Comma-separated list of image tags to apply
-    required: true
+    required: false
+    default: ghcr.io/${{ github.repository }}/renku-image:latest
   builder:
     description: Builder to use
     required: false
