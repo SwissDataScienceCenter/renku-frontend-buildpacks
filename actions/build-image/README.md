@@ -11,7 +11,7 @@ with CI if they prefer.
 | builder | Builder image to use | No | Most recent builder from this repository |
 | frontend | Which frontend to add to the image; options are "vscodium", "jupyterlab", and "ttyd" | No | vscodium |
 | run-image | Run image to use | No | Most recent run-image published from this repository |
-| tags | Image tags to publish | yes | None |
+| tags | Image tags to publish | no | ghcr.io/<repository-name>/renku-image:latest |
 
 
 ## Installation
