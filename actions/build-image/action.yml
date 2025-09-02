@@ -19,7 +19,7 @@ runs:
   using: "composite"
   steps:
     - uses: buildpacks/github-actions/setup-pack@v5.9.3
-    - id: Build image
+    - id: build-image
       shell: bash
       run: |
         TAGS=${{ inputs.tags }}
