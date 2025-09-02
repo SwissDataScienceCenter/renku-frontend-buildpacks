@@ -6,7 +6,7 @@ inputs:
     required: false
     default: vscodium
   tags:
-    description: Comman-separated list of image tags to apply
+    description: Comma-separated list of image tags to apply
     required: true
   builder:
     description: Builder to use
@@ -15,6 +15,7 @@ inputs:
   run-image:
     description: Run image to use
     default: ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.0.8
+    required: false
 runs:
   using: "composite"
   steps:
@@ -23,11 +24,11 @@ runs:
       shell: bash
       run: |
         TAGS=${{ inputs.tags }}
-        FIRST_TAG=$${TAGS%%,*}
-        pack build $$FIRST_TAG \
+        FIRST_TAG=${TAGS%%,*}
+        pack build $FIRST_TAG \
           -p . \
           --builder ${{ inputs.builder }} \
           --run-image ${{ inputs.run-image }} \
           --env BP_RENKU_FRONTENDS=${{ inputs.frontend }} \
-          --tag $$TAGS \
+          --tag $TAGS \
           --publish
