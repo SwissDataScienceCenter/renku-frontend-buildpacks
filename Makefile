@@ -165,6 +165,6 @@ update-builder-versions:
 	done
 
 .PHONY: update-action-versions
-update-action-versions:
+update-action-versions: yq
 	@echo "Updating default builder version in the image build action to $(RELEASE_VERSION)..."
 	@$(YQ) -i '.inputs."builder-version".default = strenv(RELEASE_VERSION)' actions/build-image/action.yml
