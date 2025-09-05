@@ -163,3 +163,8 @@ update-builder-versions:
 		FILE="builders/$$builder/builder.toml"; \
 	 ./scripts/update_builder_versions.sh "$(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image" "$(RELEASE_VERSION)" "$$FILE"; \
 	done
+
+.PHONY: update-action-versions
+update-action-versions: yq
+	@echo "Updating default builder version in the image build action to $(RELEASE_VERSION)..."
+	@$(YQ) -i '.inputs."builder-version".default = strenv(RELEASE_VERSION)' actions/build-image/action.yml

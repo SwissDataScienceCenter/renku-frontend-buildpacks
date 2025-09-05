@@ -92,6 +92,9 @@ jobs:
     - name: Update builder.toml
       run: make update-builder-versions RELEASE_VERSION=${{ github.event.inputs.version }}
 
+    - name: update build-image action
+      run:  make update-action-versions RELEASE_VERSION=${{ github.event.inputs.version }}
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:

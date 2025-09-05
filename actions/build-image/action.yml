@@ -1,0 +1,36 @@
+name: Build RenkuLab image
+description: Action to build images to use on the RenkuLab platform
+inputs:
+  frontend:
+    description: Frontend to add to the image
+    required: false
+    default: vscodium
+  tags:
+    description: Comma-separated list of image tags to apply
+    required: false
+    default: ghcr.io/${{ github.repository }}/renku-image:latest
+  builder-version:
+    description: Builder version to use
+    required: false
+    default: "0.0.9"
+  run-image:
+    description: Run image to use - defaults to using the image bundled with the builder
+    default: ""
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - uses: buildpacks/github-actions/setup-pack@v5.9.3
+    - id: build-image
+      shell: bash
+      run: |
+        TAGS=${{ inputs.tags }}
+        FIRST_TAG=${TAGS%%,*}
+        [ -n "${{ inputs.run_image }}" ] && RUN_IMAGE="--run-image ${{ inputs.run_image }}" || RUN_IMAGE=""
+        pack build $FIRST_TAG \
+          -p . \
+          --builder ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/selector:${{ inputs.builder-version }} \
+          ${RUN_IMAGE} \
+          --env BP_RENKU_FRONTENDS=${{ inputs.frontend }} \
+          --tag $TAGS \
+          --publish
