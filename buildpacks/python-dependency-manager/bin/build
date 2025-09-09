@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -xeou pipefail
 
 layer_dir="${CNB_LAYERS_DIR}/deps"
 execd_dir="${layer_dir}"/exec.d
@@ -9,6 +9,12 @@ cat >"${execd_dir}"/setup.sh <<EOL
 #!/usr/bin/env bash
 set -eo pipefail
 export HOME=\$(eval echo "~\$(id -nu)")
+if [ -d \${RENKU_MOUNT_DIR}/.venv ] && \
+   ([ "\$(readlink \${RENKU_MOUNT_DIR}/.venv/bin/python 2>/dev/null)" != "\$(which python 2>/dev/null)" ] || \
+    [ "\$(grep "version = " \${RENKU_MOUNT_DIR}/.venv/pyvenv.cfg 2>/dev/null | cut -d' ' -f3)" != "\$(python --version 2>/dev/null | cut -d' ' -f2)" ]); then
+    echo "Virtualenv exists but has mismatch - recreating..."
+    rm -rf \${RENKU_MOUNT_DIR}/.venv
+fi
 python -m venv --system-site-packages \${RENKU_MOUNT_DIR}/.venv
 printf 'source \${RENKU_MOUNT_DIR}/.venv/bin/activate' >>  \${HOME}/.bashrc
 source \${RENKU_MOUNT_DIR}/.venv/bin/activate
