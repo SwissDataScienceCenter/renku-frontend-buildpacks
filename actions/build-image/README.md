@@ -8,7 +8,7 @@ with CI if they prefer.
 
 | Parameter | Description | Required | Default |
 |-----------|-------------|----------|---------|
-| builder | Builder image to use | No | Most recent builder from this repository |
+| builder-version | Builder version to use | No | Most recent tag from this repository |
 | frontend | Which frontend to add to the image; options are "vscodium", "jupyterlab", and "ttyd" | No | vscodium |
 | run-image | Run image to use | No | Most recent run-image published from this repository |
 | tags | Image tags to publish | No | ghcr.io/<repository-name>/renku-image:latest |
@@ -41,7 +41,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build RenkuLab image
-        uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image
+        uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image@main
 ```
 
 You can specify the frontend and automatically provide tags using the [docker metadata action](https://github.com/docker/metadata-action):
@@ -75,7 +75,7 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
             type=semver,pattern={{version}},event=tag
       - name: Build RenkuLab image
-        uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image
+        uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image@main
         with:
           tags: ${{ steps.meta.outputs.tags }}
           frontend: jupyterlab
