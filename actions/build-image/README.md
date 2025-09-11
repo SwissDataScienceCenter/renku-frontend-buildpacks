@@ -41,7 +41,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build RenkuLab image
-        uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image
+        uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image@main
 ```
 
 You can specify the frontend and automatically provide tags using the [docker metadata action](https://github.com/docker/metadata-action):
@@ -75,7 +75,7 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
             type=semver,pattern={{version}},event=tag
       - name: Build RenkuLab image
-        uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image
+        uses: swissdatasciencecenter/renku-frontend-buildpacks/actions/build-image@main
         with:
           tags: ${{ steps.meta.outputs.tags }}
           frontend: jupyterlab
