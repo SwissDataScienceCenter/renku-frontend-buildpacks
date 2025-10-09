@@ -1,4 +1,4 @@
-ARG base_image=index.docker.io/paketobuildpacks/run-jammy-full:latest
+ARG base_image=index.docker.io/paketobuildpacks/ubuntu-noble-run:0.0.31
 FROM ${base_image}
 
 ARG user_id=1000
@@ -18,6 +18,7 @@ SHELL [ "/bin/bash", "-c", "-o", "pipefail" ]
 # Install additional dependencies and nice-to-have packages
 RUN apt-get update && apt-get install -yq --no-install-recommends \
     build-essential \
+    wget \
     curl \
     git \
     gnupg \
@@ -44,6 +45,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -C /tmp && \
     /tmp/git-lfs-3.3.0/install.sh && \
     rm -rf /tmp/git-lfs* && \
+    (userdel $(getent passwd ${user_id}|cut -d: -f1) || true) && \
     groupadd -f --gid ${group_id} renku && \
     useradd --gid ${group_id} --uid ${user_id} --create-home renku && \
     chsh -s /bin/bash renku

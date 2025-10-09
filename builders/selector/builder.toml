@@ -124,8 +124,10 @@ value = "vscodium"
     id = "renku/rstudio"
     version = "0.1.0"
 
-[stack]
-  build-image = "docker.io/paketobuildpacks/builder-jammy-buildpackless-full:0.0.256"
-  id = "io.buildpacks.stacks.jammy"
-  run-image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.1.0"
-  run-image-mirrors = []
+[build]
+  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.31"
+
+[run]
+[[run.images]]
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.1.0"
+  mirrors = []
