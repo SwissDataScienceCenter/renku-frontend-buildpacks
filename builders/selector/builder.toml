@@ -118,3 +118,11 @@ value = "vscodium"
 [[run.images]]
   image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.1.0"
   mirrors = []
+
+[[targets]]
+os = "linux"
+arch = "amd64"
+
+[[targets]]
+os = "linux"
+arch = "arm64"
