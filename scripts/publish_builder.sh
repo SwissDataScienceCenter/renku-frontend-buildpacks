@@ -15,8 +15,8 @@ echo "Building image $IMAGE:$TAG for builder at $BUILDER_PATH"
 
 if [[ -z $PUBLISH ]]; then
 	echo "Will not publish the push the image to the repository"
-	pack builder create "$IMAGE:$TAG" --config "$BUILDER_PATH/builder.toml" --target "linux/amd64"
+	pack builder create "$IMAGE:$TAG" --config "$BUILDER_PATH/builder.toml"
 else
 	echo "Found publish flag, will push the image to the repo"
-	pack builder create "$IMAGE:$TAG" --config "$BUILDER_PATH/builder.toml" --target "linux/amd64" --publish
+	pack builder create "$IMAGE:$TAG" --config "$BUILDER_PATH/builder.toml" --publish
 fi
