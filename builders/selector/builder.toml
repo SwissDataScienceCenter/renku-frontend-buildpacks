@@ -7,7 +7,7 @@ value = "vscodium"
 [[buildpacks]]
   uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.4.0"
   id = "vscodium"
-  version = "0.3.0"
+  version = "0.4.0"
 
 [[buildpacks]]
   uri = "../../buildpacks/conda-nodefaults"
@@ -96,7 +96,7 @@ value = "vscodium"
     version = "0.1.0"
   [[order.group]]
     id = "vscodium"
-    version = "0.3.0"
+    version = "0.4.0"
 
 [[order]]
 
