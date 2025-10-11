@@ -15,10 +15,12 @@ if [ -d \${RENKU_WORKING_DIR}/.venv ] && \
     rm -rf \${RENKU_WORKING_DIR}/.venv
 fi
 python -m venv --system-site-packages \${RENKU_WORKING_DIR}/.venv
-printf 'source \${RENKU_WORKING_DIR}/.venv/bin/activate' >>  \${HOME}/.bashrc
 base_site_packages="\$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
 derived_site_packages="\$(\${RENKU_WORKING_DIR}/.venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
 echo "\$base_site_packages" > "\$derived_site_packages"/_base_packages.pth
+if !(grep "source \${RENKU_WORKING_DIR}/.venv/bin/activate" \${HOME}/.bashrc); then
+  printf "source \${RENKU_WORKING_DIR}/.venv/bin/activate" >>  \${HOME}/.bashrc
+fi
 source \${RENKU_WORKING_DIR}/.venv/bin/activate
 if python -c "import ipykernel" >/dev/null 2>&1;then
   python -m ipykernel install --user --name Python3
