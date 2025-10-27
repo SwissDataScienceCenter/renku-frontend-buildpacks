@@ -5,9 +5,9 @@ name = "BP_RENKU_FRONTENDS"
 value = "vscodium"
 
 [[buildpacks]]
-  uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.3.0"
+  uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.5.0"
   id = "vscodium"
-  version = "0.3.0"
+  version = "0.5.0"
 
 [[buildpacks]]
   uri = "../../buildpacks/conda-nodefaults"
@@ -38,13 +38,13 @@ value = "vscodium"
   version = "0.3.2"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/python:2.24.3"
-  version = "2.24.3"
+  uri = "docker://docker.io/paketobuildpacks/python:2.38.0"
+  version = "2.38.0"
 
 [[buildpacks]]
   id = "paketo-buildpacks/miniconda"
-  uri = "docker://docker.io/paketobuildpacks/miniconda:0.10.4"
-  version = "0.10.4"
+  uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.5"
+  version = "0.11.5"
 
 [lifecycle]
   version = "0.20.6"
@@ -53,76 +53,56 @@ value = "vscodium"
 
   [[order.group]]
     id = "renku/conda-nodefaults"
-    version = "0.1.0"
     optional = true
   [[order.group]]
     id = "paketo-buildpacks/tini"
-    version = "0.3.2"
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
-   version = "0.10.4"
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.1.0"
   [[order.group]]
     id = "renku/jupyterlab"
-    version = "0.1.0"
   [[order.group]]
     id = "renku/kernel-installer"
-    version = "0.1.0"
 
 [[order]]
   [[order.group]]
     id = "renku/conda-nodefaults"
-    version = "0.1.0"
     optional = true
   [[order.group]]
     id = "paketo-buildpacks/tini"
-    version = "0.3.2"
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.1.0"
   [[order.group]]
     id = "renku/ttyd"
-    version = "0.1.0"
 
 [[order]]
 
   [[order.group]]
     id = "renku/conda-nodefaults"
-    version = "0.1.0"
     optional = true
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.24.3"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.1.0"
   [[order.group]]
     id = "vscodium"
-    version = "0.3.0"
 
 [[order]]
 
   [[order.group]]
     id = "renku/conda-nodefaults"
-    version = "0.1.0"
     optional = true
   [[order.group]]
     id = "paketo-buildpacks/tini"
-    version = "0.3.2"
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
-   version = "0.10.4"
   [[order.group]]
     id = "renku/rstudio"
-    version = "0.1.0"
 
 [stack]
   build-image = "docker.io/paketobuildpacks/builder-jammy-buildpackless-full:0.0.256"
