@@ -112,7 +112,7 @@ value = "vscodium"
     version = "0.1.0"
 
 [build]
-  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.31"
+  image = "docker.io/paketobuildpacks/build-jammy-full:0.1.99"
 
 [run]
 [[run.images]]

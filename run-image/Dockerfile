@@ -1,4 +1,4 @@
-ARG base_image=index.docker.io/paketobuildpacks/ubuntu-noble-run:0.0.31
+ARG base_image=index.docker.io/paketobuildpacks/run-jammy-full:0.1.99
 FROM ${base_image}
 
 ARG user_id=1000
