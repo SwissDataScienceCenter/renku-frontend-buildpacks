@@ -1,8 +1,32 @@
 # renku-frontend-buildpacks
 
-This project provides a set of buildpacks and builders for deploying Renku frontend applications. It
-includes buildpacks for various frontend frameworks and a builder that orchestrates the build
-process.
+This project provides a comprehensive set of Cloud Native Buildpacks and a specialized `selector`
+builder designed to streamline the deployment of Renku frontend applications and development
+environments. Whether you're setting up JupyterLab, RStudio, or VSCode (via Vscodium) in your Renku
+project, these buildpacks simplify the process by intelligently detecting your project's needs and
+configuring the appropriate environment.
+
+The `selector` builder acts as an orchestrator, integrating various frontend frameworks and
+essential tools (like Python dependency management and kernel installers) to create ready-to-use
+images. This allows Renku users to focus on their data science work without deep knowledge of
+underlying containerization.
+
+For automated image building within your CI/CD pipelines, you can leverage the provided GitHub
+Action [actions/build-image](actions/build-image/README.md). This action simplifies the `pack build`
+process, allowing you to easily specify the desired `frontend`, `tags`, `builder-version`, and
+`run-image` directly in your workflows.
+
+To get started with manual builds, you'll primarily interact with the
+[`pack` CLI](https://buildpacks.io/docs/for-platform-operators/how-to/integrate-ci/pack/), using the
+`selector` builder to build your project. For example:
+
+```bash
+pack build my-renku-environment --builder ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/selector:0.1.0 --path .
+```
+
+This command will leverage the `selector` builder (using version `0.1.0` as an example) to
+automatically detect and configure your Renku environment based on your project's files, and in this
+example, push the resulting image to `my-renku-environment`.
 
 ## Directory Structure
 
