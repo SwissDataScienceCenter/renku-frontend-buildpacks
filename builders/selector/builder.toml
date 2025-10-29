@@ -5,9 +5,9 @@ name = "BP_RENKU_FRONTENDS"
 value = "vscodium"
 
 [[buildpacks]]
-  uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.4.0"
+  uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.5.1"
   id = "vscodium"
-  version = "0.4.0"
+  version = "0.5.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/conda-nodefaults"
@@ -34,16 +34,16 @@ value = "vscodium"
   version = "0.1.0"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/python:2.36.2"
-  version = "2.36.2"
+  uri = "docker://docker.io/paketobuildpacks/python:2.38.0"
+  version = "2.38.0"
 
 [[buildpacks]]
   id = "paketo-buildpacks/miniconda"
-  uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.2"
-  version = "0.11.2"
+  uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.5"
+  version = "0.11.5"
 
 [lifecycle]
-  version = "0.20.6"
+  version = "0.20.16"
 
 [[order]]
 
@@ -53,10 +53,10 @@ value = "vscodium"
     optional = true
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
-   version = "0.11.2"
+   version = "0.11.5"
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.36.2"
+    version = "2.38.0"
   [[order.group]]
     id = "renku/python-dependency-manager"
     version = "0.1.0"
@@ -74,7 +74,7 @@ value = "vscodium"
     optional = true
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.36.2"
+    version = "2.38.0"
   [[order.group]]
     id = "renku/python-dependency-manager"
     version = "0.1.0"
@@ -90,13 +90,13 @@ value = "vscodium"
     optional = true
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.36.2"
+    version = "2.38.0"
   [[order.group]]
     id = "renku/python-dependency-manager"
     version = "0.1.0"
   [[order.group]]
     id = "vscodium"
-    version = "0.4.0"
+    version = "0.5.1"
 
 [[order]]
 
@@ -106,7 +106,7 @@ value = "vscodium"
     optional = true
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
-   version = "0.11.2"
+   version = "0.11.5"
   [[order.group]]
     id = "renku/rstudio"
     version = "0.1.0"
