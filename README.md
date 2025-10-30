@@ -2,7 +2,7 @@
 
 This project provides a comprehensive set of Cloud Native Buildpacks and a specialized `selector`
 builder designed to streamline the deployment of Renku frontend applications and development
-environments. Whether you're setting up JupyterLab, RStudio, or VSCode (via Vscodium) in your Renku
+environments. Whether you're setting up JupyterLab, RStudio, or Vscodium in your Renku
 project, these buildpacks simplify the process by intelligently detecting your project's needs and
 configuring the appropriate environment.
 
