@@ -7,7 +7,7 @@ project, these buildpacks simplify the process by intelligently detecting your p
 configuring the appropriate environment.
 
 The `selector` builder acts as an orchestrator, integrating various frontend frameworks and
-essential tools (like Python dependency management and kernel installers) to create ready-to-use
+essential tools (like Python dependency management and Jupyter kernel installers) to create ready-to-use
 images. This allows Renku users to focus on their data science work without deep knowledge of
 underlying containerization.
 
