@@ -21,12 +21,11 @@ To get started with manual builds, you'll primarily interact with the
 `selector` builder to build your project. For example:
 
 ```bash
-pack build my-renku-environment --builder ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/selector:0.1.0 --path .
+pack build my-user/my-renku-environment --builder ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/selector:0.1.0 --path .
 ```
 
 This command will leverage the `selector` builder (using version `0.1.0` as an example) to
-automatically detect and configure your Renku environment based on your project's files, and in this
-example, push the resulting image to `my-renku-environment`.
+automatically detect and configure your Renku environment based on your project's files.
 
 ## Directory Structure
 
