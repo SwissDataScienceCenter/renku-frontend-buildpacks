@@ -66,6 +66,7 @@ jobs:
       with:
         context: ./run-image
         file: ./run-image/Dockerfile
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/base-image:${{ github.event.inputs.version }}
         cache-from: type=gha
@@ -147,7 +148,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: buildpacks/github-actions/setup-pack@v5.9.3
+    - uses: buildpacks/github-actions/setup-pack@v5.9.5
 
     - name: publish buildpacks
       run: make publish_buildpacks

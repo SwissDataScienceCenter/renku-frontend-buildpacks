@@ -12,8 +12,8 @@ echo "Building image $IMAGE:$TAG for buildpack at $BP_PATH"
 
 if [[ -z $PUBLISH ]]; then
 	echo "Will not publish the push the image to the repository"
-	pack buildpack package "$IMAGE:$TAG" --config "$BP_PATH/package.toml" --target "linux/amd64" --format image
+	pack buildpack package "$IMAGE:$TAG" --config "$BP_PATH/package.toml" --format image
 else
 	echo "Found publish flag, will push the image to the repo"
-	pack buildpack package "$IMAGE:$TAG" --config "$BP_PATH/package.toml" --target "linux/amd64" --format image --publish
+	pack buildpack package "$IMAGE:$TAG" --config "$BP_PATH/package.toml" --format image --publish
 fi
