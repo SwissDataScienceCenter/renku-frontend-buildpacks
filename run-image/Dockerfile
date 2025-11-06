@@ -1,8 +1,10 @@
 ARG base_image=index.docker.io/paketobuildpacks/run-jammy-full:0.1.99
 FROM ${base_image}
 
-ARG user_id=1000
-ARG group_id=1000
+ARG cnb_uid=1001
+ARG cnb_gid=1001
+ENV CNB_USER_ID=${cnb_uid}
+ENV CNB_GROUP_ID=${cnb_gid}
 
 LABEL maintainer="Swiss Data Science Center <info@datascience.ch>"
 LABEL io.buildpacks.rebasable=false
@@ -11,32 +13,54 @@ LABEL org.opencontainers.image.description="Base image for Renku sessions built 
 
 USER root
 
-RUN usermod -s /bin/bash $(id -nu $(user_id))
+RUN usermod -s /bin/bash $(id -nu $(cnb_uid))
 
 SHELL [ "/bin/bash", "-c", "-o", "pipefail" ]
 
 # Install additional dependencies and nice-to-have packages
-RUN apt-get update && apt-get install -yq --no-install-recommends \
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && apt-get install -yq --no-install-recommends \
     build-essential \
-    wget \
     curl \
-    tini \
+    gdb \
     git \
     gnupg \
     graphviz \
+    inetutils-inetd \
     jq \
+    lcov \
     less \
+    libbz2-dev \
+    libffi-dev \
+    libgdbm-compat-dev \
+    libgdbm-dev \
+    liblzma-dev \
+    libmpdec-dev \
+    libncurses5-dev \
+    libreadline6-dev \
     libsm6 \
+    libsqlite3-dev \
+    libssl-dev \
     libxext-dev \
     libxrender1 \
     libyaml-0-2 \
     libyaml-dev \
+    libzstd-dev \
     lmodern \
+    lzma \
+    lzma-dev \
     nano \
     netcat-traditional \
+    openssl \
+    pkg-config \
     rclone \
-    unzip \
+    tini \
+    tk-dev \
     tmux \
+    unzip \
+    uuid-dev \
+    wget \
+    zlib1g-dev \
     vim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -46,15 +70,15 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -C /tmp && \
     /tmp/git-lfs-3.3.0/install.sh && \
     rm -rf /tmp/git-lfs* && \
-    (userdel $(getent passwd ${user_id}|cut -d: -f1) || true) && \
-    groupadd -f --gid ${group_id} renku && \
-    useradd --gid ${group_id} --uid ${user_id} --create-home renku && \
+    (userdel $(getent passwd ${cnb_uid}|cut -d: -f1) || true) && \
+    groupadd -f --gid ${cnb_gid} renku && \
+    useradd --gid ${cnb_gid} --uid ${cnb_uid} --create-home renku && \
     chsh -s /bin/bash renku
 
 # Add the start_tunnel script
 COPY bin/start_tunnel.sh /usr/local/bin/start_tunnel
 
-USER $user_id
+USER $cnb_uid
 WORKDIR /home/renku
 
 COPY .bashrc /etc/skel
