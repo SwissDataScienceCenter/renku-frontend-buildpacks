@@ -34,7 +34,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     libgdbm-compat-dev \
     libgdbm-dev \
     liblzma-dev \
-    libmpdec-dev \
     libncurses5-dev \
     libreadline6-dev \
     libsm6 \
