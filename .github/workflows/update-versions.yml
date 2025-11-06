@@ -69,6 +69,20 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/base-image:${{ github.event.inputs.version }}
+        labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=22.04
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push cuda run-image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./run-image
+        file: ./run-image/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        build-args: base_image=nvcr.io/nvidia/cuda-dl-base:24.10-cuda12.6-devel-ubuntu22.04
+        push: true
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/base-cuda-image:${{ github.event.inputs.version }}
+        labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=22.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
