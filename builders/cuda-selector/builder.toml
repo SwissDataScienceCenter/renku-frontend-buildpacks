@@ -1,0 +1,128 @@
+description = "CUDA enabled builder for Renku frontends and environments."
+
+[[build.env]]
+name = "BP_RENKU_FRONTENDS"
+value = "vscodium"
+
+[[buildpacks]]
+  uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.5.1"
+  id = "vscodium"
+  version = "0.5.1"
+
+[[buildpacks]]
+  uri = "../../buildpacks/conda-nodefaults"
+  version = "0.1.0"
+
+[[buildpacks]]
+  uri = "../../buildpacks/kernel-installer"
+  version = "0.1.0"
+
+[[buildpacks]]
+  uri = "../../buildpacks/jupyterlab"
+  version = "0.1.0"
+
+[[buildpacks]]
+  uri = "../../buildpacks/ttyd"
+  version = "0.1.0"
+
+[[buildpacks]]
+  uri = "../../buildpacks/python-dependency-manager"
+  version = "0.1.0"
+
+[[buildpacks]]
+  uri = "../../buildpacks/rstudio"
+  version = "0.1.0"
+
+[[buildpacks]]
+  uri = "docker://docker.io/paketobuildpacks/python:2.38.0"
+  version = "2.38.0"
+
+[[buildpacks]]
+  id = "paketo-buildpacks/miniconda"
+  uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.5"
+  version = "0.11.5"
+
+[lifecycle]
+  version = "0.20.16"
+
+[[order]]
+
+  [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.1.0"
+    optional = true
+  [[order.group]]
+   id = "paketo-buildpacks/miniconda"
+   version = "0.11.5"
+  [[order.group]]
+    id = "paketo-buildpacks/python"
+    version = "2.38.0"
+  [[order.group]]
+    id = "renku/python-dependency-manager"
+    version = "0.1.0"
+  [[order.group]]
+    id = "renku/jupyterlab"
+    version = "0.1.0"
+  [[order.group]]
+    id = "renku/kernel-installer"
+    version = "0.1.0"
+
+[[order]]
+  [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.1.0"
+    optional = true
+  [[order.group]]
+    id = "paketo-buildpacks/python"
+    version = "2.38.0"
+  [[order.group]]
+    id = "renku/python-dependency-manager"
+    version = "0.1.0"
+  [[order.group]]
+    id = "renku/ttyd"
+    version = "0.1.0"
+
+[[order]]
+
+  [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.1.0"
+    optional = true
+  [[order.group]]
+    id = "paketo-buildpacks/python"
+    version = "2.38.0"
+  [[order.group]]
+    id = "renku/python-dependency-manager"
+    version = "0.1.0"
+  [[order.group]]
+    id = "vscodium"
+    version = "0.5.1"
+
+[[order]]
+
+  [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.1.0"
+    optional = true
+  [[order.group]]
+   id = "paketo-buildpacks/miniconda"
+   version = "0.11.5"
+  [[order.group]]
+    id = "renku/rstudio"
+    version = "0.1.0"
+
+[build]
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-cuda-image:0.1.0"
+
+[run]
+[[run.images]]
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-cuda-image:0.1.0"
+  mirrors = []
+
+[[targets]]
+os = "linux"
+arch = "amd64"
+
+[[targets]]
+os = "linux"
+arch = "arm64"
