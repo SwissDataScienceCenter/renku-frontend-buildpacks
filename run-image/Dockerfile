@@ -1,10 +1,10 @@
 ARG base_image=index.docker.io/paketobuildpacks/run-jammy-full:0.1.99
-FROM ${base_image}
+FROM ${base_image} AS base
 
-ARG cnb_uid=1001
-ARG cnb_gid=1001
-ENV CNB_USER_ID=${cnb_uid}
-ENV CNB_GROUP_ID=${cnb_gid}
+ARG cnb_run_uid=1000
+ARG cnb_run_gid=1000
+ARG cnb_build_uid=1001
+ARG cnb_build_gid=1001
 
 LABEL maintainer="Swiss Data Science Center <info@datascience.ch>"
 LABEL io.buildpacks.rebasable=false
@@ -13,7 +13,6 @@ LABEL org.opencontainers.image.description="Base image for Renku sessions built 
 
 USER root
 
-RUN usermod -s /bin/bash $(id -nu $(cnb_uid))
 
 SHELL [ "/bin/bash", "-c", "-o", "pipefail" ]
 
@@ -69,17 +68,39 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     chmod a+x /usr/local/bin/powerline-shell && \
     tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -C /tmp && \
     /tmp/git-lfs-3.3.0/install.sh && \
-    rm -rf /tmp/git-lfs* && \
-    (userdel $(getent passwd ${cnb_uid}|cut -d: -f1) || true) && \
-    groupadd -f --gid ${cnb_gid} renku && \
-    useradd --gid ${cnb_gid} --uid ${cnb_uid} --create-home renku && \
-    chsh -s /bin/bash renku
+    rm -rf /tmp/git-lfs*
+
+FROM base AS run
+
+ENV CNB_USER_ID=${cnb_run_uid}
+ENV CNB_GROUP_ID=${cnb_run_gid}
+
+RUN
 
 # Add the start_tunnel script
 COPY bin/start_tunnel.sh /usr/local/bin/start_tunnel
 
-USER $cnb_uid
-WORKDIR /home/renku
+RUN (userdel $(getent passwd ${cnb_uid}|cut -d: -f1) || true) && \
+    groupadd -f --gid ${cnb_build_gid} renku_build && \
+    groupadd -f --gid ${cnb_run_gid} renku && \
+    useradd --gid ${cnb_run_gid} --uid ${cnb_run_uid} -s /bin/bash --create-home renku && \
+    usermod -aG renku_build renku && \
+    chsh -s /bin/bash renku
 
 COPY .bashrc /etc/skel
+
+USER $cnb_run_uid
+WORKDIR /home/renku
 RUN cp /etc/skel/.bashrc $HOME/
+
+FROM base AS build
+
+ENV CNB_USER_ID=${cnb_build_uid}
+ENV CNB_GROUP_ID=${cnb_build_gid}
+
+RUN (userdel $(getent passwd ${cnb_uid}|cut -d: -f1) || true) && \
+    groupadd -f --gid ${cnb_build_gid} renku && \
+    useradd --gid ${cnb_build_gid} --uid ${cnb_build_uid} --create-home renku && \
+    chsh -s /bin/bash renku
+
+USER $cnb_build_uid
