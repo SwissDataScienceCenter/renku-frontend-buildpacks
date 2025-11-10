@@ -51,6 +51,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 # Add the start_tunnel script
 COPY bin/start_tunnel.sh /usr/local/bin/start_tunnel
 
+RUN echo "SHELL     /bin/bash" >> /etc/login.defs
+
 USER $user_id
 WORKDIR /home/renku
 
