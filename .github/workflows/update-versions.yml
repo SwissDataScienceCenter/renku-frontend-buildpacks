@@ -37,7 +37,7 @@ jobs:
       run: |
         echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_OUTPUT}"
 
-  build-and-push-run-image:
+  build-and-push-build-run-images:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: validate-tag
@@ -67,15 +67,45 @@ jobs:
         context: ./run-image
         file: ./run-image/Dockerfile
         platforms: linux/amd64,linux/arm64
+        target: run
         push: true
         tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/base-image:${{ github.event.inputs.version }}
+        labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=22.04
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push cuda run-image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./run-image
+        file: ./run-image/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        build-args: base_image=nvcr.io/nvidia/cuda-dl-base:24.10-cuda12.6-devel-ubuntu22.04
+        target: run
+        push: true
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/run-cuda-image:${{ github.event.inputs.version }}
+        labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=22.04
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push cuda build-image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./run-image
+        file: ./run-image/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        build-args: base_image=nvcr.io/nvidia/cuda-dl-base:24.10-cuda12.6-devel-ubuntu22.04
+        target: build
+        push: true
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/build-cuda-image:${{ github.event.inputs.version }}
+        labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=22.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
   create-version-update-pr:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    needs: [validate-tag, build-and-push-run-image]
+    needs: [validate-tag, build-and-push-build-run-images]
     permissions:
       contents: write
       pull-requests: write
