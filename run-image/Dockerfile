@@ -68,28 +68,28 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     chmod a+x /usr/local/bin/powerline-shell && \
     tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -C /tmp && \
     /tmp/git-lfs-3.3.0/install.sh && \
-    rm -rf /tmp/git-lfs*
-
-FROM base AS run
-
-ENV CNB_USER_ID=${cnb_run_uid}
-ENV CNB_GROUP_ID=${cnb_run_gid}
-
-# Add the start_tunnel script
-COPY bin/start_tunnel.sh /usr/local/bin/start_tunnel
-
-RUN (userdel $(getent passwd ${cnb_run_uid}|cut -d: -f1) || true) && \
+    rm -rf /tmp/git-lfs* && \
+    (userdel $(getent passwd ${cnb_run_uid}|cut -d: -f1) || true) && \
     (groupdel $(getent group ${cnb_run_uid}|cut -d: -f1) || true) && \
     (groupdel $(getent group ${cnb_build_uid}|cut -d: -f1) || true) && \
     groupadd -f --gid ${cnb_build_gid} renku_build && \
+    useradd --gid ${cnb_build_gid} --uid ${cnb_build_uid} renku_build && \
     groupadd -f --gid ${cnb_run_gid} renku && \
     useradd --gid ${cnb_run_gid} --uid ${cnb_run_uid} -s /bin/bash --create-home renku && \
     usermod -aG renku_build renku && \
     chsh -s /bin/bash renku
 
+# Add the start_tunnel script
+COPY bin/start_tunnel.sh /usr/local/bin/start_tunnel
+
 COPY .bashrc /etc/skel
 
+FROM base AS run
+
+ENV CNB_USER_ID=${cnb_run_uid}
+ENV CNB_GROUP_ID=${cnb_run_gid}
 USER $cnb_run_uid
+
 WORKDIR /home/renku
 RUN cp /etc/skel/.bashrc $HOME/
 
@@ -97,11 +97,4 @@ FROM base AS build
 
 ENV CNB_USER_ID=${cnb_build_uid}
 ENV CNB_GROUP_ID=${cnb_build_gid}
-
-RUN (userdel $(getent passwd ${cnb_build_uid}|cut -d: -f1) || true) && \
-    (groupdel $(getent group ${cnb_build_uid}|cut -d: -f1) || true) && \
-    groupadd -f --gid ${cnb_build_gid} renku && \
-    useradd --gid ${cnb_build_gid} --uid ${cnb_build_uid} --create-home renku && \
-    chsh -s /bin/bash renku
-
 USER $cnb_build_uid
