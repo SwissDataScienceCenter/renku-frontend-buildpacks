@@ -1,5 +1,5 @@
-ARG base_image=index.docker.io/paketobuildpacks/run-jammy-full:0.1.99
-FROM ${base_image} AS base
+ARG base_image=index.docker.io/paketobuildpacks/ubuntu-noble-run:0.0.38
+FROM ${base_image}
 
 ARG cnb_run_uid=1000
 ARG cnb_run_gid=1000
@@ -34,7 +34,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     libgdbm-compat-dev \
     libgdbm-dev \
     liblzma-dev \
-    libmpdec-dev \
     libncurses5-dev \
     libreadline6-dev \
     libsm6 \
