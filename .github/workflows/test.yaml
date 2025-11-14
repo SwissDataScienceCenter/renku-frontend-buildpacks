@@ -71,8 +71,46 @@ jobs:
     runs-on: ubuntu-24.04
     needs:
       - build-devcontainer
+    outputs:
+      run_image_with_tag: ${{ steps.set_run_image_tag.outputs.RUN_IMAGE_WITH_TAG }}
+      tag: ${{ steps.set_run_image_tag.outputs.TAG }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set run image tag
+        id: set_run_image_tag
+        run: |
+          REPO=${GITHUB_REPOSITORY@L}
+          TAG=$(git describe --exact-match --tags 2>/dev/null || git rev-parse HEAD | cut -c -7)
+          RUN_IMAGE_WITH_TAG="${REPO}/run-image:${TAG}"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+          echo "RUN_IMAGE_WITH_TAG=$RUN_IMAGE_WITH_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push run-image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./run-image
+          file: ./run-image/Dockerfile
+          platforms: linux/amd64
+          target: run
+          push: true
+          tags: ghcr.io/${{ steps.set_run_image_tag.outputs.RUN_IMAGE_WITH_TAG }}
+          labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=24.04
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       - name: Run linting
         id: lint
         uses: devcontainers/ci@v0.3
@@ -82,11 +120,19 @@ jobs:
           push: never
           skipContainerUserIdUpdate: false
           cacheFrom: ${{ needs.build-devcontainer.outputs.image_repository }}:${{ needs.build-devcontainer.outputs.image_tag }}
-      - name: Run tests
+
+      - name: Run tests with custom run image
         id: tests
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
+            # Update the image in builder.toml
+            sed -i '/^\[\[run\.images\]\]$/,/^\[.*\]$/ {
+              /^\[\[run\.images\]\]$/b
+              /^\[.*\]$/b
+              s|^\([[:space:]]*image[[:space:]]*=[[:space:]]*"\)\([^":]*\)\(:[^"]*\)\"|\1\2:'"${{ steps.set_run_image_tag.outputs.TAG }}"'\"|
+            }' builders/selector/builder.toml
+            cat builders/selector/builder.toml # Print for debugging
             make tests
           push: never
           skipContainerUserIdUpdate: false
