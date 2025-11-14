@@ -19,12 +19,6 @@ cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
   name = "jupyterlab"
 
 [[requires]]
-  name = "tini"
-
-[requires.metadata]
-  launch = true
-
-[[requires]]
   name = "jupyterlab"
 
 [requires.metadata]
