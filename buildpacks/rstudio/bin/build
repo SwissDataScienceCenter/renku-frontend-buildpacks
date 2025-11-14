@@ -13,8 +13,8 @@ mkdir -p "${rstudio_layer_dir}"/bin
 mkdir -p "${cache_layer_dir}"
 mkdir -p "${launch_env_dir}"
 
-RSTUDIO_VERSION="2024.12.1-563"
-OS_CODENAME=$(grep VERSION_CODENAME /etc/os-release|cut -d= -f2)
+RSTUDIO_VERSION="2025.09.2-418"
+OS_CODENAME=jammy # https://posit.co/download/rstudio-server gives jammy regardless of ubuntu version
 FNAME="rstudio-$RSTUDIO_VERSION.deb"
 
 ARCH=$(uname -m)
