@@ -116,7 +116,7 @@ value = "vscodium"
 
 [run]
 [[run.images]]
-  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/base-image:0.1.0"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:0.1.0"
   mirrors = []
 
 [[targets]]
