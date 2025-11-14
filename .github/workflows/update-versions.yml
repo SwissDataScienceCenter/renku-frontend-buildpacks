@@ -69,7 +69,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
         target: run
         push: true
-        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/base-image:${{ github.event.inputs.version }}
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/run-image:${{ github.event.inputs.version }}
         labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -83,7 +83,7 @@ jobs:
         build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
         target: run
         push: true
-        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/run-cuda-image:${{ github.event.inputs.version }}
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-run-image:${{ github.event.inputs.version }}
         labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -97,7 +97,7 @@ jobs:
         build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
         target: build
         push: true
-        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/build-cuda-image:${{ github.event.inputs.version }}
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-build-image:${{ github.event.inputs.version }}
         labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max

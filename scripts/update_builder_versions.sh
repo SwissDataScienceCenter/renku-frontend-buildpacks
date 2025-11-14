@@ -1,7 +1,7 @@
 #!/bin/bash
-IMAGE="$1"
-RELEASE_VERSION="$2"
-BUILDER_FILE="$3"
+RELEASE_VERSION="$1"
+BUILDER_FILE="$2"
+BUILD_IMAGE="$3"
 
 # Use awk to properly handle TOML sections for buildpacks
 awk -v version="$RELEASE_VERSION" \
@@ -25,8 +25,21 @@ in_buildpack && local_buildpack && /^[[:space:]]*version = / {
 { print }
 ' "$BUILDER_FILE" > "${BUILDER_FILE}.tmp" && mv "${BUILDER_FILE}.tmp" "$BUILDER_FILE"
 
-# Update run-image tag
-sed -i 's|run-image = "[^"]*"|run-image = "'"${IMAGE}"':'"${RELEASE_VERSION}"'"|' "$BUILDER_FILE"
+# Update build image tag only if requested
+if [[ "$BUILD_IMAGE" ]]; then
+  sed -i '/^\[build\]$/,/^\[.*\]$/ {
+    /^\[build\]$/b
+    /^\[.*\]$/b
+    s|^\([[:space:]]*image[[:space:]]*=[[:space:]]*"\)\([^":]*\)\(:[^"]*\)\"|\1\2:'"${RELEASE_VERSION}"'\"|
+  }' "$BUILDER_FILE"
+fi
+
+sed -i '/^\[\[run\.images\]\]$/,/^\[.*\]$/ {
+  /^\[\[run\.images\]\]$/b
+  /^\[.*\]$/b
+  s|^\([[:space:]]*image[[:space:]]*=[[:space:]]*"\)\([^":]*\)\(:[^"]*\)\"|\1\2:'"${RELEASE_VERSION}"'\"|
+}' "$BUILDER_FILE"
+
 
 # Use awk for order group updates - track previous line for renku buildpacks
 awk -v version="$RELEASE_VERSION" \
