@@ -112,11 +112,11 @@ value = "vscodium"
     version = "0.1.0"
 
 [build]
-  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/build-cuda-image:0.1.0"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/cuda-build-image:0.1.0"
 
 [run]
 [[run.images]]
-  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-cuda-image:0.1.0"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/cuda-run-image:0.1.0"
   mirrors = []
 
 [[targets]]
