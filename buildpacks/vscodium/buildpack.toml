@@ -1,0 +1,14 @@
+api = "0.11"
+
+[buildpack]
+id = "renku/vscodium"
+name = "VSCodium frontend Buildpack"
+version = "0.1.0"
+
+[[targets]]
+  os = "linux"
+  arch = "amd64"
+
+[[targets]]
+  os = "linux"
+  arch = "arm64"
