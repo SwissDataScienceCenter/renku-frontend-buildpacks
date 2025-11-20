@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+set -eou pipefail
+
+echo "=== Renku VSCodium buildpack ==="
+
+layers_dir="${CNB_LAYERS_DIR}"
+buildpack_dir="${CNB_BUILDPACK_DIR}"
+vscodium_layer_dir="${layers_dir}"/vscodium
+cache_layer_dir="${layers_dir}"/cache
+execd_layer_dir="${vscodium_layer_dir}"/exec.d
+launch_env_dir="${vscodium_layer_dir}"/env.launch
+vscodium_bin_dir="${vscodium_layer_dir}"/bin
+mkdir -p "${vscodium_layer_dir}"
+mkdir -p "${launch_env_dir}"
+mkdir -p "${execd_layer_dir}"
+mkdir -p "${cache_layer_dir}"
+
+
+ARCH=$(uname -m)
+
+case "$ARCH" in
+  x86_64) ARCH=x64 ;;
+  arm64|aarch64) ARCH=arm64 ;;
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
+
+VSCODIUM_VERSION="1.104.36664"
+VSCODIUM_ARCHIVE="vscodium-reh-web-linux-${ARCH}-${VSCODIUM_VERSION}.tar.gz"
+VSCODIUM_URL="https://github.com/VSCodium/vscodium/releases/download/${VSCODIUM_VERSION}/${VSCODIUM_ARCHIVE}"
+
+echo "Installing VSCodium version : ${VSCODIUM_VERSION} on ${ARCH}"
+
+curl -sSLo "${cache_layer_dir}/${VSCODIUM_ARCHIVE}" -C - "${VSCODIUM_URL}"
+tar -xzf "${cache_layer_dir}/${VSCODIUM_ARCHIVE}" -C "${vscodium_layer_dir}"
+cp "${buildpack_dir}/bin/vscodium-entrypoint.sh" "${vscodium_bin_dir}/vscodium-entrypoint.sh"
+chmod 755 "${vscodium_bin_dir}"/vscodium-entrypoint.sh
+
+mkdir -p "${launch_env_dir}"
+printf "/bin/bash" >"${launch_env_dir}/SHELL.default"
+printf "0.0.0.0" >"${launch_env_dir}/RENKU_SESSION_IP.default"
+printf "8000" >"${launch_env_dir}/RENKU_SESSION_PORT.default"
+printf "/workspace" >"${launch_env_dir}/RENKU_MOUNT_DIR.default"
+printf "/workspace" >"${launch_env_dir}/RENKU_WORKING_DIR.default"
+printf "/" >"${launch_env_dir}/RENKU_BASE_URL_PATH.default"
+printf "ms-python.python ms-toolsai.jupyter" >>"${launch_env_dir}/VSCODIUM_EXTENSIONS.default"
+
+cat >"${execd_layer_dir}"/install-extensions.sh <<EOL
+#!/usr/bin/env bash
+set -eo pipefail
+for extension in \${VSCODIUM_EXTENSIONS[@]};do
+    echo "Installing VSCode extension: \${extension}"
+    codium-server \
+    --extensions-dir "\${RENKU_MOUNT_DIR}/.vscode/extensions" \
+    --server-data-dir "\${RENKU_MOUNT_DIR}/.vscode" \
+    --install-extension \${extension} || \
+    echo "Couldn't install extension \${extension}"
+done
+EOL
+chmod 755 "${execd_layer_dir}"/install-extensions.sh
+
+# Write layer metadata (CNB requirement)
+cat >"${layers_dir}/vscodium.toml" <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "vscodium frontend for renku"
+version = "0.0.6"
+EOL
+
+cat >"${layers_dir}/cache.toml" <<EOL
+[types]
+cache = true
+EOL
+
+# 4. SET DEFAULT START COMMAND
+cat >"${layers_dir}/launch.toml" <<EOL
+[[processes]]
+type = "vscodium"
+command = ["tini", "-g", "--"]
+args = ["bash", "${vscodium_bin_dir}/vscodium-entrypoint.sh"]
+default = true
+EOL
