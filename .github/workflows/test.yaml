@@ -71,9 +71,6 @@ jobs:
     runs-on: ubuntu-24.04
     needs:
       - build-devcontainer
-    outputs:
-      run_image_with_tag: ${{ steps.set_run_image_tag.outputs.RUN_IMAGE_WITH_TAG }}
-      tag: ${{ steps.set_run_image_tag.outputs.TAG }}
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -94,14 +91,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set run image tag
-        id: set_run_image_tag
-        run: |
-          REPO=${GITHUB_REPOSITORY@L}
-          TAG=$(git describe --exact-match --tags 2>/dev/null || git rev-parse HEAD | cut -c -7)
-          RUN_IMAGE_WITH_TAG="${REPO}/run-image:${TAG}"
-          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
-          echo "RUN_IMAGE_WITH_TAG=$RUN_IMAGE_WITH_TAG" >> "$GITHUB_OUTPUT"
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/run-image
+          tags: |
+            type=ref,event=tag
+            type=sha,format=short
 
       - name: Build and push run-image
         uses: docker/build-push-action@v5
@@ -111,7 +108,7 @@ jobs:
           platforms: linux/amd64
           target: run
           push: true
-          tags: ghcr.io/${{ steps.set_run_image_tag.outputs.RUN_IMAGE_WITH_TAG }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=24.04
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -135,7 +132,7 @@ jobs:
             sed -i '/^\[\[run\.images\]\]$/,/^\[.*\]$/ {
               /^\[\[run\.images\]\]$/b
               /^\[.*\]$/b
-              s|^\([[:space:]]*image[[:space:]]*=[[:space:]]*"\)\([^":]*\)\(:[^"]*\)\"|\1\2:'"${{ steps.set_run_image_tag.outputs.TAG }}"'\"|
+              s|^\([[:space:]]*image[[:space:]]*=[[:space:]]*"\)\([^":]*\)\(:[^"]*\)\"|\1\2:'"${{ steps.meta.outputs.version }}"'\"|
             }' builders/selector/builder.toml
             cat builders/selector/builder.toml # Print for debugging
             make tests
