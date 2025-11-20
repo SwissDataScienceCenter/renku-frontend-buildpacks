@@ -75,6 +75,11 @@ jobs:
       run_image_with_tag: ${{ steps.set_run_image_tag.outputs.RUN_IMAGE_WITH_TAG }}
       tag: ${{ steps.set_run_image_tag.outputs.TAG }}
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
