@@ -128,12 +128,13 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
-            # Update the image in builder.toml
-            sed -i '/^\[\[run\.images\]\]$/,/^\[.*\]$/ {
-              /^\[\[run\.images\]\]$/b
-              /^\[.*\]$/b
-              s|^\([[:space:]]*image[[:space:]]*=[[:space:]]*"\)\([^":]*\)\(:[^"]*\)\"|\1\2:'"${{ steps.meta.outputs.version }}"'\"|
-            }' builders/selector/builder.toml
+            make yq tomljson jsontoml
+            pwd
+            ls bin
+            bin/tomljson builders/selector/builder.toml | \
+              bin/yq -p json -o json '.run.images[0].image="'"${{ steps.meta.outputs.tags }}"'"' | \
+              bin/jsontoml > builders/selector/builder.toml.tmp && \
+              mv builders/selector/builder.toml.tmp builders/selector/builder.toml
             cat builders/selector/builder.toml # Print for debugging
             make tests
           push: never
