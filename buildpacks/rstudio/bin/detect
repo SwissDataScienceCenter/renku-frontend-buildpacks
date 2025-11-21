@@ -13,6 +13,12 @@ cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
   name = "rstudio"
 
 [[requires]]
+  name = "renku-env"
+
+[requires.metadata]
+  launch = true
+
+[[requires]]
   name = "rstudio"
 
 [requires.metadata]

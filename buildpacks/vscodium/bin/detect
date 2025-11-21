@@ -17,4 +17,10 @@ cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
 
 [requires.metadata]
   launch = true
+
+[[requires]]
+  name = "renku-env"
+
+[requires.metadata]
+  launch = true
 EOL
