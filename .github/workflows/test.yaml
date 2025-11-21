@@ -128,12 +128,9 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
-            make yq tomljson jsontoml
-            pwd
-            ls bin
-            bin/tomljson builders/selector/builder.toml | \
-              bin/yq -p json -o json '.run.images[0].image="'"${{ steps.meta.outputs.tags }}"'"' | \
-              bin/jsontoml > builders/selector/builder.toml.tmp && \
+            go tool tomljson builders/selector/builder.toml | \
+              go tool yq -p json -o json '.run.images[0].image="'"${{ steps.meta.outputs.tags }}"'"' | \
+              go tool jsontoml > builders/selector/builder.toml.tmp && \
               mv builders/selector/builder.toml.tmp builders/selector/builder.toml
             cat builders/selector/builder.toml # Print for debugging
             make tests
