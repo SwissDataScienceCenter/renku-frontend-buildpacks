@@ -29,7 +29,7 @@ BP_VSCODIUM_VERSION="${BP_VSCODIUM_VERSION:-${VSCODIUM_DEFAULT_VERSION}}"
 VSCODIUM_ARCHIVE="vscodium-reh-web-linux-${ARCH}-${BP_VSCODIUM_VERSION}.tar.gz"
 VSCODIUM_URL="https://github.com/VSCodium/vscodium/releases/download/${BP_VSCODIUM_VERSION}/${VSCODIUM_ARCHIVE}"
 
-echo "Installing VSCodium version : ${BP_VSCODIUM_VERSION} on ${ARCH}"
+echo "Installing VSCodium version: ${BP_VSCODIUM_VERSION} on ${ARCH}"
 
 curl -sSLo "${cache_layer_dir}/${VSCODIUM_ARCHIVE}" -C - "${VSCODIUM_URL}"
 tar -xzf "${cache_layer_dir}/${VSCODIUM_ARCHIVE}" -C "${vscodium_layer_dir}"
