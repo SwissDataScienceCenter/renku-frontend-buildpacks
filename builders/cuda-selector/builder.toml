@@ -5,6 +5,10 @@ name = "BP_RENKU_FRONTENDS"
 value = "vscodium"
 
 [[buildpacks]]
+  uri = "../../buildpacks/renku-variables"
+  version = "0.2.0"
+
+[[buildpacks]]
   uri = "../../buildpacks/vscodium"
   version = "0.2.0"
 
@@ -60,6 +64,9 @@ value = "vscodium"
     id = "renku/python-dependency-manager"
     version = "0.2.0"
   [[order.group]]
+    id = "renku/renku-variables"
+    version = "0.2.0"
+  [[order.group]]
     id = "renku/jupyterlab"
     version = "0.2.0"
   [[order.group]]
@@ -78,6 +85,9 @@ value = "vscodium"
     id = "renku/python-dependency-manager"
     version = "0.2.0"
   [[order.group]]
+    id = "renku/renku-variables"
+    version = "0.2.0"
+  [[order.group]]
     id = "renku/ttyd"
     version = "0.2.0"
 
@@ -94,6 +104,9 @@ value = "vscodium"
     id = "renku/python-dependency-manager"
     version = "0.2.0"
   [[order.group]]
+    id = "renku/renku-variables"
+    version = "0.2.0"
+  [[order.group]]
     id = "renku/vscodium"
     version = "0.2.0"
 
@@ -106,6 +119,9 @@ value = "vscodium"
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
    version = "0.11.5"
+  [[order.group]]
+    id = "renku/renku-variables"
+    version = "0.2.0"
   [[order.group]]
     id = "renku/rstudio"
     version = "0.2.0"

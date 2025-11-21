@@ -13,6 +13,12 @@ cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
   name = "ttyd"
 
 [[requires]]
+  name = "renku-env"
+
+[requires.metadata]
+  launch = true
+
+[[requires]]
   name = "ttyd"
 
 [requires.metadata]
