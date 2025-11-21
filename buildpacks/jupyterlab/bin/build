@@ -8,10 +8,8 @@ buildpack_dir="${CNB_BUILDPACK_DIR}"
 cache_layer_dir="${layers_dir}"/cache
 jupyter_layer_dir="${layers_dir}"/jupyterlab
 jupyter_environment_dir="${jupyter_layer_dir}"/jupyterlab_env
-launch_env_dir="${jupyter_layer_dir}"/env.launch
 mkdir -p "${jupyter_layer_dir}"/bin
 mkdir -p "${cache_layer_dir}"
-mkdir -p "${launch_env_dir}"
 
 unset PYTHONPATH
 conda config --remove channels defaults
@@ -23,14 +21,6 @@ conda activate "${jupyter_environment_dir}"
 jupyter kernelspec remove -f python3
 jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 conda deactivate
-
-mkdir -p "${launch_env_dir}"
-printf "/bin/bash" >"${launch_env_dir}/SHELL.default"
-printf "0.0.0.0" >"${launch_env_dir}/RENKU_SESSION_IP.default"
-printf "8000" >"${launch_env_dir}/RENKU_SESSION_PORT.default"
-printf "/workspace" >"${launch_env_dir}/RENKU_MOUNT_DIR.default"
-printf "/workspace" >"${launch_env_dir}/RENKU_WORKING_DIR.default"
-printf "/" >"${launch_env_dir}/RENKU_BASE_URL_PATH.default"
 
 cp "${buildpack_dir}/bin/jupyterlab-entrypoint.sh" "${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh"
 chmod ug+x "${jupyter_layer_dir}"/bin/jupyterlab-entrypoint.sh
