@@ -6,7 +6,7 @@ value = "vscodium"
 
 [[buildpacks]]
   uri = "../../buildpacks/vscodium"
-  version = "0.1.0"
+  version = "0.2.0"
 
 [[buildpacks]]
   uri = "../../buildpacks/conda-nodefaults"
@@ -95,7 +95,7 @@ value = "vscodium"
     version = "0.2.0"
   [[order.group]]
     id = "renku/vscodium"
-    version = "0.1.0"
+    version = "0.2.0"
 
 [[order]]
 
