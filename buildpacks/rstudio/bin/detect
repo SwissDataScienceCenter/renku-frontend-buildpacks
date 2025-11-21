@@ -19,12 +19,6 @@ cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
   launch = true
 
 [[requires]]
-  name = "tini"
-
-[requires.metadata]
-  launch = true
-
-[[requires]]
   name = "conda"
 
 [requires.metadata]

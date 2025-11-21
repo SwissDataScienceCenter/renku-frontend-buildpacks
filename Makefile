@@ -44,6 +44,10 @@ endef
 .PHONY: all buildpacks builders samples run_image
 
 ## Tools
+TOMLJSON = $(LOCALBIN)/tomljson
+JSONTOML = $(LOCALBIN)/jsontoml
+GO_TOML_VERSION ?= v2.2.4
+
 YQ = $(LOCALBIN)/yq
 YQ_VERSION ?= v4.45.1
 
@@ -55,6 +59,16 @@ SHELLCHECK_VERSION ?= "v0.10.0"
 
 GOLANG_CI_LINT = $(LOCALBIN)/golangci-lint
 GOLANG_CI_LINT_VERSION ?= "v2.1.5"
+
+.PHONY: tomljson
+tomljson: $(TOMLJSON)
+$(TOMLJSON): $(LOCALBIN)
+	$(call go-install-tool, $(TOMLJSON),github.com/pelletier/go-toml/v2/cmd/tomljson,$(GO_TOML_VERSION))
+
+.PHONY: jsontoml
+jsontoml: $(JSONTOML)
+$(JSONTOML): $(LOCALBIN)
+	$(call go-install-tool, $(JSONTOML),github.com/pelletier/go-toml/v2/cmd/jsontoml,$(GO_TOML_VERSION))
 
 .PHONY: yq
 yq: $(YQ)
@@ -107,11 +121,11 @@ REGISTRY_HOST=ghcr.io
 REGISTRY_REPO=swissdatasciencecenter/renku-frontend-buildpacks
 
 run_image:
-	bash ./scripts/publish_run_image.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image
+	bash ./scripts/publish_run_image.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/run-image
 
 .PHONY: publish_run_image
 publish_run_image: run_image
-	bash ./scripts/publish_run_image.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image --publish
+	bash ./scripts/publish_run_image.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/run-image --publish
 
 .PHONY: publish_buildpacks
 publish_buildpacks: yq
@@ -161,7 +175,11 @@ update-builder-versions:
 	@echo "Updating builder versions to $(RELEASE_VERSION)..."
 	@for builder in $(BUILDERS); do \
 		FILE="builders/$$builder/builder.toml"; \
-	 ./scripts/update_builder_versions.sh "$(REGISTRY_HOST)/$(REGISTRY_REPO)/base-image" "$(RELEASE_VERSION)" "$$FILE"; \
+		if [ $$(grep $(REGISTRY_REPO) $$FILE|wc -l) -eq 2 ];then \
+		  ./scripts/update_builder_versions.sh  "$(RELEASE_VERSION)" "$$FILE" true; \
+	  else \
+		  ./scripts/update_builder_versions.sh  "$(RELEASE_VERSION)" "$$FILE"; \
+		fi \
 	done
 
 .PHONY: update-action-versions

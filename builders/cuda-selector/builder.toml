@@ -1,4 +1,4 @@
-description = "Builder for Renku frontends and environments."
+description = "CUDA enabled builder for Renku frontends and environments."
 
 [[build.env]]
 name = "BP_RENKU_FRONTENDS"
@@ -112,11 +112,11 @@ value = "vscodium"
     version = "0.1.0"
 
 [build]
-  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/cuda-build-image:0.1.0"
 
 [run]
 [[run.images]]
-  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:0.1.0"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/cuda-run-image:0.1.0"
   mirrors = []
 
 [[targets]]
