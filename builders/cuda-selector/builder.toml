@@ -5,9 +5,8 @@ name = "BP_RENKU_FRONTENDS"
 value = "vscodium"
 
 [[buildpacks]]
-  uri = "docker://ghcr.io/swissdatasciencecenter/vscodium-buildpack/vscodium:0.5.1"
-  id = "vscodium"
-  version = "0.5.1"
+  uri = "../../buildpacks/vscodium"
+  version = "0.2.0"
 
 [[buildpacks]]
   uri = "../../buildpacks/conda-nodefaults"
@@ -95,8 +94,8 @@ value = "vscodium"
     id = "renku/python-dependency-manager"
     version = "0.2.0"
   [[order.group]]
-    id = "vscodium"
-    version = "0.5.1"
+    id = "renku/vscodium"
+    version = "0.2.0"
 
 [[order]]
 
