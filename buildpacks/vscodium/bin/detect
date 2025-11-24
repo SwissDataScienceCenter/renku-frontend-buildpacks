@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+echo "Checking if vscodium frontend should be installed..."
+if [[ "${BP_RENKU_FRONTENDS}" =~ "vscodium" ]]; then
+  echo "The BP_RENKU_FRONTENDS environment variable was found to contain vscodium and the buildpack will be applied"
+else
+  echo "The BP_RENKU_FRONTENDS environment variable is not set or does not contain vscodium, will not apply this buildpack"
+  exit 100
+fi
+
+cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
+[[provides]]
+  name = "vscodium"
+
+[[requires]]
+  name = "vscodium"
+
+[requires.metadata]
+  launch = true
+EOL
