@@ -25,7 +25,13 @@ jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
 # Install jupyterlab extensions required by the project
 if [ -f "${jupyterlab_extensions_requirements_file}" ]; then
   echo "Installing Jupyterlab extensions from ${jupyterlab_extensions_requirements_file}"
-  pip install -r "${jupyterlab_extensions_requirements_file}" || echo "Failed to install extensions!"
+  jupyterlab_version="$(python -c 'import jupyterlab; print(jupyterlab.__version__)')"
+  constraint_file="${jupyter_layer_dir}/contraint.txt"
+  echo "jupyterlab==${jupyterlab_version}" > "${constraint_file}"
+  cat "${constraint_file}"
+  pip install -r "${jupyterlab_extensions_requirements_file}" --no-input --quiet --progress-bar off --constraint "${constraint_file}" \
+    || echo "Failed to install extensions!"
+  rm "${constraint_file}"
 fi
 conda deactivate
 
