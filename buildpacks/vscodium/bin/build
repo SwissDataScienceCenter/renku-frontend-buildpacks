@@ -6,11 +6,14 @@ echo "=== Renku VSCodium buildpack ==="
 layers_dir="${CNB_LAYERS_DIR}"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
 vscodium_layer_dir="${layers_dir}"/vscodium
+vscodium_extensions_layer_dir="${layers_dir}"/vscodium_extensions
 cache_layer_dir="${layers_dir}"/cache
 execd_layer_dir="${vscodium_layer_dir}"/exec.d
 launch_env_dir="${vscodium_layer_dir}"/env.launch
 vscodium_bin_dir="${vscodium_layer_dir}"/bin
+vscodium_extensions_requirements_file=".renku/build/vscodium_extensions.txt"
 mkdir -p "${vscodium_layer_dir}"
+mkdir -p "${vscodium_extensions_layer_dir}"
 mkdir -p "${launch_env_dir}"
 mkdir -p "${execd_layer_dir}"
 mkdir -p "${cache_layer_dir}"
@@ -35,6 +38,8 @@ curl -sSLo "${cache_layer_dir}/${VSCODIUM_ARCHIVE}" -C - "${VSCODIUM_URL}"
 tar -xzf "${cache_layer_dir}/${VSCODIUM_ARCHIVE}" -C "${vscodium_layer_dir}"
 cp "${buildpack_dir}/bin/vscodium-entrypoint.sh" "${vscodium_bin_dir}/vscodium-entrypoint.sh"
 chmod 755 "${vscodium_bin_dir}"/vscodium-entrypoint.sh
+
+echo ""
 
 mkdir -p "${launch_env_dir}"
 printf "ms-python.python ms-toolsai.jupyter" >>"${launch_env_dir}/VSCODIUM_EXTENSIONS.default"
