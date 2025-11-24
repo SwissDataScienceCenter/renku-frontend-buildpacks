@@ -3,12 +3,6 @@ set -eou pipefail
 
 echo "=== Renku VSCodium buildpack ==="
 
-echo "CNB_PLATFORM_DIR=${CNB_PLATFORM_DIR}"
-ls -al "${CNB_PLATFORM_DIR}" || true
-ls -al "${CNB_PLATFORM_DIR}/env" || true
-
-echo "CNB_TARGET_ARCH=${CNB_TARGET_ARCH}"
-
 layers_dir="${CNB_LAYERS_DIR}"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
 vscodium_layer_dir="${layers_dir}"/vscodium
@@ -51,7 +45,7 @@ if [ -f "${vscodium_extensions_requirements_file}" ]; then
   VSCODIUM_EXTENSIONS="$(cat "${vscodium_extensions_requirements_file}")"
 fi
 echo "Installing extensions:"
-echo "> ${VSCODIUM_EXTENSIONS}"
+echo "> ${VSCODIUM_EXTENSIONS[*]}"
 for extension in ${VSCODIUM_EXTENSIONS[@]}; do
   echo "Installing VSCode extension: ${extension}"
   "${vscodium_bin_dir}/codium-server" \
