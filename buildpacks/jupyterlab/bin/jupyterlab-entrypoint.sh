@@ -20,6 +20,13 @@ if [ -n "$RENKU_WORKING_DIR" ]; then
 	# The ServerApp.root_dir further below only changes the file browser location in the Jupyter UI
 fi
 
+if [ -n "$RENKU_MOUNT_DIR" ]; then
+	# This sets the data dir for Jupyter
+	export JUPYTER_DATA_DIR="${RENKU_MOUNT_DIR}/.local/share/jupyter/"
+	# This sets the path for --user pip installs
+	export PYTHONUSERBASE="${RENKU_MOUNT_DIR}/.local"
+fi
+
 "${JUPYTER_ENV_DIR}/bin/python" -E "${JUPYTER_ENV_DIR}/bin/jupyter-lab" \
 	--ip "${RENKU_SESSION_IP}" \
 	--port "${RENKU_SESSION_PORT}" \
