@@ -21,7 +21,9 @@ if [ -n "$RENKU_WORKING_DIR" ]; then
 fi
 
 if [ -n "$RENKU_MOUNT_DIR" ]; then
-	# This sets the path for --user pip installs
+	# This sets the data dir for Jupyter
+	export JUPYTER_DATA_DIR="${RENKU_MOUNT_DIR}/.local/share/jupyter/"
+	# # This sets the path for --user pip installs
 	export PYTHONUSERBASE="${RENKU_MOUNT_DIR}/.local"
 fi
 

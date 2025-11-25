@@ -23,7 +23,8 @@ if !(grep "source \${RENKU_MOUNT_DIR}/.venv/bin/activate" \${HOME}/.bashrc); the
 fi
 source \${RENKU_MOUNT_DIR}/.venv/bin/activate
 if python -c "import ipykernel" >/dev/null 2>&1;then
-  python -m ipykernel install --user --name Python3
+  JUPYTER_DATA_DIR="\${RENKU_MOUNT_DIR}/.local/share/jupyter/" \
+    python -m ipykernel install --user --name Python3
 fi
 EOL
 
