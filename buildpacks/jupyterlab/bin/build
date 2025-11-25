@@ -9,7 +9,7 @@ cache_layer_dir="${layers_dir}"/cache
 jupyter_layer_dir="${layers_dir}"/jupyterlab
 jupyter_environment_dir="${jupyter_layer_dir}"/jupyterlab_env
 launch_env_dir="${jupyter_layer_dir}"/env.launch
-jupyterlab_extensions_requirements_file=".renku/build/jupyterlab_extensions.txt"
+jupyterlab_extensions_requirements_file="jupyterlab_extensions.txt"
 mkdir -p "${jupyter_layer_dir}"/bin
 mkdir -p "${cache_layer_dir}"
 mkdir -p "${launch_env_dir}"
@@ -29,7 +29,6 @@ if [ -f "${jupyterlab_extensions_requirements_file}" ]; then
   jupyterlab_version="$(python -c 'import jupyterlab; print(jupyterlab.__version__)')"
   constraint_file="${jupyter_layer_dir}/contraint.txt"
   echo "jupyterlab==${jupyterlab_version}" > "${constraint_file}"
-  cat "${constraint_file}"
   pip install -r "${jupyterlab_extensions_requirements_file}" --no-input --quiet --progress-bar off --constraint "${constraint_file}" \
     || echo "Failed to install extensions!"
   rm "${constraint_file}"
