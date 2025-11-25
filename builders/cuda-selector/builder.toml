@@ -45,6 +45,11 @@ value = "vscodium"
   uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.5"
   version = "0.11.5"
 
+[[buildpacks]]
+  id = "heroku/deb-packages"
+  uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
+  version = "0.2.0"
+
 [lifecycle]
   version = "0.20.16"
 
@@ -72,6 +77,9 @@ value = "vscodium"
   [[order.group]]
     id = "renku/kernel-installer"
     version = "0.2.0"
+  [[order.group]]
+    id = "heroku/deb-packages"
+    version = "0.2.0"
 
 [[order]]
   [[order.group]]
@@ -89,6 +97,9 @@ value = "vscodium"
     version = "0.2.0"
   [[order.group]]
     id = "renku/ttyd"
+    version = "0.2.0"
+  [[order.group]]
+    id = "heroku/deb-packages"
     version = "0.2.0"
 
 [[order]]
@@ -109,6 +120,9 @@ value = "vscodium"
   [[order.group]]
     id = "renku/vscodium"
     version = "0.2.0"
+  [[order.group]]
+    id = "heroku/deb-packages"
+    version = "0.2.0"
 
 [[order]]
 
@@ -124,6 +138,9 @@ value = "vscodium"
     version = "0.2.0"
   [[order.group]]
     id = "renku/rstudio"
+    version = "0.2.0"
+  [[order.group]]
+    id = "heroku/deb-packages"
     version = "0.2.0"
 
 [build]
