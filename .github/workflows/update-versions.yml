@@ -75,7 +75,9 @@ jobs:
         target: run
         push: true
         tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/run-image:${{ github.event.inputs.version }}
-        labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=24.04
+        labels: |
+          io.buildpacks.base.distro.name=ubuntu
+          io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -89,7 +91,9 @@ jobs:
         target: run
         push: true
         tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-run-image:${{ github.event.inputs.version }}
-        labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=24.04
+        labels: |
+          io.buildpacks.base.distro.name=ubuntu
+          io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -103,7 +107,9 @@ jobs:
         target: build
         push: true
         tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-build-image:${{ github.event.inputs.version }}
-        labels: io.buildpacks.base.distro.name=ubuntu,io.buildpacks.base.distro.version=24.04
+        labels: |
+          io.buildpacks.base.distro.name=ubuntu
+          io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
