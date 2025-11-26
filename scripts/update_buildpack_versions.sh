@@ -1,4 +1,5 @@
 #!/bin/bash
+set -xeou pipefail
 RELEASE_VERSION="$1"
 FILE_PATH="$2"
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -xeou pipefail
 RELEASE_VERSION="$1"
 BUILDER_FILE="$2"
 BUILD_IMAGE="$3"
