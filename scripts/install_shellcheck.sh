@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xeou pipefail
 
 # The tag i.e. version for the release to download - optional, default is latest
 VERSION=$1

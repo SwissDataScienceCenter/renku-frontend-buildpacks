@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xeou pipefail
 
 # The image name excluding the tag
 IMAGE=$1
