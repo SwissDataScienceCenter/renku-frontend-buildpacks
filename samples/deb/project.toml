@@ -9,4 +9,4 @@ install = [
 
 [[io.buildpacks.build.env]]
 name="BP_CPYTHON_VERSION"
-value="3.13.9"
+value="3.10.16"
