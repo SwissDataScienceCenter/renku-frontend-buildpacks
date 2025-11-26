@@ -1,0 +1,9 @@
+{
+  "name": "extensions-parser",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "jsonc_to_json.js",
+  "dependencies": {
+    "jsonc-parser": "^3.3.1"
+  }
+}

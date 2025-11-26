@@ -11,7 +11,7 @@ cache_layer_dir="${layers_dir}"/cache
 execd_layer_dir="${vscodium_layer_dir}"/exec.d
 launch_env_dir="${vscodium_layer_dir}"/env.launch
 vscodium_bin_dir="${vscodium_layer_dir}"/bin
-vscodium_extensions_requirements_file=".renku/build/vscodium_extensions.txt"
+vscodium_extensions_file=".vscode/extensions.json"
 mkdir -p "${vscodium_layer_dir}"
 mkdir -p "${preinstalled_extensions_dir}"
 mkdir -p "${launch_env_dir}"
@@ -41,11 +41,29 @@ cp "${buildpack_dir}/bin/vscodium-entrypoint.sh" "${vscodium_bin_dir}/vscodium-e
 chmod 755 "${vscodium_bin_dir}"/vscodium-entrypoint.sh
 
 VSCODIUM_EXTENSIONS="${DEFAULT_VSCODIUM_EXTENSIONS}"
-if [ -f "${vscodium_extensions_requirements_file}" ]; then
-  VSCODIUM_EXTENSIONS="$(cat "${vscodium_extensions_requirements_file}")"
+if [ -f "${vscodium_extensions_file}" ]; then
+  set +eo pipefail
+  NODE_JS_VERSION="24.11.1"
+  NODE_JS_ARCHIVE="node-v${NODE_JS_VERSION}-linux-${ARCH}.tar.xz"
+  NODE_JS_URL="https://nodejs.org/dist/v${NODE_JS_VERSION}/node-v${NODE_JS_VERSION}-linux-${ARCH}.tar.xz"
+  mkdir -p "${cache_layer_dir}/node"
+  curl -sSLo "${cache_layer_dir}/node/${NODE_JS_ARCHIVE}" -C - "${NODE_JS_URL}"
+  tar -xJf  "${cache_layer_dir}/node/${NODE_JS_ARCHIVE}" -C "${cache_layer_dir}/node"
+  NODE_JS_DIR="${cache_layer_dir}/node/node-v${NODE_JS_VERSION}-linux-${ARCH}"
+  NODE_JS_BIN_DIR="${NODE_JS_DIR}/bin"
+  cp -R "${buildpack_dir}/bin/extensions-parser" "${cache_layer_dir}/node/"
+  "${NODE_JS_BIN_DIR}/node" "${NODE_JS_BIN_DIR}/npm" clean-install --prefix "${cache_layer_dir}/node/extensions-parser"
+  VSCODIUM_EXTENSIONS=$("${NODE_JS_BIN_DIR}/node" "${cache_layer_dir}/node/extensions-parser/jsonc_to_json.js" "${vscodium_extensions_file}" \
+    | jq -r 'try .recommendations[]' | tr '\n' ' ')
+  if [ -z "${VSCODIUM_EXTENSIONS}" ]; then
+    echo "Failed to parse extensions to install with VSCodium!"
+    VSCODIUM_EXTENSIONS="${DEFAULT_VSCODIUM_EXTENSIONS}"
+  fi
+  set -eo pipefail
 fi
+
 echo "Installing extensions:"
-echo "> ${VSCODIUM_EXTENSIONS[*]}"
+echo "> ${VSCODIUM_EXTENSIONS}"
 for extension in ${VSCODIUM_EXTENSIONS[@]}; do
   echo "Installing VSCode extension: ${extension}"
   "${vscodium_bin_dir}/codium-server" \
@@ -60,18 +78,20 @@ printf "${DEFAULT_VSCODIUM_EXTENSIONS}" >"${launch_env_dir}/VSCODIUM_EXTENSIONS.
 cat >"${execd_layer_dir}"/install-extensions.sh <<EOL
 #!/usr/bin/env bash
 set -eo pipefail
-mkdir -p "\${RENKU_MOUNT_DIR}/.vscode/extensions"
+VSCODIUM_DATA_DIR="\${RENKU_MOUNT_DIR}/.vscode"
+mkdir -p "\${VSCODIUM_DATA_DIR}/extensions" || VSCODIUM_DATA_DIR="\${RENKU_MOUNT_DIR}/.vscode_"
+mkdir -p "\${VSCODIUM_DATA_DIR}/extensions"
 image_extensions="\$(ls -A ${preinstalled_extensions_dir})"
 for extension in \${image_extensions[@]}; do
   if [ -f "${preinstalled_extensions_dir}/\${extension}/package.json" ]; then
-    cp -R "${preinstalled_extensions_dir}/\${extension}" "\${RENKU_MOUNT_DIR}/.vscode/extensions/"
+    cp -R "${preinstalled_extensions_dir}/\${extension}" "\${VSCODIUM_DATA_DIR}/extensions/"
   fi
 done
 for extension in \${VSCODIUM_EXTENSIONS[@]}; do
     echo "Installing VSCode extension: \${extension}"
     codium-server \
-    --extensions-dir "\${RENKU_MOUNT_DIR}/.vscode/extensions" \
-    --server-data-dir "\${RENKU_MOUNT_DIR}/.vscode" \
+    --extensions-dir "\${VSCODIUM_DATA_DIR}/extensions" \
+    --server-data-dir "\${VSCODIUM_DATA_DIR}" \
     --install-extension \${extension} || \
     echo "Couldn't install extension \${extension}"
 done
