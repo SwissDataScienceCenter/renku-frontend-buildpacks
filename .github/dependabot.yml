@@ -5,6 +5,7 @@ updates:
       - "buildpacks/jupyterlab/bin"
     schedule:
       interval: "weekly"
+    enable-beta-ecosystems: true
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
