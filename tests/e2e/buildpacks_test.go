@@ -165,7 +165,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 					}).WithTimeout(time.Minute * 1).WithOffset(1).Should(Equal(200))
 				})
 				It("Users should be install packages in the container", func(ctx SpecContext) {
-					_, err := execInContainer(ctx, client, container, []string{"launcher", "bash", "-c", "R -e 'install.packages(\"dplyr\")'"})
+					_, err := execInContainer(ctx, client, container, []string{"bash", "-c", "R -e '.libPaths(\"'$RENKU_WORKING_DIR/.rstudio'\"); install.packages(\"dplyr\", repos = \"https://cloud.r-project.org\")'"})
 					Expect(err).ToNot(HaveOccurred())
 				})
 			})
@@ -257,7 +257,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 					_, err := execInContainer(ctx, client, container, []string{"launcher", "tree"})
 					Expect(err).ToNot(HaveOccurred())
 				})
-				It("ag should exist as a command in the container", func(ctx SpecContext) {
+				It("ag should not exist as a command in the container", func(ctx SpecContext) {
 					_, err := execInContainer(ctx, client, container, []string{"launcher", "ag"})
 					Expect(err).To(HaveOccurred())
 				})
