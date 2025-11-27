@@ -30,11 +30,19 @@ automatically detect and configure your Renku environment based on your project'
 ## Directory Structure
 
 *   **builders**: Contains builder definitions. A builder defines the environment and buildpacks
-    used to build an application. For now we only maintain the selector builder.
+    used to build an application.
+    *   **selector**: The main builder with all the renku buildpacks.
+    *   **cuda-selector**: A selector with all the renku buildpacks and CUDA pre-installed. This selector is used for the `linux/arm64` platform where Python packages such as `torch` need CUDA pre-installed.
 *   **buildpacks**: Contains individual buildpacks for different frontend frameworks. Each buildpack
     provides the necessary scripts and configurations to detect and build applications.
-  *   **jupyterlab**: Buildpack for JupyterLab frontend.
-  *   **kernel-installer**: Buildpack for installing the correct kernel for the environment.
+    *   **conda-nodefaults**: Buildpack to set the `nodefaults` channel in conda environments.
+    *   **jupyterlab**: Buildpack for the JupyterLab frontend.
+    *   **kernel-installer**: Buildpack for installing the correct kernel for the environment.
+    *   **python-dependency-manager**: Buildpack for setting up a virtual environment at launch.
+    *   **renku-variables**: Buildpack for setting up `RENKU_` environment variables at launch.
+    *   **rstudio**: Buildpack for the RStudio frontend.
+    *   **ttyd**: Buildpack for the TTYD frontend.
+    *   **vscodium**: Buildpack for the VSCodium frontend.
 *   **samples**: Contains sample applications for different frontend frameworks. These samples can
     be used to test the buildpacks and builders.
 
