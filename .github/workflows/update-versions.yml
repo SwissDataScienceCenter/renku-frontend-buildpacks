@@ -189,7 +189,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: buildpacks/github-actions/setup-pack@v5.9.5
+    - uses: buildpacks/github-actions/setup-pack@v5.9.7
 
     - name: publish buildpacks
       run: make publish_buildpacks
