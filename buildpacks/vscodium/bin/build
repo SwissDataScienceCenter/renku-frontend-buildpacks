@@ -64,16 +64,16 @@ fi
 
 echo "Installing extensions:"
 echo "> ${VSCODIUM_EXTENSIONS}"
-for extension in ${VSCODIUM_EXTENSIONS[@]}; do
+for extension in ${VSCODIUM_EXTENSIONS}; do
   echo "Installing VSCode extension: ${extension}"
   "${vscodium_bin_dir}/codium-server" \
     --extensions-dir "${preinstalled_extensions_dir}" \
-    --install-extension ${extension} || \
+    --install-extension "${extension}" || \
     echo "Couldn't install extension ${extension}"
 done
 
 mkdir -p "${launch_env_dir}"
-printf "${DEFAULT_VSCODIUM_EXTENSIONS}" >"${launch_env_dir}/VSCODIUM_EXTENSIONS.default"
+printf '%s' "${VSCODIUM_EXTENSIONS}" >"${launch_env_dir}/VSCODIUM_EXTENSIONS.default"
 
 cat >"${execd_layer_dir}"/install-extensions.sh <<EOL
 #!/usr/bin/env bash
