@@ -5,10 +5,9 @@ layer_dir="${CNB_LAYERS_DIR}/script-launcher"
 execd_dir="${layer_dir}"/exec.d
 mkdir -p "${execd_dir}"
 
-cp -a .init/. "${execd_dir}/"
-
-for f in "${execd_dir}"/*;do
+for f in .init/*.sh;do
   chmod +x "${f}"
+  cp -a "${f}" "${execd_dir}/"
 done
 
 cat >"${layer_dir}".toml <<EOL
