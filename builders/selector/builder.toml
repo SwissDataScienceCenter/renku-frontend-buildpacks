@@ -37,6 +37,10 @@ value = "vscodium"
   version = "0.2.0"
 
 [[buildpacks]]
+  uri = "../../buildpacks/init-scripts"
+  version = "0.2.0"
+
+[[buildpacks]]
   uri = "docker://docker.io/paketobuildpacks/python:2.38.0"
   version = "2.38.0"
 
@@ -81,6 +85,10 @@ value = "vscodium"
     id = "heroku/deb-packages"
     version = "0.2.0"
     optional = true
+  [[order.group]]
+    id = "renku/init-scripts"
+    version = "0.2.0"
+    optional = true
 
 [[order]]
   [[order.group]]
@@ -101,6 +109,10 @@ value = "vscodium"
     version = "0.2.0"
   [[order.group]]
     id = "heroku/deb-packages"
+    version = "0.2.0"
+    optional = true
+  [[order.group]]
+    id = "renku/init-scripts"
     version = "0.2.0"
     optional = true
 
@@ -126,6 +138,10 @@ value = "vscodium"
     id = "heroku/deb-packages"
     version = "0.2.0"
     optional = true
+  [[order.group]]
+    id = "renku/init-scripts"
+    version = "0.2.0"
+    optional = true
 
 [[order]]
 
@@ -144,6 +160,10 @@ value = "vscodium"
     version = "0.2.0"
   [[order.group]]
     id = "heroku/deb-packages"
+    version = "0.2.0"
+    optional = true
+  [[order.group]]
+    id = "renku/init-scripts"
     version = "0.2.0"
     optional = true
 
