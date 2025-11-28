@@ -129,6 +129,16 @@ func execInContainer(ctx context.Context, client docker.ContainerAPIClient, cont
 	if err != nil {
 		return "", err
 	}
+
+	inspectResp, err := client.ContainerExecInspect(ctx, ex.ID)
+	if err != nil {
+		return "", err
+	}
+
+	if inspectResp.ExitCode != 0 {
+		return string(cont), fmt.Errorf("command exited with code %d", inspectResp.ExitCode)
+	}
+
 	return string(cont), nil
 }
 

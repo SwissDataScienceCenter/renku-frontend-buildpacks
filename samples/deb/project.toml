@@ -1,0 +1,12 @@
+[_]
+schema-version = "0.2"
+
+# buildpack configuration goes here
+[com.heroku.buildpacks.deb-packages]
+install = [
+    "tree",
+]
+
+[[io.buildpacks.build.env]]
+name="BP_CPYTHON_VERSION"
+value="3.10.19"
