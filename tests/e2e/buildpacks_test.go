@@ -165,7 +165,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 					}).WithTimeout(time.Minute * 1).WithOffset(1).Should(Equal(200))
 				})
 				It("Users should be install packages in the container", func(ctx SpecContext) {
-					_, err := execInContainer(ctx, client, container, []string{"launcher", "bash", "-c", "R -e 'install.packages(\"dplyr\")'"})
+					_, err := execInContainer(ctx, client, container, []string{"bash", "-c", "R -e '.libPaths(\"'$RENKU_WORKING_DIR/.rstudio'\"); install.packages(\"dplyr\", repos = \"https://cloud.r-project.org\")'"})
 					Expect(err).ToNot(HaveOccurred())
 				})
 			})
@@ -180,9 +180,9 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 
 			Context("image building", func() {
 				It("should fail when the defaults channel is included", func(ctx SpecContext) {
-				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
-				err = buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "vscodium"})
-				Expect(err).To(HaveOccurred())
+					image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
+					err = buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "vscodium"})
+					Expect(err).To(HaveOccurred())
 				})
 			})
 		},
@@ -195,13 +195,74 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 			var image string
 			Context("image building", func() {
 				It("should pass when the defaults channel is not included or conda is not used", func(ctx SpecContext) {
-				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
-				err = buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "vscodium"})
-				Expect(err).ToNot(HaveOccurred())
+					image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
+					err = buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "vscodium"})
+					Expect(err).ToNot(HaveOccurred())
 				})
 			})
 		},
 		Entry("using conda sample", "../../samples/conda"),
 		Entry("using pip sample", "../../samples/pip"),
+	)
+
+	DescribeTableSubtree(
+		"deb-packages",
+		func(source string) {
+			var image string
+			var container string
+			var port int
+			var baseURL url.URL
+			BeforeAll(func(ctx SpecContext) {
+				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
+				Expect(buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "ttyd"})).To(Succeed())
+				port = getFreePortOrDie()
+				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", port)}
+				ports := map[int]int{port: port}
+				container, err = runImage(ctx, client, image, envVars, ports)
+				Expect(err).ToNot(HaveOccurred())
+				baseURL = url.URL{
+					Host:   fmt.Sprintf("127.0.0.1:%d", port),
+					Scheme: "http",
+				}
+			})
+
+			AfterAll(func(ctx SpecContext) {
+				if container != "" && client != nil {
+					log.Println("Cleaning up container")
+					err = removeContainer(ctx, client, container)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+				if image != "" && client != nil {
+					log.Println("Cleaning up image")
+					err = removeImage(ctx, client, image)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+			})
+
+			Context("when the container is running", func() {
+				It("ttyd should respond with 200 on the base url", func(ctx SpecContext) {
+					req, err := http.NewRequestWithContext(ctx, "GET", baseURL.String(), nil)
+					Expect(err).ToNot(HaveOccurred())
+					Eventually(func(g Gomega) int {
+						res, err := httpClient.Do(req)
+						g.Expect(err).ToNot(HaveOccurred())
+						return res.StatusCode
+					}).WithTimeout(time.Minute * 1).WithOffset(1).Should(Equal(200))
+				})
+				It("tree should exist as a command in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"launcher", "tree"})
+					Expect(err).ToNot(HaveOccurred())
+				})
+				It("ag should not exist as a command in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"launcher", "ag"})
+					Expect(err).To(HaveOccurred())
+				})
+			})
+		},
+		Entry("using deb sample", "../../samples/deb"),
 	)
 })
