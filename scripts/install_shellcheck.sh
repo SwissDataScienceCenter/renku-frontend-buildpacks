@@ -7,7 +7,23 @@ VERSION=$1
 LOCATION=$2
 
 OS="linux"
+case "$(uname)" in
+  'Darwin')
+    OS='darwin'
+    ;;
+  *) ;;
+esac
+
 ARCH="x86_64"
+case "$(uname -m)" in
+  'aarch64')
+	ARCH='aarch64'
+    ;;
+  'arm64')
+    ARCH='aarch64'
+    ;;
+  *) ;;
+esac
 
 if [[ -z $VERSION ]]; then
 	VERSION="latest"
@@ -18,13 +34,13 @@ if [[ -z $LOCATION ]]; then
 fi
 
 if [ -f "$LOCATION/shellcheck" ]; then
-	echo "Already found shellcheck installed in $LOCALBIN"
+	echo "Already found shellcheck installed in $LOCATION"
 	exit 0
 fi
 
-ALREADY_EXISTS=$(which shellcheck)
+ALREADY_EXISTS=$(which shellcheck || true)
 if [ -n "$ALREADY_EXISTS" ]; then
-	echo "Already found shellcheck installed elsewhere, linking in $LOCALBIN"
+	echo "Already found shellcheck installed elsewhere, linking in $LOCATION"
 	ln -s "$ALREADY_EXISTS" "$LOCATION/shellcheck"
 	exit 0
 fi
