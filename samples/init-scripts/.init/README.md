@@ -1,0 +1,3 @@
+# IF THIS IS EXECUTED IT SHOULD FAIL
+
+does it ?
