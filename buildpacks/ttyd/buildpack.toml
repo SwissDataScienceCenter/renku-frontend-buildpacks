@@ -1,9 +1,9 @@
 api = "0.11"
 
 [buildpack]
-id = "renku/ttyd"
-name = "ttyd frontend Buildpack"
-version = "0.2.0"
+  id = "renku/ttyd"
+  name = "ttyd frontend Buildpack"
+  version = "0.2.0"
 
 [[targets]]
   os = "linux"
