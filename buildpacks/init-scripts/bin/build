@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -xeou pipefail
+
+layer_dir="${CNB_LAYERS_DIR}/script-launcher"
+execd_dir="${layer_dir}"/exec.d
+mkdir -p "${execd_dir}"
+
+cp -a .init/. "${execd_dir}/"
+
+for f in "${execd_dir}"/*;do
+  chmod +x "${f}"
+done
+
+cat >"${layer_dir}".toml <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "set init script launcher for run sessions"
+EOL
