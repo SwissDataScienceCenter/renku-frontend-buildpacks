@@ -1,0 +1,18 @@
+# Buildpack API version
+api = "0.11"
+
+# Buildpack ID and metadata
+[buildpack]
+  id = "renku/init-scripts"
+  version = "0.2.0"
+  name = "init scripts runner buildpack"
+  description = "A simple buildpack that allows the user to define init scripts"
+
+# Targets the buildpack will work with
+[[targets]]
+  os = "linux"
+  arch = "amd64"
+
+[[targets]]
+  os = "linux"
+  arch = "arm64"
