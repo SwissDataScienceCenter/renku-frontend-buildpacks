@@ -11,7 +11,7 @@ tool (
 
 require (
 	github.com/docker/docker v28.1.1+incompatible
-	github.com/docker/go-connections v0.5.0
+	github.com/docker/go-connections v0.6.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
-	github.com/Microsoft/go-winio v0.4.14 // indirect
+	github.com/Microsoft/go-winio v0.4.21 // indirect
 	github.com/a8m/envsubst v1.4.2 // indirect
 	github.com/alecthomas/assert/v2 v2.11.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.1 // indirect
