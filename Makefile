@@ -44,41 +44,11 @@ endef
 .PHONY: all buildpacks builders samples run_image
 
 ## Tools
-TOMLJSON = $(LOCALBIN)/tomljson
-JSONTOML = $(LOCALBIN)/jsontoml
-GO_TOML_VERSION ?= v2.2.4
-
-YQ = $(LOCALBIN)/yq
-YQ_VERSION ?= v4.45.1
-
-GINKGO = $(LOCALBIN)/ginkgo
-GINKGO_VERSION ?= "v2.23.4"
-
 SHELLCHECK = $(LOCALBIN)/shellcheck
 SHELLCHECK_VERSION ?= "v0.10.0"
 
 GOLANG_CI_LINT = $(LOCALBIN)/golangci-lint
 GOLANG_CI_LINT_VERSION ?= "v2.1.5"
-
-.PHONY: tomljson
-tomljson: $(TOMLJSON)
-$(TOMLJSON): $(LOCALBIN)
-	$(call go-install-tool, $(TOMLJSON),github.com/pelletier/go-toml/v2/cmd/tomljson,$(GO_TOML_VERSION))
-
-.PHONY: jsontoml
-jsontoml: $(JSONTOML)
-$(JSONTOML): $(LOCALBIN)
-	$(call go-install-tool, $(JSONTOML),github.com/pelletier/go-toml/v2/cmd/jsontoml,$(GO_TOML_VERSION))
-
-.PHONY: yq
-yq: $(YQ)
-$(YQ): $(LOCALBIN)
-	$(call go-install-tool,$(YQ),github.com/mikefarah/yq/v4,$(YQ_VERSION))
-
-.PHONY: ginkgo
-ginkgo: $(GINKGO)
-$(GINKGO): $(LOCALBIN)
-	$(call go-install-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo,$(GINKGO_VERSION))
 
 .PHONY: shellcheck
 shellcheck: $(SHELLCHECK)
@@ -128,7 +98,7 @@ publish_run_image: run_image
 	bash ./scripts/publish_run_image.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/run-image --publish
 
 .PHONY: publish_buildpacks
-publish_buildpacks: yq
+publish_buildpacks:
 	@for bp in $(BUILDPACKS); do \
 		echo "Publishing buildpack: $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$bp"; \
 		./scripts/publish_buildpack.sh $(REGISTRY_HOST)/$(REGISTRY_REPO)/$$bp buildpacks/$$bp --publish; \
@@ -143,9 +113,9 @@ publish_builders:
 	done
 
 .PHONY: tests
-tests: ginkgo
+tests:
 	go vet ./...
-	$(GINKGO) -r -v
+	go tool ginkgo -r -v
 
 .PHONY: lint
 lint: shellcheck golang_ci_lint
@@ -183,6 +153,6 @@ update-builder-versions:
 	done
 
 .PHONY: update-action-versions
-update-action-versions: yq
+update-action-versions:
 	@echo "Updating default builder version in the image build action to $(RELEASE_VERSION)..."
-	@$(YQ) -i '.inputs."builder-version".default = strenv(RELEASE_VERSION)' actions/build-image/action.yml
+	@go tool yq -i '.inputs."builder-version".default = strenv(RELEASE_VERSION)' actions/build-image/action.yml

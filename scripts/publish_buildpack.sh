@@ -8,7 +8,7 @@ BP_PATH=$2
 # If set to anything the image will be pushed to the image repository
 PUBLISH=$3
 
-TAG=$(./bin/yq '.buildpack.version' "$BP_PATH/buildpack.toml")
+TAG=$(go tool yq '.buildpack.version' "$BP_PATH/buildpack.toml")
 echo "Building image $IMAGE:$TAG for buildpack at $BP_PATH"
 
 if [[ -z $PUBLISH ]]; then
