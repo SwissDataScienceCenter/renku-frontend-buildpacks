@@ -111,7 +111,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 				})
 			})
 		},
-		Entry("using pip", "../../samples/pip"),
+		Entry("using pip with init-scripts", "../../samples/init-scripts"),
 		Entry("using conda", "../../samples/conda"),
 		Entry("using poetry", "../../samples/poetry"),
 	)
