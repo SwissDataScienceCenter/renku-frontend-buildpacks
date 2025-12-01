@@ -6,11 +6,11 @@ echo "Checking if init scripts should be installed..."
 # 1. GET ARGS
 plan_path=$2
 
-if [[ ! -d .init ]]; then
-  echo No .init folder, not participating
-  exit 100
-else
+if ls .init/*.sh 1>/dev/null 2>&1; then
   echo .init folder found, participating
+else
+  echo No .sh files in .init folder or no .init folder, not participating
+  exit 100
 fi
 
 cat >>"${plan_path}" <<EOL
