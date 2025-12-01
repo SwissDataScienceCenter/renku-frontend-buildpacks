@@ -11,6 +11,7 @@ buildpack_dir="${CNB_BUILDPACK_DIR}"
 cache_layer_dir="${layers_dir}"/cache
 jupyter_layer_dir="${layers_dir}"/jupyterlab
 jupyter_environment_dir="${jupyter_layer_dir}"/jupyterlab_env
+jupyterlab_extensions_requirements_file="jupyterlab_extensions.txt"
 mkdir -p "${jupyter_layer_dir}"/bin
 mkdir -p "${cache_layer_dir}"
 
@@ -23,6 +24,16 @@ conda env create -y -p "${jupyter_environment_dir}" -f "${buildpack_dir}/bin/jup
 conda activate "${jupyter_environment_dir}"
 jupyter kernelspec remove -f python3
 jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
+# Install jupyterlab extensions required by the project
+if [ -f "${jupyterlab_extensions_requirements_file}" ]; then
+  echo "Installing Jupyterlab extensions from ${jupyterlab_extensions_requirements_file}"
+  jupyterlab_version="$(python -c 'import jupyterlab; print(jupyterlab.__version__)')"
+  constraint_file="${jupyter_layer_dir}/contraint.txt"
+  echo "jupyterlab==${jupyterlab_version}" > "${constraint_file}"
+  pip install -r "${jupyterlab_extensions_requirements_file}" --no-input --quiet --progress-bar off --constraint "${constraint_file}" \
+    || echo "Failed to install extensions!"
+  rm "${constraint_file}"
+fi
 conda deactivate
 
 cp "${buildpack_dir}/bin/jupyterlab-entrypoint.sh" "${jupyter_layer_dir}/bin/jupyterlab-entrypoint.sh"
