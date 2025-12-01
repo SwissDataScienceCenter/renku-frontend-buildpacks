@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-echo "=== Renku RStudio buildpack ==="
+echo -e "=== ✨ \033[1mRenku RStudio buildpack\033[0m ==="
+
+echo "  Build configuration:"
+echo -e "    \$BP_RENKU_FRONTENDS\t${BP_RENKU_FRONTENDS}\tThe frontends to install"
 
 layers_dir="${CNB_LAYERS_DIR}"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
@@ -20,7 +23,7 @@ ARCH=$(uname -m)
 case "$ARCH" in
   x86_64) ARCH=amd64 ;;
   arm64|aarch64) ARCH=arm64 ;;
-  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+  *) >&2 echo "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
 if [ -f "$cache_layer_dir/$FNAME" ]; then

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-echo "=== Renku TTYD buildpack ==="
+echo -e "=== ✨ \033[1mRenku TTYD buildpack\033[0m ==="
+
+echo "  Build configuration:"
+echo -e "    \$BP_RENKU_FRONTENDS\t${BP_RENKU_FRONTENDS}\tThe frontends to install"
 
 layers_dir="${CNB_LAYERS_DIR}"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
