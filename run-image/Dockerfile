@@ -52,14 +52,17 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     openssl \
     pkg-config \
     rclone \
+    texlive-fonts-recommended \
+    texlive-plain-generic \
+    texlive-xetex \
     tini \
     tk-dev \
     tmux \
     unzip \
     uuid-dev \
+    vim \
     wget \
-    zlib1g-dev \
-    vim && \
+    zlib1g-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     wget -q https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -P /tmp && \
