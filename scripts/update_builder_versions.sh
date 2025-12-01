@@ -2,7 +2,7 @@
 set -xeou pipefail
 RELEASE_VERSION="$1"
 BUILDER_FILE="$2"
-BUILD_IMAGE="$3"
+BUILD_IMAGE="${3:-}"
 
 # Use awk to properly handle TOML sections for buildpacks
 awk -v version="$RELEASE_VERSION" \
