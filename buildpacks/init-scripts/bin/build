@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -xeou pipefail
-echo "=== Renku init scripts buildpack ==="
+echo -e "=== 🔧 \033[1mRenku init scripts buildpack\033[0m ==="
 
 layer_dir="${CNB_LAYERS_DIR}/script-launcher"
 execd_dir="${layer_dir}"/exec.d
