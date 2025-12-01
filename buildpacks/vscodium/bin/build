@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -eou pipefail
 
-echo "=== Renku VSCodium buildpack ==="
+echo -e "=== ✨ \033[1mRenku VSCodium buildpack\033[0m ==="
+
+echo "  Build configuration:"
+echo -e "    \$BP_RENKU_FRONTENDS\t${BP_RENKU_FRONTENDS}\tThe frontends to install"
 
 layers_dir="${CNB_LAYERS_DIR}"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
@@ -24,7 +27,7 @@ ARCH=$(uname -m)
 case "$ARCH" in
   x86_64) ARCH=x64 ;;
   arm64|aarch64) ARCH=arm64 ;;
-  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+  *) >&2 echo "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
 VSCODIUM_DEFAULT_VERSION="1.104.36664"
@@ -56,7 +59,7 @@ if [ -f "${vscodium_extensions_file}" ]; then
   VSCODIUM_EXTENSIONS=$("${NODE_JS_BIN_DIR}/node" "${cache_layer_dir}/node/extensions-parser/jsonc_to_json.js" "${vscodium_extensions_file}" \
     | jq -r 'try .recommendations[]' | tr '\n' ' ')
   if [ -z "${VSCODIUM_EXTENSIONS}" ]; then
-    echo "Failed to parse extensions to install with VSCodium!"
+    >&2 echo "ERROR: Failed to parse extensions to install with VSCodium!"
     VSCODIUM_EXTENSIONS="${DEFAULT_VSCODIUM_EXTENSIONS}"
   fi
   set -eo pipefail

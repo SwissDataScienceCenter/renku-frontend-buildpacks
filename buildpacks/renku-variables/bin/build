@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-echo "=== Renku Environment Variables buildpack ==="
-
+echo -e "=== 🔧 \033[1mRenku Environment Variables buildpack\033[0m ==="
 
 layers_dir="$1"
 layer_dir="${layers_dir}"/renku-env
@@ -10,11 +9,22 @@ env_dir="${layer_dir}"/env.launch
 mkdir -p "${env_dir}"
 
 printf "/bin/bash" >"${env_dir}/SHELL.default"
+echo "Added default value for \$SHELL"
+
 printf "0.0.0.0" >"${env_dir}/RENKU_SESSION_IP.default"
+echo "Added default value for \$RENKU_SESSION_IP"
+
 printf "8000" >"${env_dir}/RENKU_SESSION_PORT.default"
+echo "Added default value for \$RENKU_SESSION_PORT"
+
 printf "/workspace" >"${env_dir}/RENKU_MOUNT_DIR.default"
+echo "Added default value for \$RENKU_MOUNT_DIR"
+
 printf "/workspace" >"${env_dir}/RENKU_WORKING_DIR.default"
+echo "Added default value for \$RENKU_WORKING_DIR"
+
 printf "/" >"${env_dir}/RENKU_BASE_URL_PATH.default"
+echo "Added default value for \$RENKU_BASE_URL_PATH"
 
 cat >"${layer_dir}.toml" <<EOL
 [types]

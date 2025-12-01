@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
-echo "Checking if ttyd frontend should be installed..."
 if [[ "${BP_RENKU_FRONTENDS}" =~ "ttyd" ]]; then
-  echo "The BP_RENKU_FRONTENDS environment variable was found to contain ttyd and the buildpack will be applied"
+  echo "PASS: The BP_RENKU_FRONTENDS environment variable was found to contain ttyd."
 else
-  echo "The BP_RENKU_FRONTENDS environment variable is not set or does not contain ttyd, will not apply this buildpack"
+  echo "SKIPPED: The BP_RENKU_FRONTENDS environment variable is not set or does not contain ttyd."
   exit 100
 fi
 

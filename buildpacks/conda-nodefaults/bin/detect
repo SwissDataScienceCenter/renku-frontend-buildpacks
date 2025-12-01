@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-set -e
+set -eo pipefail
 
 if [ -f "environment.yml" ]; then
-  exit 0  # pass
+  echo "PASS: Found conda environment."
+  exit 0
 else
-  exit 100  # opt-out
+  echo "SKIPPED: No conda environment found."
+  exit 100
 fi

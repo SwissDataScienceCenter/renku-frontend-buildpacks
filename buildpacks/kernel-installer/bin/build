@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-echo "=== Renku kernel installer buildpack ==="
-
+echo -e "=== 🔧 \033[1mRenku kernel installer buildpack\033[0m ==="
 
 layers_dir="$1"
 cache_layer_dir="${layers_dir}"/cache

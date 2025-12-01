@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
-echo "Checking if rstudio frontend should be installed..."
 if [[ "${BP_RENKU_FRONTENDS}" =~ "rstudio" ]]; then
-  echo "The BP_RENKU_FRONTENDS environment variable was found to contain rstudio and the buildpack will be applied"
+  echo "PASS: The BP_RENKU_FRONTENDS environment variable was found to contain rstudio."
 else
-  echo "The BP_RENKU_FRONTENDS environment variable is not set or does not contain rstudio, will not apply this buildpack"
+  echo "SKIPPED:The BP_RENKU_FRONTENDS environment variable is not set or does not contain rstudio."
   exit 100
 fi
 

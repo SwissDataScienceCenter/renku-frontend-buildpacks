@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo -e "🔧 \033[1mConda Channel Cleanup Buildpack\033[0m"
+echo -e "=== 🔧 \033[1mRenku Conda channel cleanup buildpack\033[0m ==="
 
 ENV_FILE="environment.yml"
 
 if [ ! -f "$ENV_FILE" ]; then
+  >&2 echo "ERROR: $ENV_FILE not found, this buildpack should not apply!"
   echo "Cannot find $ENV_FILE, exiting silently."
   exit 0
 fi
@@ -24,7 +25,7 @@ ARCH=$(uname -m)
 case "$ARCH" in
   x86_64) ARCH=amd64 ;;
   arm64|aarch64) ARCH=arm64 ;;
-  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+  *) >&2 echo "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
 YQ_FILENAME="yq_${OS}_${ARCH}"
@@ -46,8 +47,8 @@ fi
 
 # Fail if "defaults" is in the channels list
 if "$YQ_BIN" --exit-status '.channels | any_c(. == "defaults")' $ENV_FILE; then
-    echo -e "\n\033[1m!!! defaults channel detected !!! \033[0m"
-    echo -e "Failing to avoid rate limits from Anaconda. Please remove the \033[1mdefaults\033[0m channel from \033[1menvironment.yml\033[1m from and rerun."
+    >&2 echo -e "\n\033[1m!!! defaults channel detected !!! \033[0m"
+    >&2 echo -e "Failing to avoid rate limits from Anaconda. Please remove the \033[1mdefaults\033[0m channel from \033[1menvironment.yml\033[1m and rerun."
     exit 100
 fi
 
@@ -55,9 +56,14 @@ fi
 "$YQ_BIN" -i '.channels |= (. + "nodefaults" | unique)' $ENV_FILE
 
 # Show diff if there are changes
-echo -e "\n\033[1mChanges to environment.yml:\033[0m"
-if diff -u "$TMPDIR/original.yml" environment.yml; then
+echo -e "\n\033[1mChanges to environment.yml:\033[0m >>>>>"
+set +e
+diff -u "$TMPDIR/original.yml" "$ENV_FILE"
+diff_result=$?
+set -e
+echo "<<<<<"
+if [ $diff_result -eq 0 ]; then
   echo "No changes made."
 else
-  echo -e "\n✅ environment.yml updated.\n\n"
+  echo "✅ $ENV_FILE updated."
 fi
