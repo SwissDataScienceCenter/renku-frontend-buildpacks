@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+echo "PASS: Always apply the Python dependency manager."
+
 # 1. GET ARGS
 plan_path=$2
 
