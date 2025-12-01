@@ -25,8 +25,6 @@ func buildBuilder(ctx context.Context, builderLoc, image string) error {
 		image,
 		"--config",
 		builderLoc,
-		"--target",
-		"linux/amd64",
 	}
 	cmd := exec.CommandContext(
 		ctx,
@@ -52,8 +50,6 @@ func buildImage(ctx context.Context, builderImg, source, image string, envs map[
 		source,
 		"--builder",
 		builderImg,
-		"--platform",
-		"linux",
 	}
 	for k, v := range envs {
 		args = append(args, "--env")

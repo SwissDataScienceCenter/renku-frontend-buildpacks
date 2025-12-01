@@ -190,6 +190,8 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - uses: buildpacks/github-actions/setup-pack@v5.9.7
+      with:
+        pack-version: "0.39.0"
 
     - name: publish buildpacks
       run: make publish_buildpacks

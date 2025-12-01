@@ -51,7 +51,7 @@ value = "vscodium"
   version = "0.2.0"
 
 [lifecycle]
-  version = "0.20.16"
+  version = "0.20.19"
 
 [[order]]
 
@@ -156,9 +156,9 @@ value = "vscodium"
   mirrors = []
 
 [[targets]]
-os = "linux"
-arch = "amd64"
+  os = "linux"
+  arch = "amd64"
 
 [[targets]]
-os = "linux"
-arch = "arm64"
+  os = "linux"
+  arch = "arm64"

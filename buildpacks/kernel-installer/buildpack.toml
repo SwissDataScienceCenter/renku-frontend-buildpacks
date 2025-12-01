@@ -3,14 +3,15 @@ api = "0.11"
 
 # Buildpack ID and metadata
 [buildpack]
-id = "renku/kernel-installer"
-version = "0.2.0"
-name = "jupyter kernel installer"
+  id = "renku/kernel-installer"
+  version = "0.2.0"
+  name = "jupyter kernel installer"
 
 # Targets the buildpack will work with
 [[targets]]
-os = "linux"
+  os = "linux"
+  arch = "amd64"
 
-# Stacks (deprecated) the buildpack will work with
-[[stacks]]
-id = "*"
+[[targets]]
+  os = "linux"
+  arch = "arm64"
