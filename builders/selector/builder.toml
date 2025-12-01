@@ -6,35 +6,35 @@ value = "vscodium"
 
 [[buildpacks]]
   uri = "../../buildpacks/renku-variables"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/vscodium"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/conda-nodefaults"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/kernel-installer"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/jupyterlab"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/ttyd"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/python-dependency-manager"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/rstudio"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[buildpacks]]
   uri = "docker://docker.io/paketobuildpacks/python:2.38.0"
@@ -57,7 +57,7 @@ value = "vscodium"
 
   [[order.group]]
     id = "renku/conda-nodefaults"
-    version = "0.2.0"
+    version = "0.2.1"
     optional = true
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
@@ -67,16 +67,16 @@ value = "vscodium"
     version = "2.38.0"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "renku/renku-variables"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "renku/jupyterlab"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "renku/kernel-installer"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "heroku/deb-packages"
     version = "0.2.0"
@@ -85,20 +85,20 @@ value = "vscodium"
 [[order]]
   [[order.group]]
     id = "renku/conda-nodefaults"
-    version = "0.2.0"
+    version = "0.2.1"
     optional = true
   [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.38.0"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "renku/renku-variables"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "renku/ttyd"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "heroku/deb-packages"
     version = "0.2.0"
@@ -108,20 +108,20 @@ value = "vscodium"
 
   [[order.group]]
     id = "renku/conda-nodefaults"
-    version = "0.2.0"
+    version = "0.2.1"
     optional = true
   [[order.group]]
     id = "paketo-buildpacks/python"
     version = "2.38.0"
   [[order.group]]
     id = "renku/python-dependency-manager"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "renku/renku-variables"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "renku/vscodium"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "heroku/deb-packages"
     version = "0.2.0"
@@ -131,17 +131,17 @@ value = "vscodium"
 
   [[order.group]]
     id = "renku/conda-nodefaults"
-    version = "0.2.0"
+    version = "0.2.1"
     optional = true
   [[order.group]]
    id = "paketo-buildpacks/miniconda"
    version = "0.11.5"
   [[order.group]]
     id = "renku/renku-variables"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "renku/rstudio"
-    version = "0.2.0"
+    version = "0.2.1"
   [[order.group]]
     id = "heroku/deb-packages"
     version = "0.2.0"
@@ -152,7 +152,7 @@ value = "vscodium"
 
 [run]
 [[run.images]]
-  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:0.2.0"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:0.2.1"
   mirrors = []
 
 [[targets]]
