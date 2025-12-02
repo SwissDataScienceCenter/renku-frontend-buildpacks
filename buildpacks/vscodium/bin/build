@@ -23,7 +23,7 @@ mkdir -p "${cache_layer_dir}"
 
 
 ARCH="${CNB_TARGET_ARCH:-unknown}"
-case "$(ARCH)" in
+case "${ARCH}" in
   "amd64") ARCH="x64" ;;
 esac
 
