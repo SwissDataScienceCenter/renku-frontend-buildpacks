@@ -18,13 +18,7 @@ RSTUDIO_VERSION="2025.09.2-418"
 OS_CODENAME=jammy # https://posit.co/download/rstudio-server gives jammy regardless of ubuntu version
 FNAME="rstudio-$RSTUDIO_VERSION.deb"
 
-ARCH=$(uname -m)
-
-case "$ARCH" in
-  x86_64) ARCH=amd64 ;;
-  arm64|aarch64) ARCH=arm64 ;;
-  *) >&2 echo "Unsupported architecture: $ARCH"; exit 1 ;;
-esac
+ARCH="${CNB_TARGET_ARCH:-unknown}"
 
 if [ -f "$cache_layer_dir/$FNAME" ]; then
 	echo "Found rstudio $RSTUDIO_VERSION in $cache_layer_dir skipping download"

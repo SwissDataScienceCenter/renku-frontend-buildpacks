@@ -4,24 +4,31 @@ set -eo pipefail
 echo -e "=== 🔧 \033[1mRenku Environment Variables buildpack\033[0m ==="
 
 # NOTE: we run platform mismatch check here as this buildpack is always selected
-CURRENT_ARCH="amd64"
+CURRENT_ARCH="unknown"
 case "$(uname -m)" in
-  'aarch64')
-	ARCH='arm64'
-    ;;
-  'arm64')
-    ARCH='arm64'
-    ;;
-  'x86_64')
-    ARCH='amd64'
+  "aarch64"|"arm64") CURRENT_ARCH="arm64" ;;
+  "amd64"|"x86_64") CURRENT_ARCH="amd64" ;;
   *) ;;
 esac
+
 if [ -n "${CNB_TARGET_ARCH:-}" ]; then
   if [ "${CNB_TARGET_ARCH}" != "${CURRENT_ARCH}" ]; then
-    echo "WARNING: current architecture ${CURRENT_ARCH} does not match target architecture ${CNB_TARGET_ARCH}!"
-    echo 
+    >&2 echo "WARNING: current architecture ${CURRENT_ARCH} does not match target architecture ${CNB_TARGET_ARCH}!"
+    >&2 echo "WARNING: the resulting image may not run as expected!"
   fi
 fi
+
+echo "DEBUG: CNB_TARGET configuration"
+echo "==="
+echo "CNB_TARGET_OS=${CNB_TARGET_OS:-}"
+echo "CNB_TARGET_ARCH=${CNB_TARGET_ARCH:-}"
+echo "CNB_TARGET_ARCH_VARIANT=${CNB_TARGET_ARCH_VARIANT:-}"
+echo "CNB_TARGET_DISTRO_NAME=${CNB_TARGET_DISTRO_NAME:-}"
+echo "CNB_TARGET_DISTRO_VERSION=${CNB_TARGET_DISTRO_VERSION:-}"
+echo "==="
+echo "DEBUG: uname"
+uname -a
+echo "==="
 
 layers_dir="$1"
 layer_dir="${layers_dir}"/renku-env

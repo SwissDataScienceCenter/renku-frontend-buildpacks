@@ -3,18 +3,6 @@ set -eou pipefail
 
 echo -e "=== 🔧 \033[1mRenku Python dependency manager buildpack\033[0m ==="
 
-echo "DEBUG: CNB_TARGET configuration"
-echo "==="
-echo "CNB_TARGET_OS=${CNB_TARGET_OS:-}"
-echo "CNB_TARGET_ARCH=${CNB_TARGET_ARCH:-}"
-echo "CNB_TARGET_ARCH_VARIANT=${CNB_TARGET_ARCH_VARIANT:-}"
-echo "CNB_TARGET_DISTRO_NAME=${CNB_TARGET_DISTRO_NAME:-}"
-echo "CNB_TARGET_DISTRO_VERSION=${CNB_TARGET_DISTRO_VERSION:-}"
-echo "==="
-echo "DEBUG: uname"
-uname -a
-echo "==="
-
 layer_dir="${CNB_LAYERS_DIR}/deps"
 execd_dir="${layer_dir}"/exec.d
 mkdir -p "${execd_dir}"

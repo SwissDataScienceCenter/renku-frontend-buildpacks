@@ -19,14 +19,8 @@ cp environment.yml "$TMPDIR/original.yml"
 cache_layer_dir="${CNB_LAYERS_DIR}"/cache
 mkdir -p "${cache_layer_dir}"
 
-OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-ARCH=$(uname -m)
-
-case "$ARCH" in
-  x86_64) ARCH=amd64 ;;
-  arm64|aarch64) ARCH=arm64 ;;
-  *) >&2 echo "Unsupported architecture: $ARCH"; exit 1 ;;
-esac
+OS="${CNB_TARGET_OS:-unknown}"
+ARCH="${CNB_TARGET_ARCH:-unknown}"
 
 YQ_FILENAME="yq_${OS}_${ARCH}"
 YQ_VERSION=v4.47.1
