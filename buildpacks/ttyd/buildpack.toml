@@ -3,7 +3,7 @@ api = "0.11"
 [buildpack]
   id = "renku/ttyd"
   name = "ttyd frontend Buildpack"
-  version = "0.2.0"
+  version = "0.2.1"
 
 [[targets]]
   os = "linux"
