@@ -96,6 +96,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}/run-image
+          labels: |
+            io.buildpacks.base.distro.name=ubuntu
+            io.buildpacks.base.distro.version=24.04
           tags: |
             type=ref,event=tag
             type=sha,format=short
@@ -109,9 +112,7 @@ jobs:
           target: run
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: |
-            io.buildpacks.base.distro.name=ubuntu
-            io.buildpacks.base.distro.version=24.04
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
