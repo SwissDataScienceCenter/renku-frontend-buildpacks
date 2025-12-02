@@ -6,7 +6,7 @@ layer_dir="${CNB_LAYERS_DIR}/script-launcher"
 execd_dir="${layer_dir}"/exec.d
 mkdir -p "${execd_dir}"
 
-for f in .init/*.sh;do
+for f in init.d/*.sh;do
   echo "Adding to init scripts: ${f}"
   chmod +x "${f}"
   cp -a "${f}" "${execd_dir}/"

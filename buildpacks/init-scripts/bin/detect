@@ -4,10 +4,10 @@ set -eo pipefail
 # 1. GET ARGS
 plan_path=$2
 
-if ls .init/*.sh 1>/dev/null 2>&1; then
-  echo "PASS: .init folder found"
+if ls init.d/*.sh 1>/dev/null 2>&1; then
+  echo "PASS: init.d folder found"
 else
-  echo "SKIPPED: No .sh files in .init folder or no .init folder"
+  echo "SKIPPED: No .sh files in init.d folder or no init.d folder"
   exit 100
 fi
 
