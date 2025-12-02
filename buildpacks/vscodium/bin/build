@@ -25,7 +25,6 @@ mkdir -p "${cache_layer_dir}"
 ARCH="${CNB_TARGET_ARCH:-unknown}"
 case "$(ARCH)" in
   "amd64") ARCH="x64" ;;
-  *) ;;
 esac
 
 VSCODIUM_DEFAULT_VERSION="1.104.36664"

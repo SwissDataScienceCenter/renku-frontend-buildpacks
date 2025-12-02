@@ -4,11 +4,11 @@ set -eo pipefail
 echo -e "=== 🔧 \033[1mRenku Environment Variables buildpack\033[0m ==="
 
 # NOTE: we run platform mismatch check here as this buildpack is always selected
-CURRENT_ARCH="unknown"
-case "$(uname -m)" in
+CURRENT_ARCH="$(uname -m)"
+case "${CURRENT_ARCH}" in
   "aarch64"|"arm64") CURRENT_ARCH="arm64" ;;
   "amd64"|"x86_64") CURRENT_ARCH="amd64" ;;
-  *) ;;
+  *) >&2 echo "ERROR: Unsupported architecture: ${CURRENT_ARCH}" ;;
 esac
 
 if [ -n "${CNB_TARGET_ARCH:-}" ]; then
