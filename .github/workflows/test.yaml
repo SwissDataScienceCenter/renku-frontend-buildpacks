@@ -100,7 +100,6 @@ jobs:
             io.buildpacks.base.distro.name=ubuntu
             io.buildpacks.base.distro.version=24.04
           tags: |
-            type=ref,event=tag
             type=sha,format=short
 
       - name: Build and push run-image
