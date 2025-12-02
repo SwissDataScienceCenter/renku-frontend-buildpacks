@@ -18,17 +18,6 @@ if [ -n "${CNB_TARGET_ARCH:-}" ]; then
   fi
 fi
 
-echo "DEBUG: CNB_TARGET configuration"
-echo "==="
-echo "CNB_TARGET_OS=${CNB_TARGET_OS:-}"
-echo "CNB_TARGET_ARCH=${CNB_TARGET_ARCH:-}"
-echo "CNB_TARGET_ARCH_VARIANT=${CNB_TARGET_ARCH_VARIANT:-}"
-echo "CNB_TARGET_DISTRO_NAME=${CNB_TARGET_DISTRO_NAME:-}"
-echo "CNB_TARGET_DISTRO_VERSION=${CNB_TARGET_DISTRO_VERSION:-}"
-echo "==="
-echo "DEBUG: uname"
-uname -a
-echo "==="
 
 layers_dir="$1"
 layer_dir="${layers_dir}"/renku-env
