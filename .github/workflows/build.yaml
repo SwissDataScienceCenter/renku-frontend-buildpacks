@@ -125,17 +125,17 @@ jobs:
 
       - name: Combine images
         run: |
-          TAG_ARGS=$(echo '${{ steps.meta.outputs.json }}' | jq -cr '.tags | map("--tag " + .) | join(" ")')
-          echo "TAG_ARGS=${TAG_ARGS}"
+          readarray -t TAG_ARGS<<<$(echo '${{ steps.meta.outputs.json }}' | jq -cr '.tags | map("--tag\n" + .) | join("\n")')
+          echo "TAG_ARGS=${TAG_ARGS[@]}"
           readarray -t ANNOTATION_ARGS<<<$(echo '${{ steps.meta.outputs.json }}' | jq -cr '.annotations | map("--annotation\n" + .) | join("\n")')
-          echo "ANNOTATION_ARGS=${ANNOTATION_ARGS}"
+          echo "ANNOTATION_ARGS=${ANNOTATION_ARGS[@]}"
           LINUX_AMD64_IMAGE=$(echo '${{ steps.meta_amd64.outputs.json }}' | jq -cr '.tags[0]')
           echo "LINUX_AMD64_IMAGE=${LINUX_AMD64_IMAGE}"
           LINUX_ARM64_IMAGE=$(echo '${{ steps.meta_arm64.outputs.json }}' | jq -cr '.tags[0]')
           echo "LINUX_ARM64_IMAGE=${LINUX_ARM64_IMAGE}"
           set -x
           docker buildx imagetools create \
-            ${TAG_ARGS} \
-            ${ANNOTATION_ARGS} \
+            "${TAG_ARGS[@]}" \
+            "${ANNOTATION_ARGS[@]}" \
             "${LINUX_AMD64_IMAGE}" \
             "${LINUX_ARM64_IMAGE}"
