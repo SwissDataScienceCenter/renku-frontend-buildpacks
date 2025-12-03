@@ -156,13 +156,13 @@ jobs:
         base: main
         delete-branch: true
 
-  release:
+  move-tag:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
-
+    outputs:
+      version: ${{ steps.extract_version.outputs.VERSION }}
     steps:
     - name: Extract version from branch name
       id: extract_version
@@ -182,6 +182,14 @@ jobs:
         git tag -f ${{ steps.extract_version.outputs.VERSION }}
         git push origin ${{ steps.extract_version.outputs.VERSION }} --force --tags
 
+  publish-buildpacks:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    needs: [move-tag]
+    steps:
+    - uses: actions/checkout@v6
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
       with:
@@ -196,14 +204,113 @@ jobs:
     - name: publish buildpacks
       run: make publish_buildpacks
 
-    - name: publish builders
-      run: make publish_builders
+  publish-builders:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
+    needs: [move-tag]
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        builder: [selector, cuda-selector]
+        include:
+        - arch: amd64
+          runner: ubuntu-latest
+        - arch: arm64
+          runner: ubuntu-24.04-arm
+        - builder: selector
+          builder-toml: builders/selector/builder.toml
+        - builder: cuda-selector
+          builder-toml: builders/cuda-selector/builder.toml
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - uses: actions/checkout@v6
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}/${{ matrix.builder }}
+        tags: |
+          type=semver,pattern={{version}}
+        flavor: |
+          suffix=-${{ matrix.arch }}
+
+    - uses: buildpacks/github-actions/setup-pack@v5.9.7
+      with:
+        pack-version: "0.39.0"
+
+    - name: Get primary tag
+      id: get-tag
+      run: |
+        PRIMARY_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+        echo "tag=$PRIMARY_TAG" >> $GITHUB_OUTPUT
+
+    - name: Build and push arch-specific builder
+      run: |
+        pack builder create \
+          ${{ steps.get-tag.outputs.tag }} \
+          --config ${{ matrix.builder-toml }} \
+          --target linux/${{ matrix.arch }}
+        docker push ${{ steps.get-tag.outputs.tag }}
+
+  create-manifests:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
+    needs: [publish-builders]
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        builder: [selector, cuda-selector]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}/${{ matrix.builder }}
+        tags: |
+          type=semver,pattern={{version}}
+
+    - name: Get primary tag
+      id: get-tag
+      run: |
+        PRIMARY_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+        echo "tag=$PRIMARY_TAG" >> $GITHUB_OUTPUT
+
+    - name: Create multi-arch manifest
+      run: |
+        docker buildx imagetools create \
+          -t ${{ steps.get-tag.outputs.tag }} \
+          ${{ steps.get-tag.outputs.tag }}-amd64 \
+          ${{ steps.get-tag.outputs.tag }}-arm64
+
+  release:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
+    runs-on: ubuntu-latest
+    needs: [move-tag, create-manifests, publish-buildpacks]
+    permissions:
+      contents: write
+
+    steps:
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
-        tag: ${{ steps.extract_version.outputs.VERSION }}
-        name: Release ${{ steps.extract_version.outputs.VERSION }}
+        tag: ${{ needs.move-tag.outputs.version }}
+        name: Release ${{ needs.move-tag.outputs.version }}
         generateReleaseNotes: true
         draft: false
         prerelease: false
@@ -211,4 +318,4 @@ jobs:
 
     - name: Cleanup branch
       run: |
-        git push origin --delete update-versions-${{ steps.extract_version.outputs.VERSION }}
+        git push origin --delete update-versions-${{ needs.move-tag.outputs.version }}
