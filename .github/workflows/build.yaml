@@ -48,8 +48,27 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE_NAME }}
+          labels: |
+            io.buildpacks.base.distro.name=ubuntu
+            io.buildpacks.base.distro.version=24.04
           tags: |
             type=sha,prefix=${{ matrix.PLATFORM == 'linux/arm64' && 'arm64' || 'amd64' }}-
+
+      - name: Build and push cuda build-image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./run-image
+          file: ./run-image/Dockerfile
+          platforms: ${{ matrix.PLATFORM }}
+          build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
+          target: build
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       # - name: Docker meta cache
       #   id: meta_cache
       #   uses: docker/metadata-action@v5
