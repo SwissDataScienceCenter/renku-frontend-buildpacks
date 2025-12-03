@@ -51,6 +51,9 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_RUN_IMAGE_NAME }}
+          annotations: |
+            org.opencontainers.image.title=renku-frontend-buildpacks/cuda-run-image
+            org.opencontainers.image.description=The run image for CUDA-enabled buildpacks
           labels: |
             io.buildpacks.base.distro.name=ubuntu
             io.buildpacks.base.distro.version=24.04
@@ -81,6 +84,9 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_BUILD_IMAGE_NAME }}
+          annotations: |
+            org.opencontainers.image.title=renku-frontend-buildpacks/cuda-build-image
+            org.opencontainers.image.description=The build image for CUDA-enabled buildpacks
           labels: |
             io.buildpacks.base.distro.name=ubuntu
             io.buildpacks.base.distro.version=24.04
@@ -134,6 +140,9 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: index
         with:
           images: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}/cuda-${{ matrix.IMAGE_TYPE }}-image
+          annotations: |
+            org.opencontainers.image.title=renku-frontend-buildpacks/cuda-${{ matrix.IMAGE_TYPE }}-image
+            org.opencontainers.image.description=The ${{ matrix.IMAGE_TYPE }} image for CUDA-enabled buildpacks
           labels: |
             io.buildpacks.base.distro.name=ubuntu
             io.buildpacks.base.distro.version=24.04
