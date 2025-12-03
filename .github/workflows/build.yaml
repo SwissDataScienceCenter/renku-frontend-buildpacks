@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  create-cuda-run-images:
+  create-cuda-build-and-run-images:
     runs-on: ${{ matrix.PLATFORM == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: true
@@ -28,7 +28,8 @@ jobs:
           - linux/amd64
           - linux/arm64
     env:
-      CONTAINER_IMAGE_NAME: ${{ github.repository }}/cuda-build-image
+      CONTAINER_BUILD_IMAGE_NAME: ${{ github.repository }}/cuda-build-image
+      CONTAINER_RUN_IMAGE_NAME: ${{ github.repository }}/cuda-run-image
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -43,16 +44,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Docker meta
-        id: meta
+      - name: Docker build-image meta
+        id: build_meta
         uses: docker/metadata-action@v5
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
-          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE_NAME }}
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_BUILD_IMAGE_NAME }}
           labels: |
             io.buildpacks.base.distro.name=ubuntu
             io.buildpacks.base.distro.version=24.04
+            org.opencontainers.image.title=renku-frontend-buildpacks/cuda-build-image
+            org.opencontainers.image.description=The build image for CUDA-enabled buildpacks
           tags: |
             type=sha,prefix=${{ matrix.PLATFORM == 'linux/arm64' && 'arm64' || 'amd64' }}-
 
@@ -63,19 +66,53 @@ jobs:
           file: ./run-image/Dockerfile
           platforms: ${{ matrix.PLATFORM }}
           build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
-          target: run
+          target: build
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          annotations: ${{ steps.meta.outputs.annotations }}
+          tags: ${{ steps.build_meta.outputs.tags }}
+          labels: ${{ steps.build_meta.outputs.labels }}
+          annotations: ${{ steps.build_meta.outputs.annotations }}
           cache-from: type=gha,scope=cuda-build-image-${{ matrix.PLATFORM == 'linux/arm64' && 'arm64' || 'amd64' }}
           cache-to: type=gha,mode=max,scope=cuda-build-image-${{ matrix.PLATFORM == 'linux/arm64' && 'arm64' || 'amd64' }}
 
-  combine-cuda-run-images:
-    needs: [create-cuda-run-images]
+      - name: Docker run-image meta
+        id: run_meta
+        uses: docker/metadata-action@v5
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_RUN_IMAGE_NAME }}
+          labels: |
+            io.buildpacks.base.distro.name=ubuntu
+            io.buildpacks.base.distro.version=24.04
+            org.opencontainers.image.title=renku-frontend-buildpacks/cuda-run-image
+            org.opencontainers.image.description=The run image for CUDA-enabled buildpacks
+          tags: |
+            type=sha,prefix=${{ matrix.PLATFORM == 'linux/arm64' && 'arm64' || 'amd64' }}-
+
+      - name: Build and push cuda run-image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./run-image
+          file: ./run-image/Dockerfile
+          platforms: ${{ matrix.PLATFORM }}
+          build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
+          target: run
+          push: true
+          tags: ${{ steps.run_meta.outputs.tags }}
+          labels: ${{ steps.run_meta.outputs.labels }}
+          annotations: ${{ steps.run_meta.outputs.annotations }}
+          cache-from: type=gha,scope=cuda-run-image-${{ matrix.PLATFORM == 'linux/arm64' && 'arm64' || 'amd64' }}
+          cache-to: type=gha,mode=max,scope=cuda-run-image-${{ matrix.PLATFORM == 'linux/arm64' && 'arm64' || 'amd64' }}
+
+  combine-cuda-build-and-run-images:
+    needs: [create-cuda-build-and-run-images]
     runs-on: ubuntu-24.04
-    env:
-      CONTAINER_IMAGE_NAME: ${{ github.repository }}/cuda-build-image
+    strategy:
+      fail-fast: true
+      matrix:
+        IMAGE_TYPE:
+          - build
+          - run
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -96,22 +133,22 @@ jobs:
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: index
         with:
-          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE_NAME }}
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}/cuda-${{ matrix.IMAGE_TYPE }}-image
           labels: |
             io.buildpacks.base.distro.name=ubuntu
             io.buildpacks.base.distro.version=24.04
+            org.opencontainers.image.title=renku-frontend-buildpacks/cuda-${{ matrix.IMAGE_TYPE }}-image
+            org.opencontainers.image.description=The ${{ matrix.IMAGE_TYPE }} image for CUDA-enabled buildpacks
           tags: |
             type=sha,prefix=
-          # tags: |
-          #   type=sha,prefix=
-          #   type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-          #   type=semver,pattern={{version}},event=tag
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{version}},event=tag
 
       - name: Docker meta amd64
         id: meta_amd64
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE_NAME }}
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}/cuda-${{ matrix.IMAGE_TYPE }}-image
           tags: |
             type=sha,prefix=amd64-
 
@@ -119,7 +156,7 @@ jobs:
         id: meta_arm64
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE_NAME }}
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}/cuda-${{ matrix.IMAGE_TYPE }}-image
           tags: |
             type=sha,prefix=arm64-
 
