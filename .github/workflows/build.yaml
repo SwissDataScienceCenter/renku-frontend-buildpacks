@@ -93,6 +93,8 @@ jobs:
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
         with:
           images: ${{ env.CONTAINER_REGISTRY }}/${{ env.CONTAINER_IMAGE_NAME }}
           labels: |
@@ -125,11 +127,14 @@ jobs:
         run: |
           TAG_ARGS=$(echo '${{ steps.meta.outputs.json }}' | jq -cr '.tags | map("--tag " + .) | join(" ")')
           echo "TAG_ARGS=${TAG_ARGS}"
+          ANNOTATION_ARGS=$(echo '${{ steps.meta.outputs.json }}' | jq -cr '.annotations | map("--annotation " + .) | join(" ")')
+          echo "ANNOTATION_ARGS=${ANNOTATION_ARGS}"
           LINUX_AMD64_IMAGE=$(echo '${{ steps.meta_amd64.outputs.json }}' | jq -cr '.tags[0]')
           echo "LINUX_AMD64_IMAGE=${LINUX_AMD64_IMAGE}"
           LINUX_ARM64_IMAGE=$(echo '${{ steps.meta_arm64.outputs.json }}' | jq -cr '.tags[0]')
           echo "LINUX_ARM64_IMAGE=${LINUX_ARM64_IMAGE}"
           docker buildx imagetools create \
             ${TAG_ARGS} \
+            ${ANNOTATION_ARGS} \
             "${LINUX_AMD64_IMAGE}" \
             "${LINUX_ARM64_IMAGE}"
