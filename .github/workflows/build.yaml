@@ -127,7 +127,7 @@ jobs:
         run: |
           TAG_ARGS=$(echo '${{ steps.meta.outputs.json }}' | jq -cr '.tags | map("--tag " + .) | join(" ")')
           echo "TAG_ARGS=${TAG_ARGS}"
-          ANNOTATION_ARGS=$(echo '${{ steps.meta.outputs.json }}' | jq -cr '.annotations | map("--annotation " + .) | join(" ")')
+          ANNOTATION_ARGS=$(echo '${{ steps.meta.outputs.json }}' | jq -cr '.annotations | map("--annotation \"" + . + "\"") | join(" ")')
           echo "ANNOTATION_ARGS=${ANNOTATION_ARGS}"
           LINUX_AMD64_IMAGE=$(echo '${{ steps.meta_amd64.outputs.json }}' | jq -cr '.tags[0]')
           echo "LINUX_AMD64_IMAGE=${LINUX_AMD64_IMAGE}"
