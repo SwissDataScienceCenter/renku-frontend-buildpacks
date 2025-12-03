@@ -114,6 +114,8 @@ jobs:
             io.buildpacks.base.distro.version=24.04
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
 
       - name: Run linting
         id: lint

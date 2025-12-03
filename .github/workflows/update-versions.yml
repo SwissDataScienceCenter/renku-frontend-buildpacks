@@ -80,6 +80,8 @@ jobs:
           io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        provenance: false
+        sbom: false
 
     - name: Build and push cuda run-image
       uses: docker/build-push-action@v6
@@ -96,6 +98,8 @@ jobs:
           io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        provenance: false
+        sbom: false
 
     - name: Build and push cuda build-image
       uses: docker/build-push-action@v6
@@ -112,6 +116,8 @@ jobs:
           io.buildpacks.base.distro.version=24.04
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        provenance: false
+        sbom: false
 
   create-version-update-pr:
     if: github.event_name == 'workflow_dispatch'
