@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -xeou pipefail
+echo -e "=== 🔧 \033[1mRenku init scripts buildpack\033[0m ==="
+
+layer_dir="${CNB_LAYERS_DIR}/script-launcher"
+execd_dir="${layer_dir}"/exec.d
+mkdir -p "${execd_dir}"
+
+for f in init.d/*.sh;do
+  echo "Adding to init scripts: ${f}"
+  chmod +x "${f}"
+  cp -a "${f}" "${execd_dir}/"
+done
+
+cat >"${layer_dir}".toml <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "set init script launcher for run sessions"
+EOL
