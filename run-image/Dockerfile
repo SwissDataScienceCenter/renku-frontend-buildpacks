@@ -75,7 +75,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     (groupdel $(getent group ${cnb_run_uid}|cut -d: -f1) || true) && \
     (groupdel $(getent group ${cnb_build_uid}|cut -d: -f1) || true) && \
     groupadd -f --gid ${cnb_build_gid} renku_build && \
-    useradd --gid ${cnb_build_gid} --uid ${cnb_build_uid} renku_build && \
+    useradd --gid ${cnb_build_gid} --uid ${cnb_build_uid} -s /bin/bash --create-home renku_build && \
     groupadd -f --gid ${cnb_run_gid} renku && \
     useradd --gid ${cnb_run_gid} --uid ${cnb_run_uid} -s /bin/bash --create-home renku && \
     usermod -aG renku_build renku && \
