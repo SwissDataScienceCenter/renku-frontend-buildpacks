@@ -184,7 +184,7 @@ jobs:
 
   publish-buildpacks:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     needs: [move-tag]
@@ -215,7 +215,7 @@ jobs:
         builder: [selector, cuda-selector]
         include:
         - arch: amd64
-          runner: ubuntu-latest
+          runner: ubuntu-24.04
         - arch: arm64
           runner: ubuntu-24.04-arm
         - builder: selector
