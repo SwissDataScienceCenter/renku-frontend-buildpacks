@@ -12,7 +12,12 @@ ttyd_layer_dir="${layers_dir}"/ttyd
 ttyd_bin_dir="${ttyd_layer_dir}"/bin
 mkdir -p "${ttyd_bin_dir}"
 
-ARCH=$(uname -i)
+ARCH="${CNB_TARGET_ARCH:-unknown}"
+case "${ARCH}" in
+  "arm64") ARCH="aarch64" ;;
+  "amd64") ARCH="x86_64" ;;
+esac
+
 TTYD_VERSION="1.7.7"
 TTYD_URL="https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.${ARCH}"
 

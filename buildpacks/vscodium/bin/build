@@ -22,12 +22,9 @@ mkdir -p "${execd_layer_dir}"
 mkdir -p "${cache_layer_dir}"
 
 
-ARCH=$(uname -m)
-
-case "$ARCH" in
-  x86_64) ARCH=x64 ;;
-  arm64|aarch64) ARCH=arm64 ;;
-  *) >&2 echo "Unsupported architecture: $ARCH"; exit 1 ;;
+ARCH="${CNB_TARGET_ARCH:-unknown}"
+case "${ARCH}" in
+  "amd64") ARCH="x64" ;;
 esac
 
 VSCODIUM_DEFAULT_VERSION="1.104.36664"
