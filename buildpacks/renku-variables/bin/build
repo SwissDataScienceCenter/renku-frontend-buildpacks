@@ -13,8 +13,8 @@ esac
 
 if [ -n "${CNB_TARGET_ARCH:-}" ]; then
   if [ "${CNB_TARGET_ARCH}" != "${CURRENT_ARCH}" ]; then
-    >&2 echo "WARNING: current architecture ${CURRENT_ARCH} does not match target architecture ${CNB_TARGET_ARCH}!"
-    >&2 echo "WARNING: the resulting image may not run as expected!"
+    >&2 echo "ERROR: current architecture ${CURRENT_ARCH} does not match target architecture ${CNB_TARGET_ARCH}!"
+    exit 1
   fi
 fi
 
