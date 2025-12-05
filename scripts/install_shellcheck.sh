@@ -8,21 +8,13 @@ LOCATION=$2
 
 OS="linux"
 case "$(uname)" in
-  'Darwin')
-    OS='darwin'
-    ;;
-  *) ;;
+  'Darwin') OS='darwin' ;;
 esac
 
 ARCH="x86_64"
 case "$(uname -m)" in
-  'aarch64')
-	ARCH='aarch64'
-    ;;
-  'arm64')
-    ARCH='aarch64'
-    ;;
-  *) ;;
+  'aarch64') ARCH='aarch64' ;;
+  'arm64') ARCH='aarch64' ;;
 esac
 
 if [[ -z $VERSION ]]; then
