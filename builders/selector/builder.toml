@@ -153,6 +153,12 @@ value = "vscodium"
    id = "paketo-buildpacks/miniconda"
    version = "0.11.5"
   [[order.group]]
+    id = "paketo-buildpacks/python"
+    version = "2.38.0"
+  [[order.group]]
+    id = "renku/python-dependency-manager"
+    version = "0.2.2"
+  [[order.group]]
     id = "renku/renku-variables"
     version = "0.2.2"
   [[order.group]]
