@@ -24,7 +24,8 @@ if [ -f "$cache_layer_dir/$FNAME" ]; then
 	echo "Found rstudio $RSTUDIO_VERSION in $cache_layer_dir skipping download"
 else
 	echo "Downloading rstudio $RSTUDIO_VERSION in $cache_layer_dir"
-	curl -sSL "https://download2.rstudio.org/server/$OS_CODENAME/$ARCH/rstudio-server-$RSTUDIO_VERSION-$ARCH.deb" -o "$cache_layer_dir/$FNAME"
+  # Use the URLs from https://dailies.rstudio.com since they offer more os/arch combinations
+  curl -sSL "https://s3.amazonaws.com/rstudio-ide-build/server/$OS_CODENAME/$ARCH/rstudio-server-$RSTUDIO_VERSION-$ARCH.deb" -o "$cache_layer_dir/$FNAME"
 fi
 
 echo "Unpacking $cache_layer_dir/$FNAME in /tmp/rstudio"
