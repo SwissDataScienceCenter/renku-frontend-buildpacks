@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+plan_path=$CNB_BUILD_PLAN_PATH
+
+if [[ ! -f "renv.lock" ]]; then
+  echo "Did not find renv.lock, will not apply"
+  exit 100
+fi
+
+echo "R Installer Image Extension"
+
+cat >>"${plan_path}" <<EOL
+[[provides]]
+name = "r"
+EOL
+
+cat $plan_path

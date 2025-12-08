@@ -8,25 +8,46 @@ else
   exit 100
 fi
 
-cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
+if [ -f "renv.lock" ]; then
+  # R is compiled from source
+  cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
 [[provides]]
   name = "rstudio"
 
 [[requires]]
   name = "renku-env"
+[requires.metadata]
+  launch = true
 
+[[requires]]
+  name = "r"
 [requires.metadata]
   launch = true
 
 [[requires]]
   name = "rstudio"
+[requires.metadata]
+  launch = true
+EOL
+else
+  # R is installed via conda
+  cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
+[[provides]]
+  name = "rstudio"
 
+[[requires]]
+  name = "renku-env"
 [requires.metadata]
   launch = true
 
 [[requires]]
   name = "conda"
-
 [requires.metadata]
   build = true
+
+[[requires]]
+  name = "rstudio"
+[requires.metadata]
+  launch = true
 EOL
+fi

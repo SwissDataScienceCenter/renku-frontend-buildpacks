@@ -1,0 +1,7 @@
+api = "0.11"
+
+[extension]
+id = "renku/r"
+version = "0.2.1"
+name = "R compile from source"
+description = "Compiles R from source, installs it system-wide as root and switches back to the non-root user."
