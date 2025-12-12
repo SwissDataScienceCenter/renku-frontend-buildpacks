@@ -27,6 +27,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     graphviz \
     inetutils-inetd \
     jq \
+    yq \
     lcov \
     less \
     libbz2-dev \

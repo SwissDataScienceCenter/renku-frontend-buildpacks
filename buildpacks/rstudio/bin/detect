@@ -29,8 +29,13 @@ if [ -f "renv.lock" ]; then
 [requires.metadata]
   launch = true
 EOL
-else
-  # R is installed via conda
+elif [ -f "environment.yml" ]; then
+  # R should be installed via conda
+  R_INSTALLED_IN_CONDA=$(cat environment.yml | yq '.dependencies[] | select( . | test("^r-base"))')
+  if [[ -z "$R_INSTALLED_IN_CONDA" ]]; then
+    echo "Found an environment.yml file but could not find the 'r-base' package inside, please add it if you wish to use Rstudio."
+    exit 100
+  fi
   cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
 [[provides]]
   name = "rstudio"
@@ -46,8 +51,16 @@ else
   build = true
 
 [[requires]]
+  name = "conda-environment"
+[requires.metadata]
+  launch = true
+
+[[requires]]
   name = "rstudio"
 [requires.metadata]
   launch = true
 EOL
+else
+  echo "Could not find any suitable way to install R and R is needed in order to use Rstudio"
+  exit 100
 fi

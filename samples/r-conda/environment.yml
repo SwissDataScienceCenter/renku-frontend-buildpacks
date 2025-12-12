@@ -1,0 +1,5 @@
+name: r-conda
+channels:
+  - conda-forge
+dependencies:
+  - r-base

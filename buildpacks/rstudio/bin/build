@@ -42,25 +42,6 @@ cp -r /tmp/rstudio/usr/lib/rstudio-server/* "$rstudio_layer_dir/"
 
 cp "${buildpack_dir}/bin/rstudio-entrypoint.sh" "${rstudio_layer_dir}"/bin/rstudio-entrypoint.sh
 
-if [ ! -f "renv.lock" ]; then
-  # Rstudio needs R to run, use conda to install it
-  # NOTE: That the latest R version may not be immediately available through conda
-  echo "Did not find renv.lock, will install R through conda."
-  r_layer_dir="${layers_dir}"/r
-  mkdir -p "$cache_layer_dir/pkgs_dir"
-  conda config --add pkgs_dirs "$cache_layer_dir/pkgs_dir"
-  conda config --remove channels defaults
-  conda create --prefix "${r_layer_dir}" -c conda-forge r-base="$R_VERSION"
-  cat >"${layers_dir}/r.toml" <<EOL
-[types]
-launch = true
-
-[metadata]
-description = "r"
-version = "0.0.6"
-EOL
-fi
-
 # Write layer metadata (CNB requirement)
 cat >"${layers_dir}/rstudio.toml" <<EOL
 [types]

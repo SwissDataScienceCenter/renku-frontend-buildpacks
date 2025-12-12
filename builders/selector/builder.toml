@@ -50,6 +50,11 @@ value = "vscodium"
   version = "0.11.5"
 
 [[buildpacks]]
+  id = "paketo-buildpacks/conda-env-update"
+  uri = "docker://docker.io/paketobuildpacks/conda-env-update:0.8.3"
+  version = "0.8.3"
+
+[[buildpacks]]
   id = "heroku/deb-packages"
   uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
   version = "0.2.0"
@@ -160,8 +165,11 @@ value = "vscodium"
     version = "0.2.1"
     optional = true
   [[order.group]]
-   id = "paketo-buildpacks/miniconda"
-   version = "0.11.5"
+    id = "paketo-buildpacks/miniconda"
+    version = "0.11.5"
+  [[order.group]]
+    id = "paketo-buildpacks/conda-env-update"
+    version = "0.8.3"
   [[order.group]]
     id = "renku/renku-variables"
     version = "0.2.1"
@@ -195,11 +203,11 @@ value = "vscodium"
     optional = true
 
 [build]
-  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:32def91"
 
 [run]
 [[run.images]]
-  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:0.2.1"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:32def91"
   mirrors = []
 
 [[targets]]
