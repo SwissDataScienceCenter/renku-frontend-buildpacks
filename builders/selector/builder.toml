@@ -203,11 +203,11 @@ value = "vscodium"
     optional = true
 
 [build]
-  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:32def91"
+  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"
 
 [run]
 [[run.images]]
-  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:32def91"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:0.2.1"
   mirrors = []
 
 [[targets]]
