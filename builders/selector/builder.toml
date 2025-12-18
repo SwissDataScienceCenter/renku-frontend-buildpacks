@@ -5,6 +5,10 @@ name = "BP_RENKU_FRONTENDS"
 value = "vscodium"
 
 [[buildpacks]]
+  uri = "../../buildpacks/test-ld-library-path"
+  version = "0.2.2"
+
+[[buildpacks]]
   uri = "../../buildpacks/renku-variables"
   version = "0.2.2"
 
@@ -134,6 +138,10 @@ value = "vscodium"
   [[order.group]]
     id = "renku/vscodium"
     version = "0.2.2"
+  [[order.group]]
+    id = "renku/test-ld-library-path"
+    version = "0.2.2"
+    optional = true
   [[order.group]]
     id = "heroku/deb-packages"
     version = "0.2.0"

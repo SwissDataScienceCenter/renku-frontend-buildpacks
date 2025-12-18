@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "PASS: Always apply the Python dependency manager."
+
+# 1. GET ARGS
+plan_path=$2
+
+cat >>"${plan_path}" <<EOL
+[[requires]]
+name = "vscodium"
+
+[requires.metadata]
+build = true
+
+[[requires]]
+name = "conda"
+
+[requires.metadata]
+build = true
+
+EOL

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eou pipefail
+
+echo -e "=== 🔧 \033[1mRenku LD_LIBRARY_PATH tester buildpack\033[0m ==="
+
+echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
