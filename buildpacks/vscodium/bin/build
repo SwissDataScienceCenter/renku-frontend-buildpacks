@@ -21,6 +21,7 @@ mkdir -p "${launch_env_dir}"
 mkdir -p "${execd_layer_dir}"
 mkdir -p "${cache_layer_dir}"
 
+unset LD_LIBRARY_PATH
 
 ARCH="${CNB_TARGET_ARCH:-unknown}"
 case "${ARCH}" in
