@@ -30,15 +30,15 @@ jobs:
         ref: ${{ (github.event.inputs.test_mode && 'main') || github.ref }}
 
     - name: Create test branch if in test mode
-      if: github.event.inputs.test_mode == true
+      if: github.event.inputs.test_mode == 'true'
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git checkout -b test-release-${{ github.ref_name }}
-        git push origin test-release-${{ github.ref_name }}
+        git switch -c test-release/${{ github.ref_name }}
+        git push origin test-release/${{ github.ref_name }}
 
     - name: Check if tag exists
-      if: github.event.inputs.test_mode == false
+      if: github.event.inputs.test_mode == 'false'
       run: |
         if git tag -l | grep -q "^${{ github.event.inputs.version }}$"; then
           echo "Error: Tag ${{ github.event.inputs.version }} already exists"
@@ -48,7 +48,7 @@ jobs:
         fi
 
     - name: Simulate tag check in test mode
-      if: github.event.inputs.test_mode == true
+      if: github.event.inputs.test_mode == 'true'
       run: |
         echo "Running in test mode, simulating tag check."
         echo "Proceeding with version ${{ github.event.inputs.version }}-test"
@@ -174,7 +174,7 @@ jobs:
 
           **Please review and merge to complete the release process.**
         branch: update-versions-${{ github.event.inputs.version }}
-        base: ${{ (github.event.inputs.test_mode && format('test-release-{0}', github.ref_name)) || 'main' }}
+        base: ${{ (github.event.inputs.test_mode && format('test-release/{0}', github.ref_name)) || 'main' }}
         delete-branch: true
 
   move-tag:
@@ -344,7 +344,7 @@ jobs:
         git push origin --delete update-versions-${{ needs.move-tag.outputs.version }}
 
   cleanup-test-resources:
-    if: github.event.inputs.test_mode == true && always()
+    if: github.event.inputs.test_mode == 'true' && always()
     runs-on: ubuntu-latest
     needs: [validate-tag, create-version-update-pr, move-tag]
     permissions:
@@ -359,7 +359,7 @@ jobs:
 
     - name: Delete temporary branch
       run: |
-        git push origin --delete test-release-${{ github.ref_name }} || true
+        git push origin --delete test-release/${{ github.ref_name }} || true
 
     - name: Delete temporary tag
       run: |
