@@ -4,7 +4,7 @@ api = "0.11"
 # Buildpack ID and metadata
 [buildpack]
   id = "renku/python-dependency-manager"
-  version = "0.2.2"
+  version = "0.2.3-rc1"
   name = "python dependency manager buildpack"
   description = "A simple buildpack that requires the dependency manager for python"
 
