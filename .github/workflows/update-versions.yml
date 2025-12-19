@@ -322,7 +322,7 @@ jobs:
           ${{ steps.get-tag.outputs.tag }}-arm64
 
   release:
-    if: github.event.name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && github.event.inputs.test_mode == false
+    if: github.event.name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && ! startsWith(github.event.pull_request.base.ref, 'test-release/')
     runs-on: ubuntu-latest
     needs: [move-tag, create-manifests, publish-buildpacks]
     permissions:
@@ -339,12 +339,8 @@ jobs:
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Cleanup branch
-      run: |
-        git push origin --delete update-versions-${{ needs.move-tag.outputs.version }}
-
   cleanup-test-resources:
-    if: github.event.inputs.test_mode == 'true' && always()
+    if: (github.event.inputs.test_mode == 'true' && failure()) || startsWith(github.event.pull_request.base.ref, 'test-release/')
     runs-on: ubuntu-latest
     needs: [validate-tag, create-version-update-pr, move-tag]
     permissions:
