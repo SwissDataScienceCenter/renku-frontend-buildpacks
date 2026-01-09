@@ -150,13 +150,13 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Update buildpack.toml versions
-      run: make update-buildpack-versions RELEASE_VERSION=${{ github.event.inputs.version }}
+      run: make update-buildpack-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
 
     - name: Update builder.toml
-      run: make update-builder-versions RELEASE_VERSION=${{ github.event.inputs.version }}
+      run: make update-builder-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
 
     - name: update build-image action
-      run:  make update-action-versions RELEASE_VERSION=${{ github.event.inputs.version }}
+      run:  make update-action-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
@@ -176,6 +176,7 @@ jobs:
         branch: update-versions-${{ github.event.inputs.version }}
         base: ${{ (github.event.inputs.test_mode && format('test-release/{0}', github.ref_name)) || 'main' }}
         delete-branch: true
+        labels: ${{ github.event.inputs.test_mode && 'test-release' || '' }}
 
   move-tag:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
@@ -200,7 +201,7 @@ jobs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        TAG_NAME="${{ steps.extract_version.outputs.VERSION }}${{ (github.event.inputs.test_mode && '-test') || '' }}"
+        TAG_NAME="${{ steps.extract_version.outputs.VERSION }}${{ (startsWith(github.event.pull_request.base.ref, 'test-release/') && '-test') || '' }}"
         git tag -f "$TAG_NAME"
         git push origin "$TAG_NAME" --force --tags
 
@@ -261,7 +262,7 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository }}/${{ matrix.builder }}
         tags: |
-          type=semver,pattern={{version}}${{ (github.event.inputs.test_mode && '-test') || '' }}
+          type=semver,pattern={{version}}${{ (startsWith(github.event.pull_request.base.ref, 'test-release/') && '-test') || '' }}
         flavor: |
           suffix=-${{ matrix.arch }}
 
@@ -306,7 +307,7 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository }}/${{ matrix.builder }}
         tags: |
-          type=semver,pattern={{version}}${{ (github.event.inputs.test_mode && '-test') || '' }}
+          type=semver,pattern={{version}}${{ (startsWith(github.event.pull_request.base.ref, 'test-release/') && '-test') || '' }}
 
     - name: Get primary tag
       id: get-tag
@@ -322,7 +323,7 @@ jobs:
           ${{ steps.get-tag.outputs.tag }}-arm64
 
   release:
-    if: github.event.name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && ! startsWith(github.event.pull_request.base.ref, 'test-release/')
+    if: github.event.name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && ! contains(github.event.pull_request.labels.*.name, 'test-release')
     runs-on: ubuntu-latest
     needs: [move-tag, create-manifests, publish-buildpacks]
     permissions:
