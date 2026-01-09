@@ -262,7 +262,8 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository }}/${{ matrix.builder }}
         tags: |
-          type=semver,pattern={{version}}${{ (startsWith(github.event.pull_request.base.ref, 'test-release/') && '-test') || '' }}
+          type=semver,pattern={{version}},value=${{ needs.move-tag.outputs.version }}${{ (startsWith(github.event.pull_request.base.ref, 'test-release/') && '-test') || '' }}
+          type=semver,pattern={{version}}
         flavor: |
           suffix=-${{ matrix.arch }}
 
@@ -307,7 +308,8 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository }}/${{ matrix.builder }}
         tags: |
-          type=semver,pattern={{version}}${{ (startsWith(github.event.pull_request.base.ref, 'test-release/') && '-test') || '' }}
+          type=semver,pattern={{version}},value=${{ needs.move-tag.outputs.version }}${{ (startsWith(github.event.pull_request.base.ref, 'test-release/') && '-test') || '' }}
+          type=semver,pattern={{version}}
 
     - name: Get primary tag
       id: get-tag
