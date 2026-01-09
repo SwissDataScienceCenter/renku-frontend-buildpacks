@@ -3,7 +3,7 @@ api = "0.11"
 [buildpack]
   id = "renku/vscodium"
   name = "VSCodium frontend Buildpack"
-  version = "0.2.2"
+  version = "0.2.3-rc1-test"
 
 [[targets]]
   os = "linux"
