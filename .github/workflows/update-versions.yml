@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v6
       with:
         fetch-depth: 0
-        ref: ${{ (github.event.inputs.test_mode && 'main') || github.ref }}
+        ref: ${{ github.ref }}
 
     - name: Create test branch if in test mode
       if: github.event.inputs.test_mode == 'true'
