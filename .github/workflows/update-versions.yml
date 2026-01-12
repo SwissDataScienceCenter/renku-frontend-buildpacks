@@ -368,7 +368,7 @@ jobs:
 
     - name: Delete temporary tag
       run: |
-        VERSION="${{ github.event.inputs.version }}${{ needs.move-tag.outputs.version }}"
+        VERSION="${{ github.event.inputs.version || needs.move-tag.outputs.version }}"
         if [ -n "$VERSION" ]; then
           git push origin --delete "${VERSION}-test" || true
         fi
