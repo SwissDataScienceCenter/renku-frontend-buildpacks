@@ -18,7 +18,7 @@ on:
 jobs:
   validate-tag:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       repo_lower: ${{ steps.lowercase_repo.outputs.REPO }}
 
@@ -60,7 +60,7 @@ jobs:
 
   build-and-push-build-run-images:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: validate-tag
     permissions:
       contents: read
@@ -136,7 +136,7 @@ jobs:
 
   create-version-update-pr:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [validate-tag, build-and-push-build-run-images]
     permissions:
       contents: write
@@ -180,7 +180,7 @@ jobs:
 
   move-tag:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     outputs:
@@ -293,7 +293,7 @@ jobs:
     strategy:
       matrix:
         builder: [selector, cuda-selector]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
@@ -326,7 +326,7 @@ jobs:
 
   release:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && ! contains(github.event.pull_request.labels.*.name, 'test-release')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [move-tag, create-manifests, publish-buildpacks]
     permissions:
       contents: write
@@ -344,8 +344,8 @@ jobs:
 
   cleanup-test-resources:
     if: always() && ((github.event_name == 'workflow_dispatch' && github.event.inputs.test_mode == 'true' && failure()) || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.base.ref, 'test-release/')))
-    runs-on: ubuntu-latest
     needs: [validate-tag, move-tag, create-manifests]
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 
