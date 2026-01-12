@@ -176,10 +176,10 @@ jobs:
         branch: update-versions-${{ github.event.inputs.version }}
         base: ${{ (github.event.inputs.test_mode && format('test-release/{0}', github.ref_name)) || 'main' }}
         delete-branch: true
-        labels: ${{ github.event.inputs.test_mode && 'test-release' || '' }}
+        labels: ${{ github.event.inputs.test_mode && 'test-release' || 'release' }}
 
   move-tag:
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && contains(github.event.pull_request.labels.*.name, 'release')
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -206,7 +206,7 @@ jobs:
         git push origin "$TAG_NAME" --force --tags
 
   publish-buildpacks:
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && contains(github.event.pull_request.labels.*.name, 'release')
     runs-on: ubuntu-24.04
     permissions:
       packages: write
@@ -229,7 +229,7 @@ jobs:
       run: make publish_buildpacks
 
   publish-builders:
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && contains(github.event.pull_request.labels.*.name, 'release')
     needs: [move-tag]
     permissions:
       packages: write
@@ -286,7 +286,7 @@ jobs:
         docker push ${{ steps.get-tag.outputs.tag }}
 
   create-manifests:
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-') && contains(github.event.pull_request.labels.*.name, 'release')
     needs: [move-tag, publish-builders]
     permissions:
       packages: write
