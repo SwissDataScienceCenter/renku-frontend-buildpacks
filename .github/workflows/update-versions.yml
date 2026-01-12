@@ -361,9 +361,9 @@ jobs:
     - name: Delete temporary branch
       run: |
         if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-          git push origin --delete test-release/${{ github.ref_name }} || true
+          git push origin --delete test-release/${{ github.ref_name }} || echo "Branch already deleted or doesn't exist"
         else
-          git push origin --delete ${{ github.event.pull_request.base.ref }} || true
+          git push origin --delete ${{ github.event.pull_request.base.ref }} || echo "Branch already deleted or doesn't exist"
         fi
 
     - name: Delete temporary tag
