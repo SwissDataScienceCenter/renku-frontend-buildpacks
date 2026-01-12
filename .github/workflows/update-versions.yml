@@ -341,9 +341,13 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
   cleanup-test-resources:
-    if: always() && ((github.event_name == 'workflow_dispatch' && github.event.inputs.test_mode == 'true' && failure()) || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.base.ref, 'test-release/')))
-    needs: [validate-tag, move-tag, create-manifests]
+    if: |
+      always() && (
+       (github.event_name == 'workflow_dispatch' && github.event.inputs.test_mode == 'true' && failure()) ||
+       (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'test-release'))
+      )
     runs-on: ubuntu-24.04
+    needs: [validate-tag, build-and-push-build-run-images, create-version-update-pr, move-tag, publish-buildpacks, publish-builders, create-manifests]
     permissions:
       contents: write
 
