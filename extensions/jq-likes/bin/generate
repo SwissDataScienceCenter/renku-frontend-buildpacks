@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+output_dir=$CNB_OUTPUT_DIR
+
+write_dockerfile() {
+  cat >>"$1" <<EOL
+ARG base_image
+FROM \${base_image}
+ARG user_id
+USER root
+RUN apt-get update -y && \
+  apt-get install -y yq jq \
+  rm -rf /var/lib/apt/lists/*
+USER \$user_id
+EOL
+}
+
+echo "Will install jq-likes in the build image."
+write_dockerfile "${output_dir}/build.Dockerfile"

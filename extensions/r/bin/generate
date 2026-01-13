@@ -14,7 +14,8 @@ echo "Extracted R version $R_VERSION"
 
 # NOTE: Instructions for R installation are from https://docs.posit.co/resources/install-r-source.html
 
-cat >>"${output_dir}/run.Dockerfile" <<EOL
+write_dockerfile() {
+  cat >>"$1" <<EOL
 ARG base_image
 FROM \${base_image}
 ARG user_id
@@ -40,3 +41,17 @@ RUN sed 's/^Types: deb$/Types: deb-src/g' /etc/apt/sources.list.d/ubuntu.sources
   rm -rf R-${R_VERSION}.tar.gz
 USER \$user_id
 EOL
+}
+
+needed_for_launch="true"
+needed_for_build="true"
+
+if [[ "$needed_for_launch" == "true" ]]; then
+  echo "Will install R in the run image."
+  write_dockerfile "${output_dir}/run.Dockerfile"
+fi
+
+if [[ "$needed_for_build" == "true" ]]; then
+  echo "Will install R in the build image."
+  write_dockerfile "${output_dir}/build.Dockerfile"
+fi

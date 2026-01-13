@@ -20,6 +20,12 @@ if [ -f "renv.lock" ]; then
   launch = true
 
 [[requires]]
+  name = "jq-likes"
+[requires.metadata]
+  build = true
+  launch = false
+
+[[requires]]
   name = "r"
 [requires.metadata]
   launch = true

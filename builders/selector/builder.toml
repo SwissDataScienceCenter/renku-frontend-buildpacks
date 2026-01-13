@@ -63,7 +63,15 @@ value = "vscodium"
   uri="../../extensions/r"
   version= "0.2.1"
 
+[[extensions]]
+  uri="../../extensions/jq-likes"
+  version= "0.2.1"
+
 [[order-extensions]]
+[[order-extensions.group]]
+  id = "renku/jq-likes"
+  version = "0.2.1"
+  optional = true
 [[order-extensions.group]]
   id = "renku/r"
   version = "0.2.1"

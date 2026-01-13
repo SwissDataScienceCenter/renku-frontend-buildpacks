@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+plan_path=$CNB_BUILD_PLAN_PATH
+
+echo "jq-likes Image Extension"
+
+cat >>"${plan_path}" <<EOL
+[[provides]]
+name = "jq-likes"
+EOL
+
+cat $plan_path

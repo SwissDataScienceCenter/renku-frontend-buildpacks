@@ -1,0 +1,7 @@
+api = "0.11"
+
+[extension]
+id = "renku/jq-likes"
+version = "0.2.1"
+name = "Add yq and jq from APT."
+description = "Installs yq and jq from apt."
