@@ -11,7 +11,7 @@ cat >"${execd_dir}"/setup.sh <<EOL
 #!/usr/bin/env bash
 set -eo pipefail
 if [ -d \${RENKU_MOUNT_DIR}/.venv ] && \
-   ([ "\$(readlink -e \${RENKU_MOUNT_DIR}/.venv/bin/python 2>/dev/null)" != "readlink -e \$(which python 2>/dev/null)" ] || \
+   ([ "\$(readlink -e \${RENKU_MOUNT_DIR}/.venv/bin/python 2>/dev/null)" != "\$(readlink -e \$(which python 2>/dev/null) 2>/dev/null)" ] || \
     [ "\$(grep "version = " \${RENKU_MOUNT_DIR}/.venv/pyvenv.cfg 2>/dev/null | cut -d' ' -f3)" != "\$(python --version 2>/dev/null | cut -d' ' -f2)" ]); then
     echo "Virtualenv exists but has mismatch - recreating..."
     rm -rf \${RENKU_MOUNT_DIR}/.venv
