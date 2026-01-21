@@ -95,7 +95,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
         target: run
         push: true
-        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/run-image:${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/run-image:${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode == 'true' && '-test') || '' }}
         labels: |
           io.buildpacks.base.distro.name=ubuntu
           io.buildpacks.base.distro.version=24.04
@@ -111,7 +111,7 @@ jobs:
         build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
         target: run
         push: true
-        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-run-image:${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-run-image:${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode == 'true' && '-test') || '' }}
         labels: |
           io.buildpacks.base.distro.name=ubuntu
           io.buildpacks.base.distro.version=24.04
@@ -127,7 +127,7 @@ jobs:
         build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
         target: build
         push: true
-        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-build-image:${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
+        tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-build-image:${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode == 'true' && '-test') || '' }}
         labels: |
           io.buildpacks.base.distro.name=ubuntu
           io.buildpacks.base.distro.version=24.04
@@ -150,13 +150,13 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Update buildpack.toml versions
-      run: make update-buildpack-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
+      run: make update-buildpack-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode == 'true' && '-test') || '' }}
 
     - name: Update builder.toml
-      run: make update-builder-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
+      run: make update-builder-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode == 'true' && '-test') || '' }}
 
     - name: update build-image action
-      run:  make update-action-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode && '-test') || '' }}
+      run:  make update-action-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode == 'true' && '-test') || '' }}
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
@@ -174,9 +174,9 @@ jobs:
 
           **Please review and merge to complete the release process.**
         branch: update-versions-${{ github.event.inputs.version }}
-        base: ${{ (github.event.inputs.test_mode && format('test-release/{0}', github.ref_name)) || 'main' }}
+        base: ${{ (github.event.inputs.test_mode == 'true' && format('test-release/{0}', github.ref_name)) || 'main' }}
         delete-branch: true
-        labels: ${{ github.event.inputs.test_mode && 'test-release' || 'release' }}
+        labels: ${{ github.event.inputs.test_mode == 'true' && 'test-release' || 'release' }}
 
   move-tag:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'update-versions-')
