@@ -4,7 +4,7 @@ api = "0.11"
 # Buildpack ID and metadata
 [buildpack]
   id = "renku/init-scripts"
-  version = "0.2.2"
+  version = "0.2.3"
   name = "init scripts runner buildpack"
   description = "A simple buildpack that allows the user to define init scripts"
 

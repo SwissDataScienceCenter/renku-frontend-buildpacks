@@ -4,7 +4,7 @@ api = "0.11"
 # Buildpack ID and metadata
 [buildpack]
   id = "renku/renku-variables"
-  version = "0.2.2"
+  version = "0.2.3"
   name = "Renku Environment Variables"
 
 # Targets the buildpack will work with
