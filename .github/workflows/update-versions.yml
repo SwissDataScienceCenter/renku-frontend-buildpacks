@@ -223,7 +223,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: buildpacks/github-actions/setup-pack@v5.9.7
+    - uses: buildpacks/github-actions/setup-pack@v5.10.1
 
     - name: publish buildpacks
       run: make publish_buildpacks
@@ -266,7 +266,7 @@ jobs:
         flavor: |
           suffix=-${{ matrix.arch }}
 
-    - uses: buildpacks/github-actions/setup-pack@v5.9.7
+    - uses: buildpacks/github-actions/setup-pack@v5.10.1
 
     - name: Get primary tag
       id: get-tag
