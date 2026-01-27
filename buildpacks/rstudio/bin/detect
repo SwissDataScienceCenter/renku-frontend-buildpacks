@@ -25,8 +25,8 @@ cat >"${CNB_BUILD_PLAN_PATH}" <<EOL
   launch = true
 
 [[requires]]
-  name = "conda"
+  name = "rproject"
 
 [requires.metadata]
-  build = true
+  launch = true
 EOL
