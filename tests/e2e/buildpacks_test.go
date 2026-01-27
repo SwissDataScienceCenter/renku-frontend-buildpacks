@@ -170,7 +170,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 				})
 			})
 		},
-		Entry("using random sample", "../../samples/pip"),
+		Entry("using r sample", "../../samples/r"),
 	)
 
 	DescribeTableSubtree(
