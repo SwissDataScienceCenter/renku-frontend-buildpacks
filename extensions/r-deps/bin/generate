@@ -5,8 +5,8 @@ output_dir=$CNB_OUTPUT_DIR
 
 # NOTE: Instructions for R installation are from https://docs.posit.co/resources/install-r-source.html
 
-write_dockerfile() {
-  cat >>"$1" <<EOL
+echo "Will install R-build-deps in the build image."
+cat >>"${output_dir}/build.Dockerfile" <<EOL
 ARG base_image
 FROM \${base_image}
 ARG user_id
@@ -19,10 +19,23 @@ RUN sed 's/^Types: deb$/Types: deb-src/g' /etc/apt/sources.list.d/ubuntu.sources
   rm -rf /var/lib/apt/lists/*
 USER \$user_id
 EOL
-}
 
-echo "Will install R in the run image."
-write_dockerfile "${output_dir}/run.Dockerfile"
-
-echo "Will install R in the build image."
-write_dockerfile "${output_dir}/build.Dockerfile"
+echo "Will install R-run-deps in the run image."
+cat >>"${output_dir}/run.Dockerfile" <<EOL
+ARG base_image
+FROM \${base_image}
+ARG user_id
+USER root
+RUN sed 's/^Types: deb$/Types: deb-src/g' /etc/apt/sources.list.d/ubuntu.sources > /etc/apt/sources.list.d/deb-src-ubuntu.sources && \
+  apt-get update -y && \
+  apt-get install -y --no-install-recommends fontconfig fontconfig-config fonts-dejavu-core \
+  fonts-dejavu-mono libblas3 libbsd0 libcairo2 libdatrie1 libdeflate0 libfontconfig1 libfreetype6 \
+  libfribidi0 libgfortran5 libglib2.0-0t64 libgraphite2-3 libharfbuzz0b libice6 libicu74 libjbig0 \
+  libjpeg-turbo8 libjpeg8 liblapack3 liblerc4 libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 \
+  libpaper-utils libpaper1 libpixman-1-0 libpng16-16t64 libreadline8t64 libsharpyuv0 libsm6 \
+  libtcl8.6 libthai-data libthai0 libtiff6 libtirpc-common libtirpc3t64 libtk8.6 libwebp7 libx11-6 \
+  libx11-data libxau6 libxcb-render0 libxcb-shm0 libxcb1 libxdmcp6 libxext6 libxft2 libxrender1 \
+  libxss1 libxt6t64 readline-common ucf unzip xdg-utils zip && \
+  rm -rf /var/lib/apt/lists/*
+USER \$user_id
+EOL
