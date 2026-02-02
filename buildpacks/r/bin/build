@@ -99,6 +99,7 @@ touch "${r_layer_dir}/etc/R/Renviron"
 LD_LIBRARY_PATH="${r_layer_dir}/lib/${ARCH}-linux-gnu/":"${r_layer_dir}/lib/${ARCH}-linux-gnu/openblas-pthread"
 printf ':'> "${env_dir}/LD_LIBRARY_PATH.delim"
 printf "%s" "${LD_LIBRARY_PATH}" >"${env_dir}/LD_LIBRARY_PATH.prepend"
+printf "pdf" >"${env_dir}/R_INTERACTIVE_DEVICE.default"
 
 export EDITOR=vim
 echo "EDITOR=${EDITOR}" >> "${r_layer_dir}/lib/R/etc/Renviron.site"
