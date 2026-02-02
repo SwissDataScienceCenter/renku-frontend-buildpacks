@@ -103,10 +103,12 @@ curl -O "https://cran.rstudio.com/src/base/R-4/R-${R_VERSION}.tar.gz"
 tar -xzf "R-${R_VERSION}.tar.gz"
 pushd "R-${R_VERSION}/src/unix"
 gcc -o Rscript Rscript.c \
-	-DHAVE_CONFIG_H \
-	-I../../src/include \
-	-I../../ \
-	-DR_HOME="\"${r_layer_dir}/lib/R\""
+  -I"${r_layer_dir}/share/R/include" \
+  -DUNIX \
+  -DHAVE_PUTENV \
+  -DHAVE_EXECV \
+  -DR_ARCH=\"\" \
+  -DR_HOME="\"${r_layer_dir}/lib/R\""
 cp Rscript "${r_layer_dir}/bin/Rscript"
 popd
 popd
