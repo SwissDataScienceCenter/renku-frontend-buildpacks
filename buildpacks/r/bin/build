@@ -6,121 +6,32 @@ echo -e "=== ✨ \033[1mRenku R buildpack\033[0m ==="
 r_layer_dir="${CNB_LAYERS_DIR}/r"
 env_dir="${r_layer_dir}/env"
 cache_layer_dir="${CNB_LAYERS_DIR}/cache"
-apt_dir="${cache_layer_dir}/apt"
-deb_dir="${cache_layer_dir}/deb"
 source_dir="${cache_layer_dir}/source"
 mkdir -p "${r_layer_dir}/bin"
 mkdir -p "${env_dir}"
-mkdir -p "${apt_dir}/lib/dpkg"
-cp -r /etc/apt/sources.list.d "${apt_dir}/"
-touch "${apt_dir}/lib/dpkg/status"
-mkdir -p "${apt_dir}/lib/apt"
-mkdir -p "${apt_dir}/cache/apt"
-mkdir -p "${deb_dir}"
 mkdir -p "${source_dir}"
 
-ARCH="${CNB_TARGET_ARCH:-unknown}"
-case "${ARCH}" in
-  "arm64") ARCH="aarch64" ;;
-  "amd64") ARCH="x86_64" ;;
-esac
-
-DEBS=https://cloud.r-project.org/bin/linux/
-OS=ubuntu
-SUFFIX="$(grep VERSION_CODENAME /etc/os-release |cut -d= -f2)"-cran40/
-URL_PUBKEY="${DEBS}/${OS}/marutter_pubkey.asc"
-PUBKEY="${cache_layer_dir}/marutter_pubkey.asc"
-
-curl -sSL "${URL_PUBKEY}" -o "${PUBKEY}"
-echo "deb [ signed-by=${PUBKEY} ] ${DEBS}${OS} ${SUFFIX}" > "${apt_dir}"/sources.list.d/r.list
-
 R_VERSION="$(jq -r ".R.Version" "renv.lock")"
-
-pushd "${deb_dir}"
-echo apt update
-apt-get \
-  -o Dir::Etc::SourceParts="${apt_dir}/sources.list.d" \
-  -o Dir::State::status="${apt_dir}/lib/dpkg/status" \
-  -o Dir::State="${apt_dir}/lib/apt" \
-  -o Dir::Cache="${apt_dir}/cache/apt" \
-  -o pkgCacheGen::Essential="none" \
-  update
-
-
-echo apt download
-apt-get \
-  -o Dir::Etc::SourceParts="${apt_dir}/sources.list.d" \
-  -o Dir::State::status="${apt_dir}/lib/dpkg/status" \
-  -o Dir::State="${apt_dir}/lib/apt" \
-  -o Dir::Cache="${apt_dir}/cache/apt" \
-  -o pkgCacheGen::Essential="none" \
-  download \
-  r-cran-docopt \
-  libopenblas0-pthread \
-  libreadline8t64 \
-  libdeflate0 \
-  libicu74 \
-  libgfortran5 \
-  libtirpc3t64 \
-  littler  \
-  r-cran-littler \
-  r-base="${R_VERSION}"-* \
-  r-base-dev="${R_VERSION}"-* \
-  r-base-core="${R_VERSION}"-* \
-  r-recommended="${R_VERSION}"-*
-
-popd
-pushd "${r_layer_dir}"
-
-find "${deb_dir}" -type f -print0|xargs -0 -I{} dpkg -x {} .
-
-mv usr/* .
-
-# move symlinks
-find . -type l|while read -r l;do
-  target="$(readlink "$l")"
-  case "$target" in
-    /*)ln -fs "$(pwd)${target#/usr}" "$l";;
-    *) true;;
-  esac
-done
-
-# change hardcoded paths
-grep -rEI '/usr/.+/r' "${r_layer_dir}" | \
-  cut -d: -f1| \
-  xargs -I{} sed -i "s#/usr/\\(.*\\)/r#${r_layer_dir}/\1/r#g" {}
-
-grep -rEI '/usr/.+/R' "${r_layer_dir}" | \
-  cut -d: -f1| \
-  xargs -I{} sed -i "s#/usr/\\(.*\\)/R#${r_layer_dir}/\1/R#g" {}
-
-popd
-
-touch "${r_layer_dir}/etc/R/Renviron"
 
 pushd "${source_dir}"
 curl -O "https://cran.rstudio.com/src/base/R-4/R-${R_VERSION}.tar.gz"
 tar -xzf "R-${R_VERSION}.tar.gz"
-pushd "R-${R_VERSION}/src/unix"
-gcc -o Rscript Rscript.c \
-	-DHAVE_CONFIG_H \
-	-I../../src/include \
-	-I../../ \
-	-DR_HOME="\"${r_layer_dir}/lib/R\""
-cp Rscript "${r_layer_dir}/bin/Rscript"
-popd
+cd "R-${R_VERSION}"
+./configure \
+--prefix="${r_layer_dir}" \
+--enable-R-shlib \
+--enable-memory-profiling \
+--with-blas \
+--with-lapack && \
+make && make install
 popd
 
-LD_LIBRARY_PATH="${r_layer_dir}/lib/${ARCH}-linux-gnu/":"${r_layer_dir}/lib/${ARCH}-linux-gnu/openblas-pthread"
-printf ':'> "${env_dir}/LD_LIBRARY_PATH.delim"
-printf "%s" "${LD_LIBRARY_PATH}" >"${env_dir}/LD_LIBRARY_PATH.prepend"
 printf "pdf" >"${env_dir}/R_INTERACTIVE_DEVICE.default"
 
 export EDITOR=vim
-echo "EDITOR=${EDITOR}" >> "${r_layer_dir}/lib/R/etc/Renviron.site"
+echo "EDITOR=${EDITOR}" > "${r_layer_dir}/lib/R/etc/Renviron.site"
 
-LD_LIBRARY_PATH="${r_layer_dir}/lib:${LD_LIBRARY_PATH}" "${r_layer_dir}/bin/R" \
-  -e "utils::install.packages('renv', lib='${r_layer_dir}/lib/R/library', repos='http://cran.r-project.org')"
+"${r_layer_dir}/bin/R" -e "utils::install.packages('renv', lib='${r_layer_dir}/lib/R/library', repos='http://cran.r-project.org')"
 
 cat >"${r_layer_dir}".toml <<EOL
 [types]
