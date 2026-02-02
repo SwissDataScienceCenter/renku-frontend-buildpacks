@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo -e "=== ✨ \033[1mRenku RENV buildpack\033[0m ==="
+
+layers_dir="${CNB_LAYERS_DIR}"
+renv_layer_dir="${layers_dir}"/renv
+env_dir="${renv_layer_dir}/env"
+export R_LIBS_SITE="${renv_layer_dir}/renv"
+export RENV_PATHS_ROOT="${layers_dir}/cache"
+export RENV_ACTIVATE_PROJECT=false
+mkdir -p "${R_LIBS_SITE}"
+mkdir -p "${RENV_PATHS_ROOT}"
+mkdir -p "${env_dir}"
+
+echo "Setting environment variables for launch..."
+printf "%s" "${R_LIBS_SITE}" > "${env_dir}/R_LIBS_SITE.default"
+printf "%s" "${RENV_PATHS_ROOT}" > "${env_dir}/RENV_PATHS_ROOT.default"
+
+echo "Restoring dependencies using renv..."
+# Set renv to manage the user's library
+R -e "renv::restore(library = '${R_LIBS_SITE}', lockfile = 'renv.lock')"
+
+cat >"${layers_dir}/cache.toml" <<EOL
+[types]
+cache = true
+launch = true
+
+[metadata]
+description = "renv cache"
+EOL
+
+cat >"${layers_dir}/renv.toml" <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "renv restorer for renku"
+EOL
+
+echo "Renv buildpack completed."

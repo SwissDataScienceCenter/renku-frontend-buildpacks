@@ -33,6 +33,14 @@ value = "vscodium"
   version = "0.2.3"
 
 [[buildpacks]]
+  uri = "../../buildpacks/r"
+  version = "0.2.3"
+
+[[buildpacks]]
+  uri = "../../buildpacks/renv"
+  version = "0.2.3"
+
+[[buildpacks]]
   uri = "../../buildpacks/rstudio"
   version = "0.2.3"
 
@@ -146,14 +154,13 @@ value = "vscodium"
 [[order]]
 
   [[order.group]]
-    id = "renku/conda-nodefaults"
-    version = "0.2.3"
-    optional = true
-  [[order.group]]
-   id = "paketo-buildpacks/miniconda"
-   version = "0.11.5"
+   id = "renku/r"
+   version = "0.2.3"
   [[order.group]]
     id = "renku/renku-variables"
+    version = "0.2.3"
+  [[order.group]]
+    id = "renku/renv"
     version = "0.2.3"
   [[order.group]]
     id = "renku/rstudio"

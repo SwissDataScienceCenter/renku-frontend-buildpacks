@@ -10,11 +10,10 @@ layers_dir="${CNB_LAYERS_DIR}"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
 cache_layer_dir="${layers_dir}"/cache
 rstudio_layer_dir="${layers_dir}"/rstudio
-r_layer_dir="${layers_dir}"/r
 mkdir -p "${rstudio_layer_dir}"/bin
 mkdir -p "${cache_layer_dir}"
 
-RSTUDIO_VERSION="2025.09.2-418"
+RSTUDIO_VERSION="2026.01.0-392"
 OS_CODENAME=jammy # https://posit.co/download/rstudio-server gives jammy regardless of ubuntu version
 FNAME="rstudio-$RSTUDIO_VERSION.deb"
 
@@ -34,14 +33,6 @@ cp -r /tmp/rstudio/usr/lib/rstudio-server/* "$rstudio_layer_dir/"
 
 cp "${buildpack_dir}/bin/rstudio-entrypoint.sh" "${rstudio_layer_dir}"/bin/rstudio-entrypoint.sh
 
-# Rstudio needs R to run, use conda to install it
-# NOTE: That the latest R version may not be immediately available through conda
-
-mkdir -p "$cache_layer_dir/pkgs_dir"
-conda config --add pkgs_dirs "$cache_layer_dir/pkgs_dir"
-conda config --remove channels defaults
-conda create --prefix "${r_layer_dir}" -c conda-forge r-base="$R_VERSION"
-
 # Write layer metadata (CNB requirement)
 cat >"${layers_dir}/rstudio.toml" <<EOL
 [types]
@@ -49,15 +40,6 @@ launch = true
 
 [metadata]
 description = "rstudio frontend for renku"
-version = "0.0.6"
-EOL
-
-cat >"${layers_dir}/r.toml" <<EOL
-[types]
-launch = true
-
-[metadata]
-description = "r"
 version = "0.0.6"
 EOL
 
