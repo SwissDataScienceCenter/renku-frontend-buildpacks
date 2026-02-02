@@ -62,6 +62,10 @@ value = "vscodium"
   uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
   version = "0.2.0"
 
+[[extensions]]
+  uri="../../extensions/r-deps"
+  version= "0.2.3"
+
 [lifecycle]
   version = "0.20.19"
 
@@ -154,30 +158,6 @@ value = "vscodium"
 [[order]]
 
   [[order.group]]
-    id = "renku/conda-nodefaults"
-    version = "0.2.3"
-    optional = true
-  [[order.group]]
-   id = "paketo-buildpacks/miniconda"
-   version = "0.11.5"
-  [[order.group]]
-    id = "renku/renku-variables"
-    version = "0.2.3"
-  [[order.group]]
-    id = "renku/rstudio"
-    version = "0.2.3"
-  [[order.group]]
-    id = "heroku/deb-packages"
-    version = "0.2.0"
-    optional = true
-  [[order.group]]
-    id = "renku/init-scripts"
-    version = "0.2.3"
-    optional = true
-
-[[order]]
-
-  [[order.group]]
    id = "renku/r"
    version = "0.2.3"
   [[order.group]]
@@ -197,6 +177,12 @@ value = "vscodium"
     id = "renku/init-scripts"
     version = "0.2.3"
     optional = true
+
+[[order-extensions]]
+[[order-extensions.group]]
+  id = "renku/r-deps"
+  version = "0.2.3"
+  optional = true
 
 [build]
   image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"

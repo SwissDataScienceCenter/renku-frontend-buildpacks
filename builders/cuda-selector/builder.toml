@@ -62,6 +62,10 @@ value = "vscodium"
   uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
   version = "0.2.0"
 
+[[extensions]]
+  uri="../../extensions/r-deps"
+  version= "0.2.3"
+
 [lifecycle]
   version = "0.20.19"
 
@@ -173,6 +177,12 @@ value = "vscodium"
     id = "renku/init-scripts"
     version = "0.2.3"
     optional = true
+
+[[order-extensions]]
+[[order-extensions.group]]
+  id = "renku/r-deps"
+  version = "0.2.3"
+  optional = true
 
 [build]
   image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/cuda-build-image:0.2.3"
