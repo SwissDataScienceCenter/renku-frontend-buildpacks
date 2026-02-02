@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+output_dir=$CNB_OUTPUT_DIR
+
+# NOTE: Instructions for R installation are from https://docs.posit.co/resources/install-r-source.html
+
+write_dockerfile() {
+  cat >>"$1" <<EOL
+ARG base_image
+FROM \${base_image}
+ARG user_id
+USER root
+RUN sed 's/^Types: deb$/Types: deb-src/g' /etc/apt/sources.list.d/ubuntu.sources > /etc/apt/sources.list.d/deb-src-ubuntu.sources && \
+  apt-get update -y && \
+  apt-get install -y curl \
+  default-jdk || (rm -f /var/lib/dpkg/info/*jdk* && rm -f /var/lib/dpkg/info/*jre* && apt-get install -y default-jdk) && \
+  apt-get build-dep -y --no-install-recommends r-base && \
+  rm -rf /var/lib/apt/lists/*
+USER \$user_id
+EOL
+}
+
+echo "Will install R in the run image."
+write_dockerfile "${output_dir}/run.Dockerfile"
+
+echo "Will install R in the build image."
+write_dockerfile "${output_dir}/build.Dockerfile"
