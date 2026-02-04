@@ -27,6 +27,7 @@ make && make install
 popd
 
 printf "pdf" >"${env_dir}/R_INTERACTIVE_DEVICE.default"
+printf "%s/lib/R/library" "${r_layer_dir}" >"${env_dir}/R_LIBS_SITE.default"
 
 export EDITOR=vim
 echo "EDITOR=${EDITOR}" > "${r_layer_dir}/lib/R/etc/Renviron.site"

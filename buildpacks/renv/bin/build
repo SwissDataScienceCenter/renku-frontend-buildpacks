@@ -14,7 +14,8 @@ mkdir -p "${RENV_PATHS_ROOT}"
 mkdir -p "${env_dir}"
 
 echo "Setting environment variables for launch..."
-printf "%s" "${R_LIBS_SITE}" > "${env_dir}/R_LIBS_SITE.default"
+printf ":" > "${env_dir}/R_LIBS_SITE.delim"
+printf "%s" "${R_LIBS_SITE}" > "${env_dir}/R_LIBS_SITE.prepend"
 printf "%s" "${RENV_PATHS_ROOT}" > "${env_dir}/RENV_PATHS_ROOT.default"
 
 echo "Restoring dependencies using renv..."
