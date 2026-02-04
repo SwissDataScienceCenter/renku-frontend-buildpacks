@@ -8,7 +8,9 @@ cat > "${RENKU_MOUNT_DIR}/.rstudio/rsession.sh" <<EOF
 export RENV_PATHS_ROOT="${RENKU_MOUNT_DIR}/.rstudio/cache:${RENV_PATHS_ROOT}"
 export RENV_PATHS_SANDBOX="${RENKU_MOUNT_DIR}/.rstudio/cache/renv/sandbox"
 export R_INTERACTIVE_DEVICE="${R_INTERACTIVE_DEVICE:-pdf}"
-export R_LIBS_SITE="${R_LIBS_SITE}"
+export RENV_CONFIG_INSTALL_STAGED=FALSE
+export RENV_CONFIG_UPDATES_CHECK=FALSE
+export R_LIBS_SITE="${RENKU_MOUNT_DIR}/.rstudio/libs:${R_LIBS_SITE}"
 exec rsession "\$@"
 EOF
 chmod u+x "${RENKU_MOUNT_DIR}/.rstudio/rsession.sh"
