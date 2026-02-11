@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "PASS: Always apply the R dependency manager."
+
+# 1. GET ARGS
+plan_path=$2
+
+cat >>"${plan_path}" <<EOL
+[[requires]]
+name = "r"
+
+[requires.metadata]
+launch = true
+
+[[requires]]
+name = "rproject"
+
+[requires.metadata]
+launch = true
+
+EOL

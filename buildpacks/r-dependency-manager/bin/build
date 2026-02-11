@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -eou pipefail
+
+echo -e "=== 🔧 \033[1mRenku R/renv dependency manager buildpack\033[0m ==="
+
+layer_dir="${CNB_LAYERS_DIR}/r-deps"
+buildpack_dir="${CNB_BUILDPACK_DIR}"
+execd_dir="${layer_dir}"/exec.d
+mkdir -p "${execd_dir}"
+
+cp "${buildpack_dir}/bin/setup.sh" "${execd_dir}"/setup.sh
+chmod +x "${execd_dir}"/setup.sh
+
+cat >"${layer_dir}".toml <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "R/renv dependency management for run sessions"
+version = "0.0.1"
+EOL
