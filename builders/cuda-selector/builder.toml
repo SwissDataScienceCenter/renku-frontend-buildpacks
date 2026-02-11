@@ -41,6 +41,10 @@ value = "vscodium"
   version = "0.2.3"
 
 [[buildpacks]]
+  uri = "../../buildpacks/r-dependency-manager"
+  version = "0.2.3"
+
+[[buildpacks]]
   uri = "../../buildpacks/rstudio"
   version = "0.2.3"
 
@@ -158,13 +162,16 @@ value = "vscodium"
 [[order]]
 
   [[order.group]]
-   id = "renku/r"
-   version = "0.2.3"
-  [[order.group]]
     id = "renku/renku-variables"
     version = "0.2.3"
   [[order.group]]
+   id = "renku/r"
+   version = "0.2.3"
+  [[order.group]]
     id = "renku/renv"
+    version = "0.2.3"
+  [[order.group]]
+    id = "renku/r-dependency-manager"
     version = "0.2.3"
   [[order.group]]
     id = "renku/rstudio"
