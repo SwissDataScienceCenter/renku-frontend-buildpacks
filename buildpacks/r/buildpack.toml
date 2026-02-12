@@ -1,0 +1,14 @@
+api = "0.11"
+
+[buildpack]
+  id = "renku/r"
+  version = "0.2.3"
+  name = "R Buildpack"
+
+[[targets]]
+  os = "linux"
+  arch = "amd64"
+
+[[targets]]
+  os = "linux"
+  arch = "arm64"

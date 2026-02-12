@@ -25,6 +25,7 @@ func buildBuilder(ctx context.Context, builderLoc, image string) error {
 		image,
 		"--config",
 		builderLoc,
+		"--publish",
 	}
 	cmd := exec.CommandContext(
 		ctx,

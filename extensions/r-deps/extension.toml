@@ -1,0 +1,6 @@
+api = "0.11"
+
+[extension]
+id = "renku/r-deps"
+version = "0.2.3"
+name = "R dependencies"

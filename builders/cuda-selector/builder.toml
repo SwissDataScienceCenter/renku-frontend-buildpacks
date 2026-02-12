@@ -33,6 +33,18 @@ value = "vscodium"
   version = "0.2.3"
 
 [[buildpacks]]
+  uri = "../../buildpacks/r"
+  version = "0.2.3"
+
+[[buildpacks]]
+  uri = "../../buildpacks/renv"
+  version = "0.2.3"
+
+[[buildpacks]]
+  uri = "../../buildpacks/r-dependency-manager"
+  version = "0.2.3"
+
+[[buildpacks]]
   uri = "../../buildpacks/rstudio"
   version = "0.2.3"
 
@@ -53,6 +65,10 @@ value = "vscodium"
   id = "heroku/deb-packages"
   uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
   version = "0.2.0"
+
+[[extensions]]
+  uri="../../extensions/r-deps"
+  version= "0.2.3"
 
 [lifecycle]
   version = "0.20.19"
@@ -146,14 +162,16 @@ value = "vscodium"
 [[order]]
 
   [[order.group]]
-    id = "renku/conda-nodefaults"
-    version = "0.2.3"
-    optional = true
-  [[order.group]]
-   id = "paketo-buildpacks/miniconda"
-   version = "0.11.5"
-  [[order.group]]
     id = "renku/renku-variables"
+    version = "0.2.3"
+  [[order.group]]
+   id = "renku/r"
+   version = "0.2.3"
+  [[order.group]]
+    id = "renku/renv"
+    version = "0.2.3"
+  [[order.group]]
+    id = "renku/r-dependency-manager"
     version = "0.2.3"
   [[order.group]]
     id = "renku/rstudio"
@@ -166,6 +184,12 @@ value = "vscodium"
     id = "renku/init-scripts"
     version = "0.2.3"
     optional = true
+
+[[order-extensions]]
+[[order-extensions.group]]
+  id = "renku/r-deps"
+  version = "0.2.3"
+  optional = true
 
 [build]
   image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/cuda-build-image:0.2.3"

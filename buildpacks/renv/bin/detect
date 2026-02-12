@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Check for renv.lock
+# 1. GET ARGS
+plan_path="${CNB_BUILD_PLAN_PATH}"
+
+if [ -f renv.lock ]; then
+  echo "R project with renv detected"
+else
+  echo "No R project found"
+  exit 100
+fi
+
+cat >>"${plan_path}" <<EOL
+[[requires]]
+name = "r"
+
+[requires.metadata]
+build = true
+launch = true
+
+[[provides]]
+name = "rproject"
+
+EOL
