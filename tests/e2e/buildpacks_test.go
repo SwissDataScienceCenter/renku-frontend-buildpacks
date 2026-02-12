@@ -16,7 +16,7 @@ import (
 )
 
 const registry = "ghcr.io"
-const repository = "renku-frontend-buildpack"
+const repository = "swissdatasciencecenter/renku-frontend-buildpacks"
 const testBuilder = "selector"
 const builderLoc = "../../builders/" + testBuilder
 const customPackage = "cowpy"

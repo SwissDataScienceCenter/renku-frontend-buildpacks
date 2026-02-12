@@ -130,6 +130,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             go tool tomljson builders/selector/builder.toml | \
               go tool yq -p json -o json '.run.images[0].image="'"${{ steps.meta.outputs.tags }}"'"' | \
               go tool jsontoml > builders/selector/builder.toml.tmp && \
