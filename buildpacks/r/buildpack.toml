@@ -2,7 +2,7 @@ api = "0.11"
 
 [buildpack]
   id = "renku/r"
-  version = "0.2.3"
+  version = "0.3.0"
   name = "R Buildpack"
 
 [[targets]]
