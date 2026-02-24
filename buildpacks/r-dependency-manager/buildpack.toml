@@ -1,0 +1,18 @@
+# Buildpack API version
+api = "0.11"
+
+# Buildpack ID and metadata
+[buildpack]
+  id = "renku/r-dependency-manager"
+  version = "0.2.3"
+  name = "r dependency manager buildpack"
+  description = "A simple buildpack that provides the dependency manager for r"
+
+# Targets the buildpack will work with
+[[targets]]
+  os = "linux"
+  arch = "amd64"
+
+[[targets]]
+  os = "linux"
+  arch = "arm64"
