@@ -276,6 +276,7 @@ jobs:
 
     - name: Build and push arch-specific builder
       run: |
+        pack config experimental true
         pack builder create \
           ${{ steps.get-tag.outputs.tag }} \
           --config ${{ matrix.builder-toml }} \
