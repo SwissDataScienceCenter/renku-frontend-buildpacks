@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# The application directory is passed as the first argument
+plan_path="${CNB_BUILD_PLAN_PATH}"
+
+# Check if Brewfile exists
+if [[ -f "Brewfile" ]]; then
+  # Output a simple build plan
+  cat <<EOF >"${plan_path}"
+[[provides]]
+name = "homebrew"
+
+[[requires]]
+name = "homebrew"
+EOF
+  # Exit with 0 to indicate the buildpack applies
+  exit 0
+fi
+
+# Exit with 100 to indicate the buildpack does not apply
+exit 100
