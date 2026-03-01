@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "---> Homebrew Buildpack"
+
+LAYERS_DIR="$1"
+
+# Separate layer for the CLI vs the installed packages
+BREW_CLI_LAYER="${LAYERS_DIR}/brew-cli"
+BREW_PKG_LAYER="${LAYERS_DIR}/brew-packages"
+
+# Homebrew CLI setup
+export HOMEBREW_REPOSITORY="${BREW_CLI_LAYER}"
+CLI_METADATA_FILE="${BREW_CLI_LAYER}.toml"
+
+# Determine the version to install
+if [[ -n "${BP_HOMEBREW_VERSION}" ]]; then
+  BREW_VERSION="${BP_HOMEBREW_VERSION}"
+else
+  echo "---> Determining latest stable Homebrew release..."
+  # Follow GitHub's latest release redirect and grab the tag from the end of the URL
+  LATEST_URL=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/Homebrew/brew/releases/latest)
+  BREW_VERSION=$(echo "${LATEST_URL}" | grep -o '[^/]*$')
+
+  # Safety fallback just in case GitHub rate-limits the request
+  if [[ -z "${BREW_VERSION}" || "${BREW_VERSION}" == "latest" ]]; then
+    echo "---> WARNING: Could not determine latest release. Falling back to master."
+    BREW_VERSION="master"
+  fi
+fi
+
+echo "---> Target Homebrew version: ${BREW_VERSION}"
+
+# Check if we need to clear the CLI cache (if the version changed)
+if [[ -f "${CLI_METADATA_FILE}" ]]; then
+  CACHED_VERSION=$(grep "brew_version" "${CLI_METADATA_FILE}" | cut -d '"' -f 2 || true)
+  if [[ "${CACHED_VERSION}" != "${BREW_VERSION}" ]]; then
+    echo "---> Homebrew version changed from ${CACHED_VERSION:-unknown} to ${BREW_VERSION}. Invalidating CLI cache..."
+    rm -rf "${BREW_CLI_LAYER}"
+  fi
+fi
+
+# Download or use cached CLI
+if [[ ! -x "${HOMEBREW_REPOSITORY}/bin/brew" ]]; then
+  echo "---> Downloading Homebrew CLI (version: ${BREW_VERSION}) to ${BREW_CLI_LAYER}..."
+  mkdir -p "${HOMEBREW_REPOSITORY}"
+
+  # The Homebrew source tarball is architecture-agnostic (Ruby/Bash scripts)
+  curl -fsSL "https://github.com/Homebrew/brew/tarball/${BREW_VERSION}" | tar xz --strip 1 -C "${HOMEBREW_REPOSITORY}"
+else
+  echo "---> Using cached Homebrew CLI (version: ${BREW_VERSION})"
+fi
+
+# Keep the CLI layer for builds, leave it out of the final image, and track the version
+cat >"${CLI_METADATA_FILE}" <<EOF
+[types]
+cache = true
+build = true
+launch = false
+
+[metadata]
+brew_version = "${BREW_VERSION}"
+EOF
+
+# Packages installation env vars
+export HOMEBREW_PREFIX="${BREW_PKG_LAYER}"
+export HOMEBREW_CELLAR="${BREW_PKG_LAYER}/Cellar"
+
+# Calculate a checksum of the current Brewfile
+BREWFILE_SHA=$(sha256sum "Brewfile" | cut -d ' ' -f 1)
+PKG_METADATA_FILE="${BREW_PKG_LAYER}.toml"
+
+# Check if we need to clear the package cache (if the Brewfile changed)
+if [[ -f "${PKG_METADATA_FILE}" ]]; then
+  CACHED_SHA=$(grep "brewfile_sha" "${PKG_METADATA_FILE}" | cut -d '"' -f 2 || true)
+  if [[ "${CACHED_SHA}" != "${BREWFILE_SHA}" ]]; then
+    echo "---> Brewfile changed. Invalidating package cache..."
+    rm -rf "${BREW_PKG_LAYER}"
+  fi
+fi
+
+# Ensure package layer directories exist
+mkdir -p "${HOMEBREW_PREFIX}/bin" "${HOMEBREW_CELLAR}"
+
+# Symlink the brew executable into our prefix so the bundle command works
+ln -sfn "${HOMEBREW_REPOSITORY}/bin/brew" "${HOMEBREW_PREFIX}/bin/brew"
+
+# Keep the package layer for both build and launch, and save the SHA
+cat >"${PKG_METADATA_FILE}" <<EOF
+[types]
+cache = true
+build = true
+launch = true
+
+[metadata]
+brewfile_sha = "${BREWFILE_SHA}"
+EOF
+
+# Install packages
+export PATH="${HOMEBREW_PREFIX}/bin:${HOMEBREW_REPOSITORY}/bin:${PATH}"
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
+
+# Only run bundle if there's work to do (meaning the layer was just created or cleared)
+if [[ ! -d "${HOMEBREW_CELLAR}" ]] || [[ -z "$(ls -A ${HOMEBREW_CELLAR} 2>/dev/null)" ]]; then
+  echo "---> Running brew bundle into ${BREW_PKG_LAYER}..."
+  brew bundle --file=Brewfile
+else
+  echo "---> Using cached Homebrew packages"
+fi
+
+echo "---> Homebrew buildpack finished."
