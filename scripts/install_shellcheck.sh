@@ -31,7 +31,7 @@ if [ -f "$LOCATION/shellcheck" ]; then
 fi
 
 ALREADY_EXISTS=$(which shellcheck || true)
-if [ -n "$ALREADY_EXISTS" ]; then
+if [ -n "$ALREADY_EXISTS" ] && [ ! -f "$LOCATION/shellcheck" ]; then
 	echo "Already found shellcheck installed elsewhere, linking in $LOCATION"
 	ln -s "$ALREADY_EXISTS" "$LOCATION/shellcheck"
 	exit 0

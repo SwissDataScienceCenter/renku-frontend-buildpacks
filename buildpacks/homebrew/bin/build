@@ -19,7 +19,7 @@ if [[ -n "${BP_HOMEBREW_VERSION}" ]]; then
 else
   echo "---> Determining latest stable Homebrew release..."
   # Follow GitHub's latest release redirect and grab the tag from the end of the URL
-  LATEST_URL=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/Homebrew/brew/releases/latest)
+  LATEST_URL=$(curl -Ls -o /dev/null -w "%{url_effective}" https://github.com/Homebrew/brew/releases/latest)
   BREW_VERSION=$(echo "${LATEST_URL}" | grep -o '[^/]*$')
 
   # Safety fallback just in case GitHub rate-limits the request
@@ -102,7 +102,7 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 export HOMEBREW_NO_INSTALL_CLEANUP=1
 
 # Only run bundle if there's work to do (meaning the layer was just created or cleared)
-if [[ ! -d "${HOMEBREW_CELLAR}" ]] || [[ -z "$(ls -A ${HOMEBREW_CELLAR} 2>/dev/null)" ]]; then
+if [[ ! -d "${HOMEBREW_CELLAR}" ]] || [[ -z "$(ls -A "${HOMEBREW_CELLAR}" 2>/dev/null)" ]]; then
   echo "---> Running brew bundle into ${BREW_PKG_LAYER}..."
   brew bundle --file=Brewfile
 else
