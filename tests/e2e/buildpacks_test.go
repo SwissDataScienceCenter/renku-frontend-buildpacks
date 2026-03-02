@@ -304,7 +304,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 
 			Context("when the container is running", func() {
 				It("ollama should exist as a command in the container", func(ctx SpecContext) {
-					_, err := execInContainer(ctx, client, container, []string{"launcher", "ollama"})
+					_, err := execInContainer(ctx, client, container, []string{"launcher", "ollama", "--version"})
 					Expect(err).ToNot(HaveOccurred())
 				})
 				It("brew should not exist as a command in the container", func(ctx SpecContext) {
