@@ -159,7 +159,7 @@ jobs:
       run:  make update-action-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode == 'true' && '-test') || '' }}
 
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ secrets.RENKUBOT_GITHUB_TOKEN }}
         commit-message: "chore(release): Update buildpack and run-image versions to ${{ github.event.inputs.version }}"
@@ -223,7 +223,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: buildpacks/github-actions/setup-pack@v5.9.7
+    - uses: buildpacks/github-actions/setup-pack@v5.11.0
 
     - name: publish buildpacks
       run: make publish_buildpacks
@@ -266,7 +266,7 @@ jobs:
         flavor: |
           suffix=-${{ matrix.arch }}
 
-    - uses: buildpacks/github-actions/setup-pack@v5.9.7
+    - uses: buildpacks/github-actions/setup-pack@v5.11.0
 
     - name: Get primary tag
       id: get-tag
@@ -276,6 +276,7 @@ jobs:
 
     - name: Build and push arch-specific builder
       run: |
+        pack config experimental true
         pack builder create \
           ${{ steps.get-tag.outputs.tag }} \
           --config ${{ matrix.builder-toml }} \
