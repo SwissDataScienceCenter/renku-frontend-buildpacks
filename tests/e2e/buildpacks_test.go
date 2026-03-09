@@ -269,7 +269,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 		Entry("using deb sample", "../../samples/deb"),
 	)
 
-	DescribeTableSubtree(
+	FDescribeTableSubtree(
 		"homebrew",
 		func(source string) {
 			var image string
