@@ -269,7 +269,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 		Entry("using deb sample", "../../samples/deb"),
 	)
 
-	FDescribeTableSubtree(
+	DescribeTableSubtree(
 		"homebrew",
 		func(source string) {
 			var image string
@@ -303,8 +303,8 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 			})
 
 			Context("when the container is running", func() {
-				It("ollama should exist as a command in the container", func(ctx SpecContext) {
-					_, err := execInContainer(ctx, client, container, []string{"launcher", "ollama", "--version"})
+				It("lazygit should exist as a command in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"launcher", "lazygit", "--version"})
 					Expect(err).ToNot(HaveOccurred())
 				})
 				It("brew should not exist as a command in the container", func(ctx SpecContext) {
