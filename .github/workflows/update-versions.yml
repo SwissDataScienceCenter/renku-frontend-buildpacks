@@ -88,7 +88,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push run-image
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         context: ./run-image
         file: ./run-image/Dockerfile
@@ -103,7 +103,7 @@ jobs:
         cache-to: type=gha,mode=max
 
     - name: Build and push cuda run-image
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         context: ./run-image
         file: ./run-image/Dockerfile
@@ -119,7 +119,7 @@ jobs:
         cache-to: type=gha,mode=max
 
     - name: Build and push cuda build-image
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         context: ./run-image
         file: ./run-image/Dockerfile
