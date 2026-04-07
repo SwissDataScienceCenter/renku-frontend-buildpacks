@@ -315,4 +315,51 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 		},
 		Entry("using homebrew sample", "../../samples/homebrew"),
 	)
+
+	DescribeTableSubtree(
+		"nix",
+		func(source string) {
+			var image string
+			var container string
+			var port int
+			BeforeAll(func(ctx SpecContext) {
+				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
+				Expect(buildImage(ctx, builderImg, source, image, map[string]string{})).To(Succeed())
+				port = getFreePortOrDie()
+				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", port)}
+				ports := map[int]int{port: port}
+				container, err = runImage(ctx, client, image, envVars, ports)
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			AfterAll(func(ctx SpecContext) {
+				if container != "" && client != nil {
+					log.Println("Cleaning up container")
+					err = removeContainer(ctx, client, container)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+				if image != "" && client != nil {
+					log.Println("Cleaning up image")
+					err = removeImage(ctx, client, image)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+			})
+
+			Context("when the container is running", func() {
+				It("cowsay should exist in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"launcher", "cowsay", "moo"})
+					Expect(err).ToNot(HaveOccurred())
+				})
+				It("nix should not exist in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"launcher", "nix"})
+					Expect(err).To(HaveOccurred())
+				})
+			})
+		},
+		Entry("using nix sample", "../../samples/nix"),
+	)
 })
