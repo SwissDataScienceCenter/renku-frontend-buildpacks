@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+if [[ ! -f flake.nix ]]; then
+  echo "Could nout find flake.nix, skipping the nix packages buildpack."
+  exit 1
+fi
+echo "Found flake.nix, will apply the buildpack."
+
+cat >>"$CNB_BUILD_PLAN_PATH" <<'EOF'
+[[requires]]
+  name = "nix"
+
+[[provides]]
+  name = "nix-packages"
+EOF
+
+exit 0

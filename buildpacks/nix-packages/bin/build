@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+layers_dir="$1"
+
+nix_layer="$layers_dir/nix-packages"
+mkdir -p "$nix_layer"
+
+# Build the flake's default package or a specific output
+nix build --no-sandbox --out-link "$nix_layer/result" .#
+
+cat >"$nix_layer.toml" <<TOML
+launch = true
+build = false
+cache = false
+TOML
+
+# Add the nix result bin to PATH
+env_dir="$nix_layer/env.launch"
+mkdir -p "$env_dir"
+echo -n "$nix_layer/result/bin" >"$env_dir/PATH.prepend"
+echo -n ":" >"$env_dir/PATH.delim"

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+output_dir="$1"
+
+mkdir -p "$output_dir"
+
+cat >"$output_dir/build.Dockerfile" <<'EOF'
+ARG base_image
+FROM ${base_image}
+ARG user_id
+
+USER root
+RUN curl -fsSL https://nixos.org/nix/install | sh -s -- --no-daemon
+ENV PATH="/root/.nix-profile/bin:/nix/var/nix/profiles/default/bin:${PATH}"
+
+# Enable flakes
+RUN mkdir -p /etc/nix && echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
+
+USER ${user_id}
+EOF
