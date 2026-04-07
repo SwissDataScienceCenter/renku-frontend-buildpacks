@@ -10,6 +10,9 @@ cat >>"$CNB_BUILD_PLAN_PATH" <<'EOF'
 [[requires]]
   name = "nix"
 
+[[requires]]
+  name = "nix-packages"
+
 [[provides]]
   name = "nix-packages"
 EOF

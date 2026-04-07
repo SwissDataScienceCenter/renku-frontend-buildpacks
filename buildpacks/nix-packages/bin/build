@@ -4,19 +4,25 @@ set -euo pipefail
 layers_dir="$1"
 
 nix_layer="$layers_dir/nix-packages"
-mkdir -p "$nix_layer"
+mkdir -p "$nix_layer/nix/store"
 
-# Build the flake's default package or a specific output
-nix build --no-sandbox --out-link "$nix_layer/result" .#
+store_path=$(nix build --no-sandbox --no-link --print-out-paths .#)
+
+echo "---> Store path: $store_path"
+
+# Copy the entire closure into the layer with real files (no symlinks)
+while IFS= read -r path; do
+  echo "---> Copying $path"
+  cp -rL "$path" "$nix_layer/nix/store/"
+done < <(nix path-info --no-sandbox --recursive .#)
 
 cat >"$nix_layer.toml" <<TOML
-launch = true
-build = false
-cache = false
+[types]
+  launch = true
+  build = false
+  cache = true
 TOML
 
-# Add the nix result bin to PATH
-env_dir="$nix_layer/env.launch"
-mkdir -p "$env_dir"
-echo -n "$nix_layer/result/bin" >"$env_dir/PATH.prepend"
-echo -n ":" >"$env_dir/PATH.delim"
+mkdir -p "$nix_layer/env.launch"
+printf '%s' "${store_path}/bin" >"$nix_layer/env.launch/PATH.prepend"
+printf '%s' ":" >"$nix_layer/env.launch/PATH.delim"

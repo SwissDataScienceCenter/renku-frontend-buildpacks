@@ -231,13 +231,13 @@ value = "vscodium"
 
 [[order-extensions]]
 [[order-extensions.group]]
-  id = "renku/r-deps"
+  id = "renku/nix"
   version = "0.3.1"
   optional = true
 
 [[order-extensions]]
 [[order-extensions.group]]
-  id = "renku/nix"
+  id = "renku/r-deps"
   version = "0.3.1"
   optional = true
 

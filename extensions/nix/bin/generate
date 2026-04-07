@@ -11,11 +11,32 @@ FROM ${base_image}
 ARG user_id
 
 USER root
-RUN curl -fsSL https://nixos.org/nix/install | sh -s -- --no-daemon
-ENV PATH="/root/.nix-profile/bin:/nix/var/nix/profiles/default/bin:${PATH}"
+RUN mkdir -p /nix && chmod 755 /nix
+RUN curl -fsSL https://install.determinate.systems/nix | \
+    sh -s -- install linux \
+      --no-confirm \
+      --init none \
+      --extra-conf "sandbox = false" \
+      ${NIX_VERSION:+--nix-package-url "https://releases.nixos.org/nix/nix-${NIX_VERSION}/nix-${NIX_VERSION}-$(uname -m)-linux.tar.xz"}
+# ENV PATH="/nix/var/nix/profiles/default/bin:\${PATH}"
+ENV PATH="${PATH}:/nix/var/nix/profiles/default/bin"
 
 # Enable flakes
-RUN mkdir -p /etc/nix && echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
+RUN /bin/mkdir -p /etc/nix && echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
+RUN chown -R ${CNB_USER_ID}:${CNB_GROUP_ID} /nix
 
 USER ${user_id}
+EOF
+
+BUILDPACK_ID="renku_nix-packages"
+LAYER_NAME="nix-packages"
+LAYER_PATH="/layers/${BUILDPACK_ID}/${LAYER_NAME}/nix/store"
+
+cat >"$output_dir/run.Dockerfile" <<EOF
+ARG base_image
+FROM \${base_image}
+
+USER root
+RUN mkdir -p /nix && ln -sf ${LAYER_PATH} /nix/store
+USER \${CNB_USER_ID}
 EOF
