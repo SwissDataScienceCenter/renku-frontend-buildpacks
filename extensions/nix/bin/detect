@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+plan_path=$CNB_BUILD_PLAN_PATH
+echo "Nix install image extension"
+
+cat >>"${plan_path}" <<EOL
+[[provides]]
+name = "nix"
+EOL

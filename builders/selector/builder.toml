@@ -67,12 +67,20 @@ value = "vscodium"
   version = "0.2.0"
 
 [[buildpacks]]
+  uri = "../../buildpacks/nix-packages"
+  version = "0.3.1"
+
+[[buildpacks]]
   uri = "../../buildpacks/homebrew"
   version = "0.3.1"
 
 [[extensions]]
   uri="../../extensions/r-deps"
-  version= "0.2.3"
+  version= "0.3.1"
+
+[[extensions]]
+  uri="../../extensions/nix"
+  version= "0.3.1"
 
 [lifecycle]
   version = "0.20.19"
@@ -113,6 +121,10 @@ value = "vscodium"
     id = "renku/init-scripts"
     version = "0.3.1"
     optional = true
+  [[order.group]]
+    id = "renku/nix-packages"
+    version = "0.3.1"
+    optional = true
 
 [[order]]
   [[order.group]]
@@ -141,6 +153,10 @@ value = "vscodium"
     optional = true
   [[order.group]]
     id = "renku/init-scripts"
+    version = "0.3.1"
+    optional = true
+  [[order.group]]
+    id = "renku/nix-packages"
     version = "0.3.1"
     optional = true
 
@@ -174,6 +190,10 @@ value = "vscodium"
     id = "renku/init-scripts"
     version = "0.3.1"
     optional = true
+  [[order.group]]
+    id = "renku/nix-packages"
+    version = "0.3.1"
+    optional = true
 
 [[order]]
 
@@ -204,11 +224,21 @@ value = "vscodium"
     id = "renku/init-scripts"
     version = "0.3.1"
     optional = true
+  [[order.group]]
+    id = "renku/nix-packages"
+    version = "0.3.1"
+    optional = true
+
+[[order-extensions]]
+[[order-extensions.group]]
+  id = "renku/nix"
+  version = "0.3.1"
+  optional = true
 
 [[order-extensions]]
 [[order-extensions.group]]
   id = "renku/r-deps"
-  version = "0.2.3"
+  version = "0.3.1"
   optional = true
 
 [build]
