@@ -70,9 +70,9 @@ value = "vscodium"
   uri = "../../buildpacks/homebrew"
   version = "0.4.0"
 
-[[extensions]]
-  uri="../../extensions/r-deps"
-  version= "0.2.3"
+[[buildpacks]]
+  uri = "../../buildpacks/r-micromamba"
+  version = "0.4.0"
 
 [lifecycle]
   version = "0.20.19"
@@ -181,7 +181,7 @@ value = "vscodium"
     id = "renku/renku-variables"
     version = "0.4.0"
   [[order.group]]
-   id = "renku/r"
+   id = "renku/r-micromamba"
    version = "0.4.0"
   [[order.group]]
     id = "renku/renv"
@@ -204,12 +204,6 @@ value = "vscodium"
     id = "renku/init-scripts"
     version = "0.4.0"
     optional = true
-
-[[order-extensions]]
-[[order-extensions.group]]
-  id = "renku/r-deps"
-  version = "0.2.3"
-  optional = true
 
 [build]
   image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"
