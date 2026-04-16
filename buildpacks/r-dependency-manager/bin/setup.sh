@@ -5,7 +5,9 @@ export RENV_PATHS_ROOT="${RENKU_MOUNT_DIR}/.rstudio/cache:${RENV_PATHS_ROOT}"
 export ORIGINAL_LOCKFILE="/workspace/renv.lock"
 
 # shellcheck disable=SC2016
-current_r_version=$(Rscript --vanilla -e 'cat(paste(R.version$major, R.version$minor, sep="."))' 2>/dev/null)
+# NOTE: If there is a mistmatch between R_HOME env var and Rscript a warning shows up in stdout
+# So that is why we set R_HOME to "" before we try to get the R version.
+current_r_version=$(R_HOME="" Rscript --vanilla -e 'options(warn=-1); cat(paste(R.version$major, R.version$minor, sep="."))' 2>/dev/null)
 
 # Check for version mismatch - clean library but preserve cache
 if [ -f "${RENKU_MOUNT_DIR}/renv.lock" ]; then
@@ -13,7 +15,9 @@ if [ -f "${RENKU_MOUNT_DIR}/renv.lock" ]; then
     if [ "${stored_r_version}" != "${current_r_version}" ]; then
         echo "R version mismatch (${stored_r_version} -> ${current_r_version}) - rebuilding library..."
         rm -rf "${RENKU_MOUNT_DIR}/renv"
-        rm -f "${RENKU_MOUNT_DIR}/renv.lock"
+        if [[ "$RENKU_MOUNT_DIR/renv.lock" != "$ORIGINAL_LOCKFILE" ]]; then
+          rm -f "${RENKU_MOUNT_DIR}/renv.lock"
+        fi
     fi
 fi
 
