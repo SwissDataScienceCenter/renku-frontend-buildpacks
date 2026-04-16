@@ -35,11 +35,16 @@ aarch64) MAMBA_PLATFORM="linux-aarch64" ;;
   ;;
 esac
 
+CACHE_MAMBA="true"
+if [[ "$MICROMAMBA_VERSION" == "latest" ]]; then
+  CACHE_MAMBA="false"
+fi
+
 cat >"${MAMBA_LAYER}.toml" <<TOML
 [types]
 build  = true
 launch = false
-cache  = true
+cache  = $CACHE_MAMBA
 
 [metadata]
 micromamba_version = "${MICROMAMBA_VERSION}"
@@ -102,6 +107,11 @@ else
     r-renv \
     openjdk \
     cairo \
+    zlib \
+    bzip2 \
+    xz \
+    hdf5 \
+    libxml2 \
     libpng \
     libjpeg-turbo \
     libtiff \
