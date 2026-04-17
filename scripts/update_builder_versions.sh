@@ -13,7 +13,7 @@ awk -v version="$RELEASE_VERSION" \
     local_buildpack=0
     next
 }
-/^\[\[/ && !/^\[\[buildpacks\]\]/ {
+/^\[/ && !/^\[\[buildpacks\]\]/ {
     in_buildpack=0
     local_buildpack=0
 }
@@ -48,7 +48,7 @@ awk -v version="$RELEASE_VERSION" \
 /^\[\[order\]\]/ {
     in_order=1
 }
-/^\[\[/ && !/^\[\[order\]\]/ && !/^\[\[order\.group\]\]/ {
+/^\[/ && !/^\[\[order\]\]/ && !/^\[\[order\.group\]\]/ {
     in_order=0
     prev_line_renku=0
 }
