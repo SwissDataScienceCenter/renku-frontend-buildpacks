@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo -e "=== 🔧 \033[1mRenku R buildpack\033[0m ==="
+
 LAYERS_DIR="${1}"
 
 log() { echo "-----> $*"; }
