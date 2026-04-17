@@ -10,7 +10,8 @@ import (
 )
 
 var cli struct {
-	Builder BuildersCmds `cmd:"" help:"Commands to modify builders"`
+	Builder    BuildersCmds  `cmd:"" help:"Commands to modify builders"`
+	Buildpacks BuildpackCmds `cmd:"" help:"Commands to modify buildpacks"`
 }
 
 type BuildersCmds struct {
@@ -18,6 +19,10 @@ type BuildersCmds struct {
 	SetBuildpacks SetBuildpacksCmd `cmd:"" help:"Update the version of the renku buildpacks in a builder."`
 	SetBuilder    SetBuilderCmd    `cmd:"" help:"Update the version of the builder image."`
 	SetRunner     SetRunnerCmd     `cmd:"" help:"Update the version of the runner image."`
+}
+
+type BuildpackCmds struct {
+	SetVersion SetBuildpackVersionCmd `cmd:"" help:"Update the version of all buildpacks image."`
 }
 
 type SetBuildpacksCmd struct {
@@ -32,6 +37,10 @@ type SetRunnerCmd struct {
 	Version string `arg:"" help:"New version (tag) to set."`
 }
 
+type SetBuildpackVersionCmd struct {
+	Version string `arg:"" help:"New version (tag) to set."`
+}
+
 func main() {
 	ctx := kong.Parse(&cli,
 		kong.Name("bpu"),
@@ -41,14 +50,16 @@ func main() {
 
 	switch ctx.Command() {
 	case "builder set-buildpacks <version>":
-		cfg := mustLoad(cli.Builder.File)
+		cfg := mustLoadBuilder(cli.Builder.File)
 		cli.Builder.SetBuildpacks.Run(cfg, cli.Builder.File)
 	case "builder set-builder <version>":
-		cfg := mustLoad(cli.Builder.File)
+		cfg := mustLoadBuilder(cli.Builder.File)
 		cli.Builder.SetBuilder.Run(cfg, cli.Builder.File)
 	case "builder set-runner <version>":
-		cfg := mustLoad(cli.Builder.File)
+		cfg := mustLoadBuilder(cli.Builder.File)
 		cli.Builder.SetRunner.Run(cfg, cli.Builder.File)
+	case "buildpacks set-version <version>":
+		cli.Buildpacks.SetVersion.Run()
 	}
 }
 
@@ -68,7 +79,7 @@ func (c *SetBuildpacksCmd) Run(cfg *BuilderConfig, path string) {
 		os.Exit(1)
 	}
 
-	mustSave(path, cfg)
+	mustSaveBuilder(path, cfg)
 	fmt.Printf("\n✓ Updated %d field(s) in %s\n", changed, path)
 }
 
@@ -76,8 +87,8 @@ func (c *SetBuilderCmd) Run(cfg *BuilderConfig, path string) {
 	oldImg := cfg.Build.Image
 	newImg, _ := updateTag(oldImg, c.Version)
 	cfg.Build.Image = newImg
-	fmt.Printf("\n✓ Updated builder at %s %s -> %s\n", path, oldImg, newImg)
-	mustSave(path, cfg)
+	fmt.Printf("✓ Updated builder at %s %s -> %s\n", path, oldImg, newImg)
+	mustSaveBuilder(path, cfg)
 }
 
 func (c *SetRunnerCmd) Run(cfg *BuilderConfig, path string) {
@@ -85,13 +96,25 @@ func (c *SetRunnerCmd) Run(cfg *BuilderConfig, path string) {
 		oldImg := runImg.Image
 		newImg, _ := updateTag(oldImg, c.Version)
 		cfg.Run.Images[runImgInd].Image = newImg
-		fmt.Printf("\n✓ Updated runner at %s with ind %d %s -> %s\n", path, runImgInd, oldImg, newImg)
+		fmt.Printf("✓ Updated runner at %s with ind %d %s -> %s\n", path, runImgInd, oldImg, newImg)
+		mustSaveBuilder(path, cfg)
+	}
+}
+
+func (c *SetBuildpackVersionCmd) Run() {
+	bps := getBuildpacks()
+	for _, bp := range bps {
+		path := fmt.Sprintf("buildpacks/%s/buildpack.toml", bp)
+		spec := mustLoadBuildpack(path)
+		spec.Buildpack["version"] = c.Version
+		fmt.Printf("Updated buildpack at %s to %s\n", path, c.Version)
+		mustSaveBuildpack(path, spec)
 	}
 }
 
 // mutation helpers
 
-func applyToBuildpacks(bps []Buildpack, target, newVer, section string, changed *int) {
+func applyToBuildpacks(bps []BuilderBuildpack, target, newVer, section string, changed *int) {
 	for i := range bps {
 		bp := &bps[i]
 		if !matchesTarget(bp, target) {
@@ -123,7 +146,7 @@ func applyToOrder(orders []Order, target, newVer, section string, changed *int) 
 
 // toml I/O
 
-func mustLoad(path string) *BuilderConfig {
+func mustLoadBuilder(path string) *BuilderConfig {
 	var cfg BuilderConfig
 	if _, err := toml.DecodeFile(path, &cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "error: cannot parse %s: %v\n", path, err)
@@ -132,7 +155,30 @@ func mustLoad(path string) *BuilderConfig {
 	return &cfg
 }
 
-func mustSave(path string, cfg *BuilderConfig) {
+func mustSaveBuilder(path string, cfg *BuilderConfig) {
+	f, err := os.Create(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: cannot write %s: %v\n", path, err)
+		os.Exit(1)
+	}
+	defer f.Close()
+	if err := toml.NewEncoder(f).Encode(cfg); err != nil {
+		fmt.Fprintf(os.Stderr, "error: cannot encode toml: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func mustLoadBuildpack(path string) *BuildpackSpec {
+	var cfg BuildpackSpec
+	_, err := toml.DecodeFile(path, &cfg)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: cannot parse %s: %v\n", path, err)
+		os.Exit(1)
+	}
+	return &cfg
+}
+
+func mustSaveBuildpack(path string, cfg *BuildpackSpec) {
 	f, err := os.Create(path)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: cannot write %s: %v\n", path, err)
@@ -147,15 +193,8 @@ func mustSave(path string, cfg *BuilderConfig) {
 
 // utilities
 
-func matchesTarget(bp *Buildpack, target string) bool {
+func matchesTarget(bp *BuilderBuildpack, target string) bool {
 	return strings.Trim(bp.URI, " \n\t") == target || strings.Trim(bp.ID, " \n\t") == target
-}
-
-func imageTag(ref string) string {
-	if i := strings.LastIndex(ref, ":"); i >= 0 {
-		return ref[i+1:]
-	}
-	return ""
 }
 
 func updateTag(ref, newTag string) (string, bool) {
