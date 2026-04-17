@@ -1,18 +1,15 @@
-# Buildpack API version
 api = "0.11"
 
-# Buildpack ID and metadata
-[buildpack]
-  id = "renku/python-dependency-manager"
-  version = "0.5.0"
-  name = "python dependency manager buildpack"
-  description = "A simple buildpack that requires the dependency manager for python"
-
-# Targets the buildpack will work with
 [[targets]]
-  os = "linux"
   arch = "amd64"
+  os = "linux"
 
 [[targets]]
-  os = "linux"
   arch = "arm64"
+  os = "linux"
+
+[buildpack]
+  description = "A simple buildpack that requires the dependency manager for python"
+  id = "renku/python-dependency-manager"
+  name = "python dependency manager buildpack"
+  version = "0.5.0-test"

@@ -1,14 +1,14 @@
 api = "0.11"
 
+[[targets]]
+  arch = "amd64"
+  os = "linux"
+
+[[targets]]
+  arch = "arm64"
+  os = "linux"
+
 [buildpack]
   id = "renku/r-conda"
-  version = "0.5.0"
   name = "R via Miniconda Buildpack"
-
-[[targets]]
-  os = "linux"
-  arch = "amd64"
-
-[[targets]]
-  os = "linux"
-  arch = "arm64"
+  version = "0.5.0-test"
