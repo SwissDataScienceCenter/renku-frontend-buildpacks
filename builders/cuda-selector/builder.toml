@@ -71,7 +71,7 @@ value = "vscodium"
   version = "0.4.0"
 
 [[buildpacks]]
-  uri = "../../buildpacks/r-micromamba"
+  uri = "../../buildpacks/r-conda"
   version = "0.4.0"
 
 [lifecycle]
@@ -181,7 +181,10 @@ value = "vscodium"
     id = "renku/renku-variables"
     version = "0.4.0"
   [[order.group]]
-   id = "renku/r-micromamba"
+   id = "paketo-buildpacks/miniconda"
+   version = "0.11.5"
+  [[order.group]]
+   id = "renku/r-conda"
    version = "0.4.0"
   [[order.group]]
     id = "renku/renv"

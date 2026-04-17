@@ -12,60 +12,17 @@ read_meta() {
 
 R_VERSION="$(jq -r ".R.Version" "renv.lock" || true)"
 
-# Default to "latest" if MICROMAMBA_VERSION is not provided.
-MICROMAMBA_VERSION="${MICROMAMBA_VERSION:-latest}"
+# Conda package cache layer
 
-log "R Buildpack"
-info "R version         : ${R_VERSION}"
-info "micromamba version: ${MICROMAMBA_VERSION}"
+PKG_CACHE_LAYER="${LAYERS_DIR}/r-conda-pkg-cache"
+mkdir -p "${PKG_CACHE_LAYER}"
 
-# micromamba layer
-
-MAMBA_LAYER="${LAYERS_DIR}/micromamba"
-mkdir -p "${MAMBA_LAYER}/bin"
-
-CACHED_MAMBA_VERSION="$(read_meta "${MAMBA_LAYER}.toml" "micromamba_version")"
-
-case "$(uname -m)" in
-x86_64) MAMBA_PLATFORM="linux-64" ;;
-aarch64) MAMBA_PLATFORM="linux-aarch64" ;;
-*)
-  echo "ERROR: Unsupported architecture: $(uname -m)" >&2
-  exit 1
-  ;;
-esac
-
-CACHE_MAMBA="true"
-if [[ "$MICROMAMBA_VERSION" == "latest" ]]; then
-  CACHE_MAMBA="false"
-fi
-
-cat >"${MAMBA_LAYER}.toml" <<TOML
+cat >"${PKG_CACHE_LAYER}.toml" <<TOML
 [types]
-build  = true
+build  = false
 launch = false
-cache  = $CACHE_MAMBA
-
-[metadata]
-micromamba_version = "${MICROMAMBA_VERSION}"
+cache  = true
 TOML
-
-MAMBA="${MAMBA_LAYER}/bin/micromamba"
-
-if [[ "${CACHED_MAMBA_VERSION}" == "${MICROMAMBA_VERSION}" && -x "${MAMBA}" ]]; then
-  log "Reusing cached micromamba ${MICROMAMBA_VERSION}"
-else
-  log "Downloading micromamba ${MICROMAMBA_VERSION}..."
-
-  # The micromamba release API accepts "latest" or a specific version tag.
-  MAMBA_URL="https://micro.mamba.pm/api/micromamba/${MAMBA_PLATFORM}/${MICROMAMBA_VERSION}"
-
-  curl --silent --show-error --location "${MAMBA_URL}" |
-    tar -xj -C "${MAMBA_LAYER}/bin" --strip-components=1 bin/micromamba
-
-  chmod +x "${MAMBA}"
-  info "micromamba installed: $("${MAMBA}" --version)"
-fi
 
 # R layer
 
@@ -89,17 +46,12 @@ if [[ "${CACHED_R_VERSION}" == "${R_VERSION}" && -x "${R_LAYER}/bin/R" ]]; then
 else
   log "Installing R ${R_VERSION} via micromamba (conda-forge)..."
 
-  # Use the micromamba layer as the conda root prefix for package downloads
-  # and index caching. Packages themselves are installed into ${R_LAYER}.
-  MAMBA_ROOT_PREFIX="${MAMBA_LAYER}"
-
   R_PACKAGE_NAME="r-base"
   if [[ -n "${R_VERSION}" ]]; then
     R_PACKAGE_NAME="r-base=${R_VERSION}"
   fi
-  "${MAMBA}" create \
+  CONDA_PKGS_DIRS="$PKG_CACHE_LAYER" conda create \
     --prefix "${R_LAYER}" \
-    --root-prefix "${MAMBA_ROOT_PREFIX}" \
     --channel conda-forge \
     --channel nodefaults \
     --yes \
@@ -132,7 +84,7 @@ printf ':' >"${ENV_LAUNCH}/LD_LIBRARY_PATH.delim"
 printf '%s' "${R_LAYER}" >"${ENV_LAUNCH}/R_HOME.override"
 printf '%s' "${R_LAYER}/lib/R/library" >"${ENV_LAUNCH}/R_LIBS.override"
 
-# Environment — build ────────────────────────────────────────────────────
+# Environment — build
 
 ENV_BUILD="${R_LAYER}/env.build"
 mkdir -p "${ENV_BUILD}"
