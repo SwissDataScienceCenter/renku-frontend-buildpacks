@@ -9,6 +9,6 @@ cat >>"${plan_path}" <<EOL
 name = "r-deps"
 
 [[provides]]
-name = "r-img-ext"
+name = "r"
 
 EOL

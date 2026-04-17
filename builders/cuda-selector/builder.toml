@@ -33,10 +33,6 @@ value = "vscodium"
   version = "0.4.0"
 
 [[buildpacks]]
-  uri = "../../buildpacks/r"
-  version = "0.4.0"
-
-[[buildpacks]]
   uri = "../../buildpacks/renv"
   version = "0.4.0"
 
