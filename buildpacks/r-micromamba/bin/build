@@ -10,7 +10,7 @@ read_meta() {
   grep -Po "(?<=^${2} = \")([^\"]+)" "${1}" 2>/dev/null || true
 }
 
-R_VERSION="$(jq -r ".R.Version" "renv.lock" || '')"
+R_VERSION="$(jq -r ".R.Version" "renv.lock" || true)"
 
 # Default to "latest" if MICROMAMBA_VERSION is not provided.
 MICROMAMBA_VERSION="${MICROMAMBA_VERSION:-latest}"
