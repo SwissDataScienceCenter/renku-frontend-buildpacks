@@ -33,10 +33,6 @@ value = "vscodium"
   version = "0.4.0"
 
 [[buildpacks]]
-  uri = "../../buildpacks/r"
-  version = "0.4.0"
-
-[[buildpacks]]
   uri = "../../buildpacks/renv"
   version = "0.4.0"
 
@@ -70,9 +66,9 @@ value = "vscodium"
   uri = "../../buildpacks/homebrew"
   version = "0.4.0"
 
-[[extensions]]
-  uri="../../extensions/r-deps"
-  version= "0.2.3"
+[[buildpacks]]
+  uri = "../../buildpacks/r-conda"
+  version = "0.4.0"
 
 [lifecycle]
   version = "0.20.19"
@@ -181,7 +177,10 @@ value = "vscodium"
     id = "renku/renku-variables"
     version = "0.4.0"
   [[order.group]]
-   id = "renku/r"
+   id = "paketo-buildpacks/miniconda"
+   version = "0.11.5"
+  [[order.group]]
+   id = "renku/r-conda"
    version = "0.4.0"
   [[order.group]]
     id = "renku/renv"
@@ -204,12 +203,6 @@ value = "vscodium"
     id = "renku/init-scripts"
     version = "0.4.0"
     optional = true
-
-[[order-extensions]]
-[[order-extensions.group]]
-  id = "renku/r-deps"
-  version = "0.2.3"
-  optional = true
 
 [build]
   image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/cuda-build-image:0.4.0"

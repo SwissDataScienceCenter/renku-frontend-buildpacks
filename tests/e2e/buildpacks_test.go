@@ -15,8 +15,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-const registry = "ghcr.io"
-const repository = "swissdatasciencecenter/renku-frontend-buildpacks"
+// Needed if publishing the builder image when testing image extensions
+// const registry = "ghcr.io"
+// const repository = "swissdatasciencecenter/renku-frontend-buildpacks"
 const testBuilder = "selector"
 const builderLoc = "../../builders/" + testBuilder
 const customPackage = "cowpy"
@@ -28,7 +29,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 	var httpClient http.Client
 
 	BeforeAll(func(ctx SpecContext) {
-		builderImg = strings.ToLower(fmt.Sprintf("%s/%s/%s:test-builder-image-%s", registry, repository, testBuilder, getULID()))
+		builderImg = strings.ToLower(fmt.Sprintf("test-builder-image-%s", getULID()))
 		Expect(buildBuilder(ctx, filepath.Join(builderLoc, "builder.toml"), builderImg)).To(Succeed())
 		client, err = docker.NewClientWithOpts(docker.FromEnv, docker.WithAPIVersionNegotiation())
 		Expect(err).ToNot(HaveOccurred())

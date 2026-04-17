@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo -e "=== 🔧 \033[1mRenku R buildpack\033[0m ==="
+
+LAYERS_DIR="${1}"
+
+log() { echo "-----> $*"; }
+info() { echo "       $*"; }
+
+read_meta() {
+  grep -Po "(?<=^${2} = \")([^\"]+)" "${1}" 2>/dev/null || true
+}
+
+R_VERSION="$(jq -r ".R.Version" "renv.lock" || true)"
+
+# Conda package cache layer
+
+PKG_CACHE_LAYER="${LAYERS_DIR}/r-conda-pkg-cache"
+mkdir -p "${PKG_CACHE_LAYER}"
+
+cat >"${PKG_CACHE_LAYER}.toml" <<TOML
+[types]
+build  = false
+launch = false
+cache  = true
+TOML
+
+# R layer
+
+R_LAYER="${LAYERS_DIR}/r"
+mkdir -p "${R_LAYER}"
+
+CACHED_R_VERSION="$(read_meta "${R_LAYER}.toml" "r_version")"
+
+cat >"${R_LAYER}.toml" <<TOML
+[types]
+build  = true
+launch = true
+cache  = true
+
+[metadata]
+r_version = "${R_VERSION}"
+TOML
+
+if [[ "${CACHED_R_VERSION}" == "${R_VERSION}" && -x "${R_LAYER}/bin/R" ]]; then
+  log "Reusing cached R ${R_VERSION}"
+else
+  log "Installing R ${R_VERSION} via miniconda (using conda-forge channel only)..."
+
+  R_PACKAGE_NAME="r-base"
+  if [[ -n "${R_VERSION}" ]]; then
+    R_PACKAGE_NAME="r-base=${R_VERSION}"
+  fi
+  CONDA_PKGS_DIRS="$PKG_CACHE_LAYER" conda create \
+    --prefix "${R_LAYER}" \
+    --channel conda-forge \
+    --channel nodefaults \
+    --yes \
+    "${R_PACKAGE_NAME}" \
+    r-renv \
+    openjdk \
+    cairo \
+    zlib \
+    bzip2 \
+    xz \
+    hdf5 \
+    libxml2 \
+    libpng \
+    libjpeg-turbo \
+    libtiff \
+    2>&1 | sed 's/^/       /'
+
+  info "R ${R_VERSION} installed to ${R_LAYER}"
+fi
+
+# Environment — launch
+
+ENV_LAUNCH="${R_LAYER}/env.launch"
+mkdir -p "${ENV_LAUNCH}"
+
+printf '%s' "${R_LAYER}/bin" >"${ENV_LAUNCH}/PATH.prepend"
+printf ':' >"${ENV_LAUNCH}/PATH.delim"
+printf '%s' "${R_LAYER}/lib" >"${ENV_LAUNCH}/LD_LIBRARY_PATH.prepend"
+printf ':' >"${ENV_LAUNCH}/LD_LIBRARY_PATH.delim"
+printf '%s' "${R_LAYER}" >"${ENV_LAUNCH}/R_HOME.override"
+printf '%s' "${R_LAYER}/lib/R/library" >"${ENV_LAUNCH}/R_LIBS.override"
+
+# Environment — build
+
+ENV_BUILD="${R_LAYER}/env.build"
+mkdir -p "${ENV_BUILD}"
+
+printf '%s' "${R_LAYER}/bin" >"${ENV_BUILD}/PATH.prepend"
+printf ':' >"${ENV_BUILD}/PATH.delim"
+printf '%s' "${R_LAYER}/lib" >"${ENV_BUILD}/LD_LIBRARY_PATH.prepend"
+printf ':' >"${ENV_BUILD}/LD_LIBRARY_PATH.delim"
+printf '%s' "${R_LAYER}" >"${ENV_BUILD}/R_HOME.override"
+printf '%s' "${R_LAYER}/lib/R/library" >"${ENV_BUILD}/R_LIBS.override"
