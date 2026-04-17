@@ -25,7 +25,7 @@ func buildBuilder(ctx context.Context, builderLoc, image string) error {
 		image,
 		"--config",
 		builderLoc,
-		"--publish",
+		// "--publish",  This is only needed if we use and test image extensions
 	}
 	cmd := exec.CommandContext(
 		ctx,
