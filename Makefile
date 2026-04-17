@@ -134,22 +134,17 @@ lint: shellcheck golang_ci_lint
 
 .PHONY: update-buildpack-versions
 update-buildpack-versions:
-	@echo "Updating buildpack versions to $(RELEASE_VERSION)..."
-	@for bp in $(BUILDPACKS); do \
-		FILE="buildpacks/$$bp/buildpack.toml"; \
-		./scripts/update_buildpack_versions.sh "$(RELEASE_VERSION)" "$$FILE"; \
-	done
+	@echo "Updating buildpack versions to $(RELEASE_VERSION)..."; \
+	go run ./scripts/*go buildpacks set-version "$(RELEASE_VERSION)"
 
 .PHONY: update-builder-versions
 update-builder-versions:
 	@echo "Updating builder versions to $(RELEASE_VERSION)..."
 	@for builder in $(BUILDERS); do \
 		FILE="builders/$$builder/builder.toml"; \
-		if [ $$(grep $(REGISTRY_REPO) $$FILE|wc -l) -eq 2 ];then \
-		  ./scripts/update_builder_versions.sh  "$(RELEASE_VERSION)" "$$FILE" true; \
-	  else \
-		  ./scripts/update_builder_versions.sh  "$(RELEASE_VERSION)" "$$FILE"; \
-		fi \
+		go run ./scripts/*go builder -f $$FILE set-buildpacks "$(RELEASE_VERSION)"; \
+		go run ./scripts/*go builder -f $$FILE set-builder "$(RELEASE_VERSION)"; \
+		go run ./scripts/*go builder -f $$FILE set-runner "$(RELEASE_VERSION)"; \
 	done
 
 .PHONY: update-action-versions
