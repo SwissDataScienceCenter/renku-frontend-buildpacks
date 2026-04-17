@@ -44,7 +44,7 @@ TOML
 if [[ "${CACHED_R_VERSION}" == "${R_VERSION}" && -x "${R_LAYER}/bin/R" ]]; then
   log "Reusing cached R ${R_VERSION}"
 else
-  log "Installing R ${R_VERSION} via micromamba (conda-forge)..."
+  log "Installing R ${R_VERSION} via miniconda (using conda-forge channel only)..."
 
   R_PACKAGE_NAME="r-base"
   if [[ -n "${R_VERSION}" ]]; then
