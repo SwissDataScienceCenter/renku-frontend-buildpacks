@@ -163,8 +163,10 @@ func mustSaveBuilder(path string, cfg *BuilderConfig) {
 	}
 	defer func() {
 		err := f.Close()
-		fmt.Fprintf(os.Stderr, "error: cannot close file: %v\n", err)
-		os.Exit(1)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: cannot close file: %v\n", err)
+			os.Exit(1)
+		}
 	}()
 	if err := toml.NewEncoder(f).Encode(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "error: cannot encode toml: %v\n", err)
@@ -190,8 +192,10 @@ func mustSaveBuildpack(path string, cfg *BuildpackSpec) {
 	}
 	defer func() {
 		err := f.Close()
-		fmt.Fprintf(os.Stderr, "error: cannot close file: %v\n", err)
-		os.Exit(1)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: cannot close file: %v\n", err)
+			os.Exit(1)
+		}
 	}()
 	if err := toml.NewEncoder(f).Encode(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "error: cannot encode toml: %v\n", err)
