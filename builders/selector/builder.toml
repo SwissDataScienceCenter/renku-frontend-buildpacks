@@ -205,7 +205,7 @@ value = "vscodium"
     optional = true
 
 [build]
-  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/run-image:0.5.0"
 
 [run]
 [[run.images]]
