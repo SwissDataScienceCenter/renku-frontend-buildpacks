@@ -149,6 +149,8 @@ jobs:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
+    - uses: actions/setup-go@v6
+
     - name: Update buildpack.toml versions
       run: make update-buildpack-versions RELEASE_VERSION=${{ github.event.inputs.version }}${{ (github.event.inputs.test_mode == 'true' && '-test') || '' }}
 

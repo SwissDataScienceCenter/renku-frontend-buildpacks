@@ -71,7 +71,7 @@ value = "vscodium"
   version = "0.5.0"
 
 [lifecycle]
-  version = "0.5.0"
+  version = "0.20.19"
 
 [[order]]
 
