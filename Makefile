@@ -143,8 +143,10 @@ update-builder-versions:
 	@for builder in $(BUILDERS); do \
 		FILE="builders/$$builder/builder.toml"; \
 		go run ./scripts/*go builder -f $$FILE set-buildpacks "$(RELEASE_VERSION)"; \
-		go run ./scripts/*go builder -f $$FILE set-builder "$(RELEASE_VERSION)"; \
 		go run ./scripts/*go builder -f $$FILE set-runner "$(RELEASE_VERSION)"; \
+		if [ "$$builder" = "cuda-selector" ]; then \
+			go run ./scripts/*go builder -f $$FILE set-builder "$(RELEASE_VERSION)"; \
+		fi \
 	done
 
 .PHONY: update-action-versions
