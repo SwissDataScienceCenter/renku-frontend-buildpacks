@@ -2,7 +2,7 @@
 set -eo pipefail
 
 export RENV_PATHS_ROOT="${RENKU_MOUNT_DIR}/.rstudio/cache:${RENV_PATHS_ROOT}"
-export ORIGINAL_LOCKFILE="/workspace/renv.lock"
+export ORIGINAL_LOCKFILE="${ENV_SOURCE_DIR}/renv.lock"
 
 # shellcheck disable=SC2016
 # NOTE: If there is a mistmatch between R_HOME env var and Rscript a warning shows up in stdout
