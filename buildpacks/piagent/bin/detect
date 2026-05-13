@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+plan_path="${CNB_BUILD_PLAN_PATH}"
+
+cat >>"${plan_path}" <<EOL
+[[provides]]
+name = "piagent"
+
+[[requires]]
+name = "node_modules"  # provided by "paketo-buildpacks/npm-install"
+
+[requires.metadata]
+build  = true
+launch = false
+EOL

@@ -54,6 +54,11 @@ description = "Builder for Renku frontends and environments."
   version = "0.11.5"
 
 [[buildpacks]]
+  uri = "docker://docker.io/paketobuildpacks/npm-install:2.3.18"
+  id = "paketo-buildpacks/npm-install"
+  version = "2.3.18"
+
+[[buildpacks]]
   uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
   id = "heroku/deb-packages"
   version = "0.2.0"
@@ -64,6 +69,10 @@ description = "Builder for Renku frontends and environments."
 
 [[buildpacks]]
   uri = "../../buildpacks/r-conda"
+  version = "0.5.1"
+
+[[buildpacks]]
+  uri = "../../buildpacks/piagent"
   version = "0.5.1"
 
 [[order]]
@@ -111,6 +120,11 @@ description = "Builder for Renku frontends and environments."
     id = "renku/init-scripts"
     version = "0.5.1"
     optional = true
+  
+  [[order.group]]
+    id = "renku/piagent"
+    version = "0.5.1"
+    optional = true
 
 [[order]]
 
@@ -149,6 +163,11 @@ description = "Builder for Renku frontends and environments."
     id = "renku/init-scripts"
     version = "0.5.1"
     optional = true
+  
+  [[order.group]]
+    id = "renku/piagent"
+    version = "0.5.1"
+    optional = true
 
 [[order]]
 
@@ -185,6 +204,11 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "renku/init-scripts"
+    version = "0.5.1"
+    optional = true
+  
+  [[order.group]]
+    id = "renku/piagent"
     version = "0.5.1"
     optional = true
 
@@ -226,6 +250,11 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "renku/init-scripts"
+    version = "0.5.1"
+    optional = true
+  
+  [[order.group]]
+    id = "renku/piagent"
     version = "0.5.1"
     optional = true
 
