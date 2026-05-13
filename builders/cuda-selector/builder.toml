@@ -230,7 +230,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
     optional = true
 
 [build]
-  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"
+  image = "ghcr.io/swissdatasciencecenter/renku-frontend-buildpacks/cuda-build-image:0.5.1"
 
   [[build.env]]
     name = "BP_RENKU_FRONTENDS"
