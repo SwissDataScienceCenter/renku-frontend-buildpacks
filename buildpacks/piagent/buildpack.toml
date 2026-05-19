@@ -10,5 +10,5 @@ api = "0.11"
 
 [buildpack]
   id = "renku/piagent"
-  name = "Piagent"
+  name = "Piagent Buildpack"
   version = "0.5.1"

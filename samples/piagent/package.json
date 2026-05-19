@@ -1,0 +1,7 @@
+{
+  "name": "renku-piagent",
+  "version": "0.1.0",
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "~0.75.0"
+  }
+}
