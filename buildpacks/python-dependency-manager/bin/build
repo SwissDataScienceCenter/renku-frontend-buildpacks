@@ -30,6 +30,32 @@ if python -c "import ipykernel" >/dev/null 2>&1;then
 fi
 EOL
 
+if (which uv); then
+    uv_cache_dir="${CNB_LAYERS_DIR}/uv_cache"
+    ls -la /layers
+    cat /layers/*.toml
+    uv_cache_layer="/layers/paketo-buildpacks_python-package-managers-run/uv-env-cache"
+    cp -r "${uv_cache_layer}" "$uv_cache_dir"
+    chmod -R go+w "${uv_cache_dir}"
+    cat >>"${execd_dir}"/setup.sh <<EOL
+cp -ras --update=none "${uv_cache_dir}" "\${RENKU_MOUNT_DIR}/.uv_cache"
+export UV_CACHE_DIR="\${RENKU_MOUNT_DIR}/.uv_cache"
+if !(grep "UV_CACHE_DIR" \${HOME}/.bashrc); then
+  printf "export UV_CACHE_DIR=\${RENKU_MOUNT_DIR}/.uv_cache\n" >>  \${HOME}/.bashrc
+fi
+EOL
+
+    cat >"${uv_cache_dir}.toml"<<EOL
+[types]
+launch = true
+
+[metadata]
+description = "set uv cache for in session use"
+version = "0.0.6"
+EOL
+fi
+
+
 chmod +x "${execd_dir}"/setup.sh
 
 echo "Added launch script to ${execd_dir}/setup.sh"
@@ -42,3 +68,6 @@ launch = true
 description = "set dependency management for run sessions"
 version = "0.0.6"
 EOL
+
+ls -la "${CNB_LAYERS_DIR}"
+cat "${CNB_LAYERS_DIR}"/*toml

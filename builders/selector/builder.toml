@@ -162,6 +162,10 @@ description = "Builder for Renku frontends and environments."
     version = "2.46.0"
 
   [[order.group]]
+    id = "renku/python-dependency-manager"
+    version = "0.5.1"
+
+  [[order.group]]
     id = "renku/renku-variables"
     version = "0.5.1"
 
