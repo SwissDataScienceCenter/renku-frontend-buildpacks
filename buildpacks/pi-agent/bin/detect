@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
-set -eo pipefail
+'unalias' -a
+'set' -euCo pipefail
 
 plan_path="${CNB_BUILD_PLAN_PATH}"
 
-cat >>"${plan_path}" <<EOL
+if [[ "${BP_RENKU_AI_AGENT-}" == "piagent" ]]; then
+  echo "PASS: BP_RENKU_AI_AGENT=${BP_RENKU_AI_AGENT}"
+else
+  echo "SKIPPED: BP_RENKU_AI_AGENT not set"
+  'exit' 100
+fi
+
+'cat' -- >>"${plan_path}" <<EOL
 [[provides]]
 name = "piagent"
 
@@ -25,11 +33,4 @@ name = "piagent"
   [requires.metadata]
     build = true
     launch = true
-
-#[[requires]]
-  #name = "node_modules"
-
-  #[requires.metadata]
-    #build  = true
-    #launch = true
 EOL

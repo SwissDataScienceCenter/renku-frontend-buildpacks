@@ -54,16 +54,6 @@ description = "Builder for Renku frontends and environments."
   version = "0.11.22"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/nodejs:10.3.0"
-  id = "paketo-buildpacks/nodejs"
-  version = "10.3.0"
-
-[[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/npm-install:2.3.18"
-  id = "paketo-buildpacks/npm-install"
-  version = "2.3.18"
-
-[[buildpacks]]
   uri = "docker://docker.io/paketobuildpacks/node-engine:8.1.1"
   id = "paketo-buildpacks/node-engine"
   version = "8.1.1"
@@ -82,7 +72,7 @@ description = "Builder for Renku frontends and environments."
   version = "0.5.1"
 
 [[buildpacks]]
-  uri = "../../buildpacks/piagent"
+  uri = "../../buildpacks/pi-agent"
   version = "0.5.1"
 
 [[order]]
@@ -137,9 +127,9 @@ description = "Builder for Renku frontends and environments."
     optional = true
   
   [[order.group]]
-    id = "renku/piagent"
+    id = "renku/pi-agent"
     version = "0.5.1"
-    optional = false
+    optional = true
 
 [[order]]
 
@@ -185,9 +175,9 @@ description = "Builder for Renku frontends and environments."
     optional = true
   
   [[order.group]]
-    id = "renku/piagent"
+    id = "renku/pi-agent"
     version = "0.5.1"
-    optional = false
+    optional = true
 
 [[order]]
 
@@ -233,9 +223,9 @@ description = "Builder for Renku frontends and environments."
     optional = true
   
   [[order.group]]
-    id = "renku/piagent"
+    id = "renku/pi-agent"
     version = "0.5.1"
-    optional = false
+    optional = true
 
 [[order]]
 
@@ -284,9 +274,9 @@ description = "Builder for Renku frontends and environments."
     optional = true
   
   [[order.group]]
-    id = "renku/piagent"
+    id = "renku/pi-agent"
     version = "0.5.1"
-    optional = false
+    optional = true
 
 [build]
   image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"

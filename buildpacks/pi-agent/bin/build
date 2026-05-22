@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+'unalias' -a
+'set' -euCo pipefail
+
+echo -e "=== 🔧 \033[1mRenku Pi Coding Agent buildpack\033[0m ==="
+
+PI_LAYER="${CNB_LAYERS_DIR}/pi"
+mkdir -p "${PI_LAYER}/node_modules"
+
+PI_LAYER_CACHE="${CNB_LAYERS_DIR}/pi-cache"
+mkdir -p "${PI_LAYER_CACHE}/.npm"
+
+# Use npm cache directory inside this layer
+export NPM_CONFIG_CACHE="${PI_LAYER_CACHE}/.npm"
+
+log()  { echo "-----> $*"; }
+info() { echo "       $*"; }
+
+# PI Version
+if [[ -z "${BP_RENKU_PI_VERSION-}" ]]; then
+    BP_RENKU_PI_VERSION=$(sed -En '/^\[metadata\]/,/^$/s/^[[:space:]]*pi_version[[:space:]]=[[:space:]]"([~^]?[^"]+)"[[:space:]]*$/\1/p' "${CNB_BUILDPACK_DIR}/buildpack.toml" 2>/dev/null||true)
+fi
+
+if [[ ! "${BP_RENKU_PI_VERSION-}" =~ ^[~^]?[0-9.]+$ ]]; then
+	# blank it to use latest.
+	BP_RENKU_PI_VERSION=
+fi
+
+# Metadata
+cat > "${PI_LAYER}.toml" <<EOL
+[types]
+build = true
+cache = false
+launch = true
+
+[metadata]
+description = "Pi runtime"
+EOL
+
+# Metadata
+cat > "${PI_LAYER_CACHE}.toml" <<EOL
+[types]
+build  = true
+cache = true
+launch = false
+
+[metadata]
+description = "Pi cache"
+EOL
+
+# Install pi-agent
+log "Install Pi Coding Agent [${BP_RENKU_PI_VERSION:-latest}]"
+npm install --prefix "${PI_LAYER}/node_modules" -g "@earendil-works/pi-coding-agent${BP_RENKU_PI_VERSION:+@$BP_RENKU_PI_VERSION}"
+
+# Launch environment
+ENV_LAUNCH="${PI_LAYER}/env.launch"
+mkdir -p "${ENV_LAUNCH}"
+
+printf '%s' "${PI_LAYER}/node_modules/bin" > "${ENV_LAUNCH}/PATH.prepend"
+printf ':' > "${ENV_LAUNCH}/PATH.delim"
+
+# Build environment
+ENV_BUILD="${PI_LAYER}/env.build"
+mkdir -p "${ENV_BUILD}"
+
+printf '%s' "${PI_LAYER}/node_modules/bin" > "${ENV_BUILD}/PATH.prepend"
+printf ':' > "${ENV_BUILD}/PATH.delim"
+
+
+# Cleanup
+log "Cleanup"
+rm -rf "${PI_LAYER}/node_modules/.cache"
+rm -rf "${PI_LAYER_CACHE}/.npm/_logs"
+
+info "Pi Coding Agent installed"
