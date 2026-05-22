@@ -4,8 +4,8 @@
 
 plan_path="${CNB_BUILD_PLAN_PATH}"
 
-if [[ "${BP_RENKU_AI_AGENT-}" == "piagent" ]]; then
-  echo "PASS: BP_RENKU_AI_AGENT=${BP_RENKU_AI_AGENT}"
+if [[ -n "${BP_RENKU_AI_AGENTS:-}" ]]; then
+  echo "PASS: BP_RENKU_AI_AGENT=${BP_RENKU_AI_AGENTS}"
 else
   echo "SKIPPED: BP_RENKU_AI_AGENT not set"
   'exit' 100
@@ -13,10 +13,10 @@ fi
 
 'cat' -- >>"${plan_path}" <<EOL
 [[provides]]
-name = "piagent"
+name = "coding-agent"
 
 [[requires]]
-name = "piagent"
+name = "coding-agent"
   [requires.metadata]
     launch = true
 

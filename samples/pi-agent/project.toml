@@ -1,7 +1,0 @@
-[_]
-id = "sdsc.renku.piagent"
-schema-version = "0.2"
-
-[[io.buildpacks.build.env]]
-name = "BP_RENKU_AI_AGENT"
-value = "piagent"

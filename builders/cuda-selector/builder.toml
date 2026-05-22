@@ -72,7 +72,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
   version = "0.5.1"
 
 [[buildpacks]]
-  uri = "../../buildpacks/pi-agent"
+  uri = "../../buildpacks/coding-agent"
   version = "0.5.1"
 
 [[order]]
@@ -127,7 +127,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
     optional = true
 
   [[order.group]]
-    id = "renku/pi-agent"
+    id = "renku/coding-agent"
     version = "0.5.1"
     optional = true
 
@@ -175,7 +175,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
     optional = true
 
   [[order.group]]
-    id = "renku/pi-agent"
+    id = "renku/coding-agent"
     version = "0.5.1"
     optional = true
 
@@ -223,7 +223,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
     optional = true
 
   [[order.group]]
-    id = "renku/pi-agent"
+    id = "renku/coding-agent"
     version = "0.5.1"
     optional = true
 
@@ -274,7 +274,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
     optional = true
 
   [[order.group]]
-    id = "renku/pi-agent"
+    id = "renku/coding-agent"
     version = "0.5.1"
     optional = true
 

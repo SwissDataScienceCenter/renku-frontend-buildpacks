@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+'unalias' -a
+'set' -euCo pipefail
+
+echo -e "=== 🔧 \033[1mRenku Coding Agent buildpack\033[0m ==="
+
+AI_LAYER="${CNB_LAYERS_DIR}/agent"
+mkdir -p "${AI_LAYER}"
+
+AI_LAYER_CACHE="${CNB_LAYERS_DIR}/cache"
+mkdir -p "${AI_LAYER_CACHE}/.npm"
+
+# Use npm cache directory inside this layer
+export NPM_CONFIG_CACHE="${AI_LAYER_CACHE}/.npm"
+
+log()  { echo "-----> $*"; }
+info() { echo "       $*"; }
+
+# Metadata
+cat > "${AI_LAYER}.toml" <<EOL
+[types]
+build = true
+cache = false
+launch = true
+
+[metadata]
+description = "Agentic runtime"
+EOL
+
+# Metadata
+cat > "${AI_LAYER_CACHE}.toml" <<EOL
+[types]
+build  = true
+cache = true
+launch = false
+
+[metadata]
+description = "Agentic cache"
+EOL
+
+info "Install ${BP_RENKU_AI_AGENTS:-}"
+
+for agent in ${BP_RENKU_AI_AGENTS:-}; do
+	name=${agent%@*}
+	version=${agent##*@}
+
+	if [[ "${version}" == "${name}" ]]; then
+		version=$(sed -En \
+			'/^\[metadata\]/,/^$/s/^[[:space:]]*'${name}'_version[[:space:]]=[[:space:]]"([~^]?[0-9.]+)"[[:space:]]*$/\1/p' \
+			"${CNB_BUILDPACK_DIR}/buildpack.toml" 2>/dev/null || echo "")
+	fi
+
+	[[ "${version}" =~ ^([~^]?[0-9]+(\.[0-9]+){0,2})?$ ]] || continue
+
+	case "${name}" in
+	pi)
+		log "Install PI agent [${version:-latest}]"
+		npm install --prefix "${AI_LAYER}" -g "@earendil-works/pi-coding-agent${version:+@$version}"
+		;;
+	claude)
+		log "Install Claude agent [${version:-latest}]"
+		npm install --prefix "${AI_LAYER}" -g @anthropic-ai/claude-code${version:+@$version}
+		;;
+	codex)
+		log "Install Codex agent [${version:-latest}]"
+		npm install --prefix "${AI_LAYER}" -g @openai/codex${version:+@$version}
+		;;
+	esac
+done
+
+# Launch environment
+ENV_LAUNCH="${AI_LAYER}/env.launch"
+mkdir -p "${ENV_LAUNCH}"
+
+printf '%s' "${AI_LAYER}/bin" > "${ENV_LAUNCH}/PATH.prepend"
+printf ':' > "${ENV_LAUNCH}/PATH.delim"
+
+# Build environment
+ENV_BUILD="${AI_LAYER}/env.build"
+mkdir -p "${ENV_BUILD}"
+
+printf '%s' "${AI_LAYER}/bin" > "${ENV_BUILD}/PATH.prepend"
+printf ':' > "${ENV_BUILD}/PATH.delim"
+
+# Cleanup
+log "Cleanup"
+rm -rf "${AI_LAYER}/.cache"
+rm -rf "${AI_LAYER_CACHE}/.npm/_logs"
+
+info "Coding Agent installed"
