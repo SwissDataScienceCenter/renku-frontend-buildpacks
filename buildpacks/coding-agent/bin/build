@@ -61,7 +61,7 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 
 	if [[ "${version}" == "${name}" ]]; then
 		version=$(sed -En \
-			'/^\[metadata\]/,/^$/s/^[[:space:]]*'${name}'_version[[:space:]]=[[:space:]]"([~^]?[0-9.]+)"[[:space:]]*$/\1/p' \
+			'/^\[metadata\]/,/^$/s/^[[:space:]]*'"${name}"'_version[[:space:]]=[[:space:]]"([~^]?[0-9.]+)"[[:space:]]*$/\1/p' \
 			"${CNB_BUILDPACK_DIR}/buildpack.toml" 2>/dev/null || echo "")
 	fi
 
@@ -75,7 +75,7 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 		;;
 	claude)
 		log "Install Claude agent [${version:-latest}]"
-		npm install --prefix "${AI_LAYER}" -g @anthropic-ai/claude-code${version:+@$version}
+		npm install --prefix "${AI_LAYER}" -g "@anthropic-ai/claude-code${version:+@$version}"
 		printf '/home/renku/work/.claude' >    "${ENV_LAUNCH}/CLAUDE_CONFIG_DIR.override"
 		mkdir -p "${AI_LAYER}/exec.d/"
 		cat > "${AI_LAYER}/exec.d/init-claude.sh" <<- 'EOL'
@@ -92,7 +92,7 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 		;;
 	codex)
 		log "Install Codex agent [${version:-latest}]"
-		npm install --prefix "${AI_LAYER}" -g @openai/codex${version:+@$version}
+		npm install --prefix "${AI_LAYER}" -g "@openai/codex${version:+@$version}"
 		printf '/home/renku/work/.codex' >     "${ENV_LAUNCH}/CODEX_HOME.override"
 		mkdir -p "${AI_LAYER}/exec.d/"
 		cat > "${AI_LAYER}/exec.d/init-codex.sh" <<- 'EOL'
