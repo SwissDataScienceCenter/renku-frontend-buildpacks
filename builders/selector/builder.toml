@@ -45,13 +45,13 @@ description = "Builder for Renku frontends and environments."
   version = "0.5.1"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/python:2.38.0"
-  version = "2.38.0"
+  uri = "docker://docker.io/paketobuildpacks/python:2.46.0"
+  version = "2.46.0"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.5"
+  uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.22"
   id = "paketo-buildpacks/miniconda"
-  version = "0.11.5"
+  version = "0.11.22"
 
 [[buildpacks]]
   uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
@@ -75,11 +75,11 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/miniconda"
-    version = "0.11.5"
+    version = "0.11.22"
 
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.38.0"
+    version = "2.46.0"
 
   [[order.group]]
     id = "renku/python-dependency-manager"
@@ -121,7 +121,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.38.0"
+    version = "2.46.0"
 
   [[order.group]]
     id = "renku/python-dependency-manager"
@@ -159,7 +159,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.38.0"
+    version = "2.46.0"
 
   [[order.group]]
     id = "renku/python-dependency-manager"
@@ -196,7 +196,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/miniconda"
-    version = "0.11.5"
+    version = "0.11.22"
 
   [[order.group]]
     id = "renku/r-conda"

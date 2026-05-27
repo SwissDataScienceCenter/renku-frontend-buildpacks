@@ -33,4 +33,16 @@ name = "poetry-venv"
 [or.requires.metadata]
 launch = true
 
+[[or]]
+[[or.requires]]
+name = "uv-environment"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
+name = "uv"
+
+[or.requires.metadata]
+launch = true
 EOL
