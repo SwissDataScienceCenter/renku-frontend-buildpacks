@@ -13,7 +13,7 @@ require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/alecthomas/kong v1.15.0
 	github.com/docker/docker v28.5.2+incompatible
-	github.com/docker/go-connections v0.6.0
+	github.com/docker/go-connections v0.7.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.41.0
@@ -21,7 +21,7 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
-	github.com/Microsoft/go-winio v0.4.21 // indirect
+	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/a8m/envsubst v1.4.2 // indirect
 	github.com/alecthomas/participle/v2 v2.1.1 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
