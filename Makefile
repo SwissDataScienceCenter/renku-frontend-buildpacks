@@ -1,8 +1,11 @@
 
 # Makefile
 
+# Define the architecture
+ARCH_NAME ?= $(shell uname -m)
+
 # Define the sample images to build (assuming each subdirectory in samples is an app)
-SAMPLE_IMAGES := $(shell cd samples && ls -d *)
+SAMPLE_IMAGES ?= $(shell cd samples && ls -d *)
 
 # Buildpacks directory (assuming each subdirectory contains a buildpack)
 BUILDPACKS := $(shell cd buildpacks && ls -d *)
@@ -65,22 +68,23 @@ all: buildpacks builders samples
 buildpacks:
 	@echo "Building buildpacks..."
 	@for bp in $(BUILDPACKS); do \
-		echo "  Building buildpack: $$bp"; \
-		pack buildpack package $$bp --config buildpacks/$$bp/package.toml --target "linux/amd64"; \
+		echo "  Building buildpack: $$bp [$(ARCH_NAME)]"; \
+		pack buildpack package $$bp --config buildpacks/$$bp/package.toml --target "linux/$(ARCH_NAME)"; \
 	done
 
 builders:
 	@echo "Building builders..."
 	@for builder in $(BUILDERS); do \
-		echo "  Building builder: $$builder"; \
-		pack builder create $$builder --config builders/$$builder/builder.toml --target "linux/amd64"; \
+		echo "  Building builder: $$builder [$(ARCH_NAME)]"; \
+		pack builder create $$builder --config builders/$$builder/builder.toml --target "linux/$(ARCH_NAME)"; \
+		echo " Done"; \
 	done
 
 samples:
 	@echo "Building sample images..."
 	@for image in $(SAMPLE_IMAGES); do \
-		echo "  Building image: $$image with $(BUILDER_IMAGE)"; \
-		pack build $$image-$(FRONTEND) --clear-cache --path samples/$$image --env BP_RENKU_FRONTENDS=$(FRONTEND) --builder $(BUILDER_IMAGE) --platform "linux"; \
+		echo "  Building image: $$image with $(BUILDER_IMAGE) [$(ARCH_NAME)]"; \
+		pack build $$image-$(FRONTEND) --clear-cache --path samples/$$image --env BP_RENKU_FRONTENDS=$(FRONTEND) --builder $(BUILDER_IMAGE) --platform "linux/$(ARCH_NAME)"; \
 	done
 
 run:

@@ -1,0 +1,20 @@
+api = "0.11"
+
+[[targets]]
+  arch = "amd64"
+  os = "linux"
+
+[[targets]]
+  arch = "arm64"
+  os = "linux"
+
+[buildpack]
+  id = "renku/coding-agent"
+  name = "Coding agent Buildpack"
+  version = "0.5.1"
+
+[metadata]
+  # npm version specifier: "latest" (default), exact version, or semver ranges like "~0.1.2", "^0.1.2"
+  pi_version = "latest"
+  claude_version = "latest"
+  codex_version = "latest"
