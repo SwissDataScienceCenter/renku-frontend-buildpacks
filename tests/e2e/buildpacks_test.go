@@ -317,8 +317,8 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 		Entry("using homebrew sample", "../../samples/homebrew"),
 	)
 
-	FDescribeTableSubtree(
-		"piagent",
+	DescribeTableSubtree(
+		"coding-agent",
 		func(source string) {
 			var image string
 			var container string
@@ -351,12 +351,24 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 			})
 
 			Context("when the container is running", func() {
-				It("piagent should exist as a command in the container", func(ctx SpecContext) {
-					_, err := execInContainer(ctx, client, container, []string{"launcher", "piagent", "--version"})
+				It("pi should exist as a command in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"bash", "-c", "make pi__version"})
+					Expect(err).ToNot(HaveOccurred())
+				})
+				It("users should be able to install pi npm packages", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"bash", "-c", "make pi__install PKG=pi-adaptive-thinking"})
+					Expect(err).ToNot(HaveOccurred())
+				})
+				It("claude should exist as a command in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"bash", "-c", "make claude__version"})
+					Expect(err).ToNot(HaveOccurred())
+				})
+				It("codex should exist as a command in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"bash", "-c", "make codex__version"})
 					Expect(err).ToNot(HaveOccurred())
 				})
 			})
 		},
-		Entry("using piagent sample", "../../samples/piagent"),
+		Entry("using coding-agent sample", "../../samples/coding-agent"),
 	)
 })
