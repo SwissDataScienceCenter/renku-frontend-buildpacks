@@ -331,7 +331,6 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 				ports := map[int]int{port: port}
 				container, err = runImage(ctx, client, image, envVars, ports)
 				Expect(err).ToNot(HaveOccurred())
-				time.Sleep(10 * time.Second)
 			})
 
 			AfterAll(func(ctx SpecContext) {
