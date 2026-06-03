@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+'unalias' -a
+'set' -euCo pipefail
+
+plan_path="${CNB_BUILD_PLAN_PATH}"
+
+if [[ -n "${BP_RENKU_AI_AGENTS:-}" ]]; then
+  echo "PASS: BP_RENKU_AI_AGENT=${BP_RENKU_AI_AGENTS}"
+else
+  echo "SKIPPED: BP_RENKU_AI_AGENT not set"
+  'exit' 100
+fi
+
+'cat' -- >>"${plan_path}" <<EOL
+[[provides]]
+name = "coding-agent"
+
+[[requires]]
+name = "coding-agent"
+  [requires.metadata]
+    launch = true
+
+[[requires]]
+  name = "node" # provided by "paketo-buildpacks/node-engine" (https://github.com/paketo-buildpacks/node-engine)
+
+  ## The version of the Node Engine dependency is not required. In the case it
+  ## is not specified, the buildpack will provide the default version, which can
+  ## be seen in the buildpack.toml file.
+  ## If you wish to request a specific version, the buildpack supports
+  ## specifying a semver constraint in the form of "15.*", "15.14.*", or even
+  ## "15.14.0".
+  # version = "15.14.0"
+  [requires.metadata]
+    build = true
+    launch = true
+EOL

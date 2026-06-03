@@ -10,6 +10,11 @@ mkdir -p "${execd_dir}"
 cat >"${execd_dir}"/setup.sh <<EOL
 #!/usr/bin/env bash
 set -eo pipefail
+exec 9>\${RENKU_MOUNT_DIR}/.setup.lock
+if ! flock -w 10 9; then
+    echo "Timed out waiting for .setup.lock" >&2
+    exit 1
+fi
 if [ -d \${RENKU_MOUNT_DIR}/.venv ] && \
    ([ "\$(readlink -e \${RENKU_MOUNT_DIR}/.venv/bin/python 2>/dev/null)" != "\$(readlink -e \$(which python 2>/dev/null) 2>/dev/null)" ] || \
     [ "\$(grep "version = " \${RENKU_MOUNT_DIR}/.venv/pyvenv.cfg 2>/dev/null | cut -d' ' -f3)" != "\$(python --version 2>/dev/null | cut -d' ' -f2)" ]); then

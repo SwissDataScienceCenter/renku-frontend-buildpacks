@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+
+'unalias' -a
+'set' -euCo pipefail
+
+echo -e "=== 🔧 \033[1mRenku Coding Agent buildpack\033[0m ==="
+
+AI_LAYER="${CNB_LAYERS_DIR}/agent"
+mkdir -p "${AI_LAYER}"
+
+AI_LAYER_CACHE="${CNB_LAYERS_DIR}/cache"
+mkdir -p "${AI_LAYER_CACHE}/.npm"
+
+# Use npm cache directory inside this layer
+export NPM_CONFIG_CACHE="${AI_LAYER_CACHE}/.npm"
+
+log()  { echo "-----> $*"; }
+info() { echo "       $*"; }
+
+# Metadata
+cat > "${AI_LAYER}.toml" <<EOL
+[types]
+build = true
+cache = false
+launch = true
+
+[metadata]
+description = "Agentic runtime"
+EOL
+
+# Metadata
+cat > "${AI_LAYER_CACHE}.toml" <<EOL
+[types]
+build  = true
+cache = true
+launch = false
+
+[metadata]
+description = "Agentic cache"
+EOL
+
+# Launch environment
+ENV_LAUNCH="${AI_LAYER}/env.launch"
+
+mkdir -p "${ENV_LAUNCH}"
+printf '%s' "${AI_LAYER}/bin" > "${ENV_LAUNCH}/PATH.prepend"
+printf ':' > "${ENV_LAUNCH}/PATH.delim"
+
+# Build environment
+ENV_BUILD="${AI_LAYER}/env.build"
+mkdir -p "${ENV_BUILD}"
+
+printf '%s' "${AI_LAYER}/bin" > "${ENV_BUILD}/PATH.prepend"
+printf ':' > "${ENV_BUILD}/PATH.delim"
+
+# Selective npm installation
+info "Install ${BP_RENKU_AI_AGENTS:-}"
+for agent in ${BP_RENKU_AI_AGENTS:-}; do
+	name=${agent%@*}
+	version=${agent##*@}
+
+	if [[ "${version}" == "${name}" ]]; then
+		version=$(sed -En \
+			'/^\[metadata\]/,/^$/s/^[[:space:]]*'"${name}"'_version[[:space:]]=[[:space:]]"([~^]?[0-9.]+)"[[:space:]]*$/\1/p' \
+			"${CNB_BUILDPACK_DIR}/buildpack.toml" 2>/dev/null || echo "")
+	fi
+
+	[[ "${version}" =~ ^([~^]?[0-9]+(\.[0-9]+){0,2})?$ ]] || continue
+
+	case "${name}" in
+	pi)
+		log "Install PI agent [${version:-latest}]"
+		npm install --prefix "${AI_LAYER}" -g "@earendil-works/pi-coding-agent${version:+@$version}"
+		printf '/home/renku/work/.pi/agent' >  "${ENV_LAUNCH}/PI_CODING_AGENT_DIR.override"
+		;;
+	claude)
+		log "Install Claude agent [${version:-latest}]"
+		npm install --prefix "${AI_LAYER}" -g "@anthropic-ai/claude-code${version:+@$version}"
+		printf '/home/renku/work/.claude' >    "${ENV_LAUNCH}/CLAUDE_CONFIG_DIR.override"
+		mkdir -p "${AI_LAYER}/exec.d/"
+		cat > "${AI_LAYER}/exec.d/init-claude.sh" <<- 'EOL'
+			#!/usr/bin/env bash
+			if [ -z "${CLAUDE_CONFIG_DIR:-}" ]; then
+			  exit 0
+			elif ! mkdir -p "${CLAUDE_CONFIG_DIR}" 2>/dev/null; then
+			  echo "codex disabled: cannot create CLAUDE_CONFIG_DIR=${CLAUDE_CONFIG_DIR}" >&2
+			  unset CLAUDE_CONFIG_DIR
+			  exit 0
+			fi
+		EOL
+		chmod a+x "${AI_LAYER}/exec.d/init-claude.sh"
+		;;
+	codex)
+		log "Install Codex agent [${version:-latest}]"
+		npm install --prefix "${AI_LAYER}" -g "@openai/codex${version:+@$version}"
+		printf '/home/renku/work/.codex' >     "${ENV_LAUNCH}/CODEX_HOME.override"
+		mkdir -p "${AI_LAYER}/exec.d/"
+		cat > "${AI_LAYER}/exec.d/init-codex.sh" <<- 'EOL'
+			#!/usr/bin/env bash
+			if [ -z "${CODEX_HOME:-}" ]; then
+			  exit 0
+			elif ! mkdir -p "${CODEX_HOME}" 2>/dev/null; then
+			  echo "codex disabled: cannot create CODEX_HOME=${CODEX_HOME}" >&2
+			  unset CODEX_HOME
+			  exit 0
+			fi
+		EOL
+		chmod a+x "${AI_LAYER}/exec.d/init-codex.sh"
+		;;
+	esac
+done
+
+# Cleanup
+log "Cleanup"
+rm -rf "${AI_LAYER}/.cache"
+rm -rf "${AI_LAYER_CACHE}/.npm/_logs"
+
+info "Coding Agent installed"

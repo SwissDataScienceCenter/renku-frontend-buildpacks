@@ -54,6 +54,11 @@ description = "Builder for Renku frontends and environments."
   version = "0.11.22"
 
 [[buildpacks]]
+  uri = "docker://docker.io/paketobuildpacks/node-engine:8.1.1"
+  id = "paketo-buildpacks/node-engine"
+  version = "8.1.1"
+
+[[buildpacks]]
   uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
   id = "heroku/deb-packages"
   version = "0.2.0"
@@ -65,6 +70,10 @@ description = "Builder for Renku frontends and environments."
 [[buildpacks]]
   uri = "../../buildpacks/r-conda"
   version = "0.6.0"
+
+[[buildpacks]]
+  uri = "../../buildpacks/coding-agent"
+  version = "0.5.1"
 
 [[order]]
 
@@ -112,6 +121,16 @@ description = "Builder for Renku frontends and environments."
     version = "0.6.0"
     optional = true
 
+  [[order.group]]
+    id = "paketo-buildpacks/node-engine"
+    version = "8.1.1"
+    optional = true
+  
+  [[order.group]]
+    id = "renku/coding-agent"
+    version = "0.5.1"
+    optional = true
+
 [[order]]
 
   [[order.group]]
@@ -148,6 +167,16 @@ description = "Builder for Renku frontends and environments."
   [[order.group]]
     id = "renku/init-scripts"
     version = "0.6.0"
+    optional = true
+  
+  [[order.group]]
+    id = "paketo-buildpacks/node-engine"
+    version = "8.1.1"
+    optional = true
+  
+  [[order.group]]
+    id = "renku/coding-agent"
+    version = "0.5.1"
     optional = true
 
 [[order]]
@@ -186,6 +215,16 @@ description = "Builder for Renku frontends and environments."
   [[order.group]]
     id = "renku/init-scripts"
     version = "0.6.0"
+    optional = true
+  
+  [[order.group]]
+    id = "paketo-buildpacks/node-engine"
+    version = "8.1.1"
+    optional = true
+  
+  [[order.group]]
+    id = "renku/coding-agent"
+    version = "0.5.1"
     optional = true
 
 [[order]]
@@ -227,6 +266,16 @@ description = "Builder for Renku frontends and environments."
   [[order.group]]
     id = "renku/init-scripts"
     version = "0.6.0"
+    optional = true
+  
+  [[order.group]]
+    id = "paketo-buildpacks/node-engine"
+    version = "8.1.1"
+    optional = true
+  
+  [[order.group]]
+    id = "renku/coding-agent"
+    version = "0.5.1"
     optional = true
 
 [build]
