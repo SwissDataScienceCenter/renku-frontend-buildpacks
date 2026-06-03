@@ -10,3 +10,13 @@ else
   echo "skipping did not find environment.yml"
   exit 100
 fi
+
+plan_path="${CNB_BUILD_PLAN_PATH}"
+cat >>"${plan_path}" <<EOL
+  [[requires]]
+  name = "conda"  # provided by "paketo-buildpacks/miniconda"
+
+  [requires.metadata]
+  build  = true
+  launch = true
+EOL
