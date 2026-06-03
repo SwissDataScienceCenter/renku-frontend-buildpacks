@@ -80,6 +80,7 @@ conda init
 set +u
 # Bashrc refernces env variables that do not exist so with set in this script,
 # the source command fails.
+# shellcheck source=/dev/null
 source ~/.bashrc
 set -u
 conda activate "$USER_ENV_DIR"
