@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BUILD_DIR="${1}"
+
+if [[ -f "${BUILD_DIR}/environment.yml" ]]; then
+  echo "found environment.yml"
+  exit 0
+else
+  echo "skipping did not find environment.yml"
+  exit 100
+fi

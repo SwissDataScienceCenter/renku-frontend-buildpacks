@@ -1,0 +1,15 @@
+api = "0.11"
+
+[[targets]]
+arch = "amd64"
+os = "linux"
+
+[[targets]]
+arch = "arm64"
+os = "linux"
+
+[buildpack]
+description = "A simple buildpack that provides the dependency manager for r with conda"
+id = "renku/r-dependency-manager-conda"
+name = "r dependency manager buildpack using conda"
+version = "0.5.1"
