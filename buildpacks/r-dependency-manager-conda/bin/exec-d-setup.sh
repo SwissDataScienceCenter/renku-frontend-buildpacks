@@ -13,9 +13,9 @@ BUILD_ENV_NAME="${__RENKU_BUILD_ENV_NAME}"
 BUILD_ENV_FILE="${__RENKU_BUILD_ENV_FILE}"
 BUILD_ENV_DIR="${__RENKU_BUILD_ENV_DIR}"
 
-RENKU_WORKING_DIR="${RENKU_WORKING_DIR:-${HOME}}"
-RENKU_MOUNT_DIR="${RENKU_MOUNT_DIR:-${RENKU_WORKING_DIR}}"
-USER_BASE="${RENKU_MOUNT_DIR}/.conda-envs}"
+RENKU_WORKING_DIR="${RENKU_WORKING_DIR:-$HOME}"
+RENKU_MOUNT_DIR="${RENKU_MOUNT_DIR:-$RENKU_WORKING_DIR}"
+USER_BASE="${RENKU_MOUNT_DIR}/.conda-envs"
 USER_ENV_DIR="${USER_BASE}/${BUILD_ENV_NAME}"
 
 LAUNCHER_LOG "Conda env name  : ${BUILD_ENV_NAME}"
@@ -61,4 +61,24 @@ fi
 
 # Where should conda look for envs
 # Remove the buildpack layer environment here because the names are the same and it is not writable
-export CONDA_ENVS_PATH="${USER_BASE}"
+# Stuff written to FD3 in toml format gets converted to env variables
+cat >&3 <<EOF
+CONDA_ENVS_PATH = "${USER_BASE}"
+R_HOME = "${USER_ENV_DIR}"
+PATH = "${USER_ENV_DIR}/bin:${PATH}"
+LD_LIBRARY_PATH = "${USER_ENV_DIR}/lib:${LD_LIBRARY_PATH}"
+EOF
+
+conda init
+set +u
+# Bashrc refernces env variables that do not exist so with set in this script,
+# the source command fails.
+source ~/.bashrc
+set -u
+conda activate "$USER_ENV_DIR"
+
+conda_activate_check=$(cat ~/.bashrc | egrep "^conda activate")
+if [[ -z "$conda_activate_check" ]]; then
+  echo "" >>~/.bashrc
+  echo "conda activate $USER_ENV_DIR" >>~/.bashrc
+fi

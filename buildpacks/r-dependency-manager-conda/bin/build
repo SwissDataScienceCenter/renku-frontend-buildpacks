@@ -2,9 +2,8 @@
 set -euo pipefail
 
 # CNB layer directories
-BUILD_DIR="${1}"
-CACHE_DIR="${2}"
-LAYERS_DIR="${3}"
+LAYERS_DIR="${1}"
+CACHE_DIR="${LAYERS_DIR}"/cache
 
 CONDA_ENV_LAYER="${LAYERS_DIR}/conda-env"
 LAUNCH_LAYER="${LAYERS_DIR}/conda-launch"
@@ -21,8 +20,9 @@ fi
 log "Using conda at: $(conda info --base) ($(conda --version))"
 
 # Cache invalidation via environment.yml checksum
-ENV_YML="${BUILD_DIR}/environment.yml"
-CHECKSUM=$(sha256sum "${ENV_YML}" | cut -d' ' -f1)
+ENV_YML="environment.yml"
+# The build image does not have sha256sum but it has openssl
+CHECKSUM=$(openssl dgst -sha256 -r "$ENV_YML" | awk '{print $1}')
 CHECKSUM_FILE="${CACHE_DIR}/environment.yml.sha256"
 
 CACHE_VALID=false
@@ -99,11 +99,5 @@ echo -n "${BUILD_ENV_DIR}" >"${LAUNCH_LAYER}/env/__RENKU_BUILD_ENV_DIR.override"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
 execd_dir="${LAUNCH_LAYER}/exec.d"
 mkdir -p "$execd_dir"
-cp "${buildpack_dir}/bin/exec-d-setup.sh" "${execd_dir}/"
+cp "${buildpack_dir}/bin/exec-d-setup.sh" "${execd_dir}/exec-d-setup.sh"
 chmod +x "${execd_dir}/exec-d-setup.sh"
-
-# Copy profile.d script
-profiled_dir="${LAUNCH_LAYER}/profile.d"
-mkdir -p "$profiled_dir"
-cp "${buildpack_dir}/bin/profile-d-conda-activate.sh" "${execd_dir}/"
-chmod +x "${profiled_dir}/profile-d-conda-activate.sh"
