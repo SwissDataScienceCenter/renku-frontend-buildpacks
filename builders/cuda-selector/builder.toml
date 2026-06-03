@@ -285,6 +285,11 @@ description = "CUDA enabled builder for Renku frontends and environments."
 [[order]]
 
   [[order.group]]
+    id = "renku/conda-nodefaults"
+    version = "0.5.1"
+    optional = true
+
+  [[order.group]]
     id = "renku/renku-variables"
     version = "0.5.1"
 
