@@ -23,6 +23,13 @@ LAUNCHER_LOG "User env dir    : ${USER_ENV_DIR}"
 LAUNCHER_LOG "Build env dir   : ${BUILD_ENV_DIR:-<not found>}"
 LAUNCHER_LOG "environment.yml : ${BUILD_ENV_FILE:-<not found>}"
 
+# Helps with race condition that can occur when running tests
+exec 9>"${RENKU_MOUNT_DIR}/.setup.lock"
+if ! flock -w 10 9; then
+  echo "Timed out waiting for .setup.lock" >&2
+  exit 1
+fi
+
 # Ensure base directory exists
 mkdir -p "${USER_BASE}"
 
