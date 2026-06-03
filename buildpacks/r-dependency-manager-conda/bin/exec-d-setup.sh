@@ -77,8 +77,13 @@ source ~/.bashrc
 set -u
 conda activate "$USER_ENV_DIR"
 
-conda_activate_check=$(cat ~/.bashrc | egrep "^conda activate")
-if [[ -z "$conda_activate_check" ]]; then
+conda config --remove channels defaults
+conda config --add channels conda-forge
+conda config --add channels nodefaults
+conda config --set channel_priority strict
+
+if ! grep -qE "^conda activate" ~/.bashrc; then
+  echo "Adding conda activate $USER_ENV_DIR command to bashrc"
   echo "" >>~/.bashrc
   echo "conda activate $USER_ENV_DIR" >>~/.bashrc
 fi
