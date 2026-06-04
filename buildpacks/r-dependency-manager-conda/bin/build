@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# CNB layer directories
+LAYERS_DIR="${1}"
+CACHE_DIR="${LAYERS_DIR}"/cache
+
+CONDA_ENV_LAYER="${LAYERS_DIR}/conda-env"
+LAUNCH_LAYER="${LAYERS_DIR}/conda-launch"
+
+log() { echo "-----> [conda-buildpack] $*"; }
+info() { echo "       $*"; }
+
+# Locate conda
+CONDA_BIN=$(command -v conda 2>/dev/null || true)
+if [[ -z "${CONDA_BIN}" ]]; then
+  echo "ERROR: conda not found in PATH. The build image must have conda pre-installed."
+  exit 1
+fi
+log "Using conda at: $(conda info --base) ($(conda --version))"
+
+# Cache invalidation via environment.yml checksum
+ENV_YML="environment.yml"
+# The build image does not have sha256sum but it has openssl
+CHECKSUM=$(openssl dgst -sha256 -r "$ENV_YML" | awk '{print $1}')
+CHECKSUM_FILE="${CACHE_DIR}/environment.yml.sha256"
+
+CACHE_VALID=false
+if [[ -f "${CHECKSUM_FILE}" && "$(cat "${CHECKSUM_FILE}")" == "${CHECKSUM}" ]]; then
+  CACHE_VALID=true
+fi
+
+# Parse the env name from environment.yml (fallback: "env")
+ENV_NAME=$(grep -m1 '^name:' "${ENV_YML}" | sed 's/^name:[[:space:]]*//' | tr -d '\r' || true)
+ENV_NAME="${ENV_NAME:-env}"
+log "Conda environment name: ${ENV_NAME}"
+
+# conda-env layer
+# This layer holds the built environment so it is restored from cache on
+# subsequent builds and on image startup.
+mkdir -p "${CONDA_ENV_LAYER}"
+cat >"${CONDA_ENV_LAYER}.toml" <<TOML
+[types]
+cache = true
+build = true
+launch = true
+TOML
+
+BUILD_ENV_DIR="${CONDA_ENV_LAYER}/envs/${ENV_NAME}"
+
+if [[ "${CACHE_VALID}" == "true" && -d "${BUILD_ENV_DIR}" ]]; then
+  log "Cache hit — skipping conda env install (environment.yml unchanged)"
+else
+  log "Cache miss — creating/updating conda environment from environment.yml"
+
+  if [[ -d "${BUILD_ENV_DIR}" ]]; then
+    log "Updating existing environment …"
+    conda env update \
+      --prefix "${BUILD_ENV_DIR}" \
+      --file "${ENV_YML}" \
+      --prune
+  else
+    log "Creating environment …"
+    conda env create \
+      --prefix "${BUILD_ENV_DIR}" \
+      --file "${ENV_YML}"
+  fi
+
+  # Store checksum so next build can skip if unchanged
+  mkdir -p "${CACHE_DIR}"
+  echo "${CHECKSUM}" >"${CHECKSUM_FILE}"
+fi
+
+info "Environment installed at: ${BUILD_ENV_DIR}"
+
+# Export a copy of the environment.yml into the layer so the launcher can
+# use it at runtime for sync.
+cp "${ENV_YML}" "${CONDA_ENV_LAYER}/environment.yml"
+
+# conda-launch layer
+# Carries the setup script and profile.d activation into the final run image.
+mkdir -p "${LAUNCH_LAYER}/profile.d" "${LAUNCH_LAYER}/env"
+cat >"${LAUNCH_LAYER}.toml" <<TOML
+[types]
+cache = false
+build = false
+launch = true
+TOML
+
+# Expose relevant parameters about the build environment via environment variables
+# These environment variables are used in the setup and profile.d scripts
+echo -n "${ENV_NAME}" >"${LAUNCH_LAYER}/env/__RENKU_BUILD_ENV_NAME.override"
+echo -n "${CONDA_ENV_LAYER}/environment.yml" >"${LAUNCH_LAYER}/env/__RENKU_BUILD_ENV_FILE.override"
+echo -n "${BUILD_ENV_DIR}" >"${LAUNCH_LAYER}/env/__RENKU_BUILD_ENV_DIR.override"
+
+# NOTE: scripts in exec.d run before stuff in profile.d
+
+# Copy exec.d script
+buildpack_dir="${CNB_BUILDPACK_DIR}"
+execd_dir="${LAUNCH_LAYER}/exec.d"
+mkdir -p "$execd_dir"
+cp "${buildpack_dir}/bin/exec-d-setup.sh" "${execd_dir}/exec-d-setup.sh"
+chmod +x "${execd_dir}/exec-d-setup.sh"

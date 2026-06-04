@@ -1,0 +1,7 @@
+name: r-env
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - r-base
+  - r-shiny
