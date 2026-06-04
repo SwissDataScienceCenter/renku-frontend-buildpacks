@@ -41,25 +41,23 @@ if [[ ! -d "${USER_ENV_DIR}" ]]; then
     LAUNCHER_LOG "Cloning build-time env (conda create --clone) …"
     conda create \
       --prefix "${USER_ENV_DIR}" \
-      --clone "${BUILD_ENV_DIR}" \
-      --quiet
+      --clone "${BUILD_ENV_DIR}"
     LAUNCHER_LOG "Clone complete."
-  elif [[ -n "${LAYER_ENV_YML}" && -f "${LAYER_ENV_YML}" ]]; then
+  elif [[ -n "${BUILD_ENV_FILE}" && -f "${BUILD_ENV_FILE}" ]]; then
     LAUNCHER_LOG "Build-time env not available; installing from environment.yml …"
     conda env create \
       --prefix "${USER_ENV_DIR}" \
-      --file "${LAYER_ENV_YML}"
+      --file "${BUILD_ENV_FILE}"
     LAUNCHER_LOG "Install complete."
   else
     LAUNCHER_LOG "WARNING: Neither build env nor environment.yml found; skipping env setup."
   fi
 else
   LAUNCHER_LOG "User env exists — syncing with environment.yml …"
-  if [[ -n "${LAYER_ENV_YML}" && -f "${LAYER_ENV_YML}" ]]; then
+  if [[ -n "${BUILD_ENV_FILE}" && -f "${BUILD_ENV_FILE}" ]]; then
     conda env update \
       --prefix "${USER_ENV_DIR}" \
-      --file "${LAYER_ENV_YML}" \
-      --quiet
+      --file "${BUILD_ENV_FILE}"
     LAUNCHER_LOG "Sync complete."
   else
     LAUNCHER_LOG "WARNING: No environment.yml found; skipping sync."
