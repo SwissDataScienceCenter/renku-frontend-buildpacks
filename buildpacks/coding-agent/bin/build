@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-'unalias' -a
-'set' -euCo pipefail
+unalias -a
+set -euCo pipefail
 
 echo -e "=== 🔧 \033[1mRenku Coding Agent buildpack\033[0m ==="
 
@@ -54,6 +54,26 @@ printf '%s' "${AI_LAYER}/bin" > "${ENV_BUILD}/PATH.prepend"
 printf ':' > "${ENV_BUILD}/PATH.delim"
 
 # Selective npm installation
+if [[ -z "${BP_RENKU_AI_AGENTS:-}" && -f "project.toml" ]]; then
+  BP_RENKU_AI_AGENTS=$(awk 'BEGIN { is_set = 0; has_value=0 }
+    /^\[\[io\.buildpacks\.build\.env\]\]/ {
+        is_set=0
+        has_value=0
+    }
+    /^[[:space:]]*name[[:space:]]*=[[:space:]]*"BP_RENKU_AI_AGENTS"[[:space:]]*$/ {
+        is_set=1
+    }
+    /^[[:space:]]*value[[:space:]]*=/ {
+        match($0, /"([^"]*)"/)
+        value=substr($0, RSTART+1, RLENGTH-2)
+        has_value=1
+    }
+    is_set==1 && has_value==1 {
+        print value
+        exit
+    }' project.toml)
+fi
+
 info "Install ${BP_RENKU_AI_AGENTS:-}"
 for agent in ${BP_RENKU_AI_AGENTS:-}; do
 	name=${agent%@*}
