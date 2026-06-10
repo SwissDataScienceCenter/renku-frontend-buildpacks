@@ -4,4 +4,4 @@ schema-version = "0.2"
 
 [[io.buildpacks.build.env]]
 name = "BP_RENKU_AI_AGENTS"
-value = "pi@~0.75.4 claude codex"
+value = "pi claude codex"
