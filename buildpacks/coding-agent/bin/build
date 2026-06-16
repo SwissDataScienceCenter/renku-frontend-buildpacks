@@ -91,16 +91,22 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 	pi)
 		log "Install PI agent [${version:-latest}]"
 		npm install --prefix "${AI_LAYER}" -g "@earendil-works/pi-coding-agent${version:+@$version}"
-		node -e 'try {
-			const fs = require("fs");
-			const cfg = JSON.parse(fs.readFileSync("./agentic/'"${name}"'/settings.json", "utf8"));
-			console.log((cfg.packages || []).join(" "));
-		} catch(e) {
-			console.log("");
-		}
-		'|while read -r pkg; do
-			[[ -n "${pkg:-}" ]] && PI_CODING_AGENT_DIR=./agentic/${name} "${AI_LAYER}/bin/pi" install "${pkg}"
-		done
+		if [[ -d "./agentic/${name}" ]]; then
+			mkdir -p "${AI_LAYER}/agentic/"
+			mkdir -p "${AI_LAYER_CACHE}/agentic"
+			cp -RpP "./agentic/${name}" "${AI_LAYER_CACHE}/agentic/${name}"
+			node -e 'try {
+				const fs = require("fs");
+				const cfg = JSON.parse(fs.readFileSync("./agentic/'"${name}"'/settings.json", "utf8"));
+				console.log((cfg.packages || []).join(" "));
+			} catch(e) {
+				console.log("");
+			}
+			'|while read -r pkg; do
+				[[ -n "${pkg:-}" ]] && PI_CODING_AGENT_DIR="${AI_LAYER_CACHE}/agentic/${name}" "${AI_LAYER}/bin/pi" install "${pkg}"
+			done
+			tar -C "${AI_LAYER_CACHE}/agentic/${name}" -czf "${AI_LAYER}/agentic/${name}.tgz" .
+		fi
 
 		printf '/home/renku/work/.pi/agent' >  "${ENV_LAUNCH}/PI_CODING_AGENT_DIR.override"
 		printf '1' >  "${ENV_LAUNCH}/PI_SKIP_VERSION_CHECK.override"
@@ -112,11 +118,9 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 			  exit 0
 			elif ! mkdir -p "\${PI_CODING_AGENT_DIR}" 2>/dev/null; then
 			  echo "pi disabled: cannot create PI_CODING_AGENT_DIR=\${PI_CODING_AGENT_DIR}" >&2
-			  unset PI_CODING_AGENT_DIR
-			  exit 0
 			fi
-			if [[ -f "${AI_LAYER}/agentic/pi.tgz" ]]; then
-			  tar -C "\${PI_CODING_AGENT_DIR}" -xzf "${AI_LAYER}/agentic/pi.tgz"
+			if [[ -f "${AI_LAYER}/agentic/${name}.tgz" ]]; then
+			  tar -C "\${PI_CODING_AGENT_DIR}" -xzf "${AI_LAYER}/agentic/${name}.tgz"
 			fi
 		EOL
 		chmod a+x "${AI_LAYER}/exec.d/init-pi.sh"
@@ -162,12 +166,6 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 		chmod a+x "${AI_LAYER}/exec.d/init-codex.sh"
 		;;
 	esac
-
-	if [ -d "./agentic/${name}" ]; then
-		mkdir -p "${AI_LAYER}/agentic/"
-        tar -C "./agentic/${name}" -czf "${AI_LAYER}/agentic/${name}.tgz" .
-	fi
-
 done
 
 # Cleanup
