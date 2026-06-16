@@ -87,16 +87,24 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 
 	[[ "${version}" =~ ^([~^]?[0-9]+(\.[0-9]+){0,2})?$ ]] || continue
 
-	if [ -d "./agentic/${name}" ]; then
-		mkdir -p "${AI_LAYER}/agentic/"
-        tar -C "./agentic/${name}" -czf "${AI_LAYER}/agentic/${name}.tgz" .
-	fi
-
 	case "${name}" in
 	pi)
 		log "Install PI agent [${version:-latest}]"
 		npm install --prefix "${AI_LAYER}" -g "@earendil-works/pi-coding-agent${version:+@$version}"
+		node -e 'try {
+			const fs = require("fs");
+			const cfg = JSON.parse(fs.readFileSync("./agentic/'"${name}"'/settings.json", "utf8"));
+			console.log((cfg.packages || []).join(" "));
+		} catch(e) {
+			console.log("");
+		}
+		'|while read -r pkg; do
+			[[ -n "${pkg:-}" ]] && PI_CODING_AGENT_DIR=./agentic/${name} "${AI_LAYER}/bin/pi" install "${pkg}"
+		done
+
 		printf '/home/renku/work/.pi/agent' >  "${ENV_LAUNCH}/PI_CODING_AGENT_DIR.override"
+		printf '1' >  "${ENV_LAUNCH}/PI_SKIP_VERSION_CHECK.override"
+		printf '1' >  "${ENV_LAUNCH}/PI_OFFLINE.override"
 		mkdir -p "${AI_LAYER}/exec.d/"
 		cat > "${AI_LAYER}/exec.d/init-pi.sh" <<- EOL
 			#!/usr/bin/env bash
@@ -154,6 +162,12 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 		chmod a+x "${AI_LAYER}/exec.d/init-codex.sh"
 		;;
 	esac
+
+	if [ -d "./agentic/${name}" ]; then
+		mkdir -p "${AI_LAYER}/agentic/"
+        tar -C "./agentic/${name}" -czf "${AI_LAYER}/agentic/${name}.tgz" .
+	fi
+
 done
 
 # Cleanup
