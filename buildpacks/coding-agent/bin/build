@@ -86,22 +86,22 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 	fi
 
 	[[ "${version}" =~ ^([~^]?[0-9]+(\.[0-9]+){0,2})?$ ]] || continue
+	mkdir -p "${AI_LAYER}/agentic/"
+	mkdir -p "${AI_LAYER_CACHE}/agentic"
 
 	case "${name}" in
 	pi)
 		log "Install PI agent [${version:-latest}]"
 		npm install --prefix "${AI_LAYER}" -g "@earendil-works/pi-coding-agent${version:+@$version}"
-		if [[ -d "./agentic/${name}" ]]; then
-			mkdir -p "${AI_LAYER}/agentic/"
-			mkdir -p "${AI_LAYER_CACHE}/agentic"
-			cp -RpP "./agentic/${name}" "${AI_LAYER_CACHE}/agentic/${name}"
+		if [[ -d "./.${name}" ]]; then
+			cp -RpP "./.${name}" "${AI_LAYER_CACHE}/agentic/${name}"
 			node -e 'try {
 				const fs = require("fs");
 				const cfg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
 				console.log((cfg.packages || []).join(" "));
 			} catch(e) {
 				console.log("");
-			}' "./agentic/${name}/settings.json"|while read -r pkg; do
+			}' "./.${name}/settings.json"|while read -r pkg; do
 				[[ -n "${pkg:-}" ]] && PI_CODING_AGENT_DIR="${AI_LAYER_CACHE}/agentic/${name}" "${AI_LAYER}/bin/pi" install "${pkg}"
 			done
 			tar -C "${AI_LAYER_CACHE}/agentic/${name}" -czf "${AI_LAYER}/agentic/${name}.tgz" .
@@ -128,7 +128,8 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 	claude)
 		log "Install Claude agent [${version:-latest}]"
 		npm install --prefix "${AI_LAYER}" -g "@anthropic-ai/claude-code${version:+@$version}"
-		if [[ -d "./agentic/${name}" ]]; then
+		if [[ -d "./.${name}" ]]; then
+			cp -RpP "./.${name}" "${AI_LAYER_CACHE}/agentic/${name}"
 			tar -C "${AI_LAYER_CACHE}/agentic/${name}" -czf "${AI_LAYER}/agentic/${name}.tgz" .
 		fi
 		printf '/home/renku/work/.claude' >    "${ENV_LAUNCH}/CLAUDE_CONFIG_DIR.override"
@@ -150,7 +151,8 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 	codex)
 		log "Install Codex agent [${version:-latest}]"
 		npm install --prefix "${AI_LAYER}" -g "@openai/codex${version:+@$version}"
-		if [[ -d "./agentic/${name}" ]]; then
+		if [[ -d "./.${name}" ]]; then
+			cp -RpP "./.${name}" "${AI_LAYER_CACHE}/agentic/${name}"
 			tar -C "${AI_LAYER_CACHE}/agentic/${name}" -czf "${AI_LAYER}/agentic/${name}.tgz" .
 		fi
 		printf '/home/renku/work/.codex' >     "${ENV_LAUNCH}/CODEX_HOME.override"
