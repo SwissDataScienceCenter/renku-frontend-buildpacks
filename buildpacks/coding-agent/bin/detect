@@ -1,17 +1,37 @@
 #!/usr/bin/env bash
-'unalias' -a
-'set' -euCo pipefail
+unalias -a
+set -euCo pipefail
 
 plan_path="${CNB_BUILD_PLAN_PATH}"
 
 if [[ -n "${BP_RENKU_AI_AGENTS:-}" ]]; then
-  echo "PASS: BP_RENKU_AI_AGENT=${BP_RENKU_AI_AGENTS}"
-else
-  echo "SKIPPED: BP_RENKU_AI_AGENT not set"
-  'exit' 100
+  echo "PASS: BP_RENKU_AI_AGENTS=${BP_RENKU_AI_AGENTS}"
+elif [[ -f "project.toml" ]]; then
+  BP_RENKU_AI_AGENTS=$(awk 'BEGIN { is_set = 0; has_value=0 }
+    /^\[\[io\.buildpacks\.build\.env\]\]/ {
+        is_set=0
+        has_value=0
+    }
+    /^[[:space:]]*name[[:space:]]*=[[:space:]]*"BP_RENKU_AI_AGENTS"[[:space:]]*$/ {
+        is_set=1
+    }
+    /^[[:space:]]*value[[:space:]]*=/ {
+        match($0, /"([^"]*)"/)
+        value=substr($0, RSTART+1, RLENGTH-2)
+        has_value=1
+    }
+    is_set==1 && has_value==1 {
+        print value
+        exit
+    }' project.toml)
 fi
 
-'cat' -- >>"${plan_path}" <<EOL
+if [[ -z "${BP_RENKU_AI_AGENTS:-}" ]]; then
+  echo "SKIPPED: BP_RENKU_AI_AGENTS not set"
+  exit 100
+fi
+
+cat -- >>"${plan_path}" <<EOL
 [[provides]]
 name = "coding-agent"
 
