@@ -16,7 +16,7 @@ require (
 	github.com/docker/go-connections v0.7.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/onsi/ginkgo/v2 v2.28.1
-	github.com/onsi/gomega v1.41.0
+	github.com/onsi/gomega v1.42.0
 )
 
 require (
