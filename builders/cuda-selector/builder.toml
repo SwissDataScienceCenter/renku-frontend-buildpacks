@@ -25,7 +25,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
   version = "0.8.0"
 
 [[buildpacks]]
-  uri = "../../buildpacks/none-frontend"
+  uri = "../../buildpacks/custom-frontend"
   version = "0.8.0"
 
 [[buildpacks]]
@@ -159,7 +159,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
     version = "0.8.0"
 
   [[order.group]]
-    id = "renku/none-frontend"
+    id = "renku/custom-frontend"
     version = "0.8.0"
 
   [[order.group]]
@@ -395,7 +395,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
     version = "0.8.0"
 
   [[order.group]]
-    id = "renku/none-frontend"
+    id = "renku/custom-frontend"
     version = "0.8.0"
 
   [[order.group]]
@@ -443,7 +443,7 @@ description = "CUDA enabled builder for Renku frontends and environments."
     version = "0.8.0"
 
   [[order.group]]
-    id = "renku/none-frontend"
+    id = "renku/custom-frontend"
     version = "0.8.0"
 
   [[order.group]]
