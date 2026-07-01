@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-set -eou pipefail
-
-echo -e "=== ✨ \033[1mRenku Empty Frontend buildpack\033[0m ==="
-echo  "No frontend will be implicitely included"
-echo  "if you require something served ensure to launch it from the Procfile"
