@@ -48,6 +48,10 @@ export UV_CACHE_DIR="\${RENKU_MOUNT_DIR}/.uv_cache"
 if !(grep "UV_CACHE_DIR" \${HOME}/.bashrc); then
   printf "export UV_CACHE_DIR=\${RENKU_MOUNT_DIR}/.uv_cache\n" >>  \${HOME}/.bashrc
 fi
+export UV_PROJECT_ENVIRONMENT="\${RENKU_WORKING_DIR}/.venv"
+if !(grep "UV_PROJECT_ENVIRONMENT" \${HOME}/.bashrc); then
+  printf "export UV_PROJECT_ENVIRONMENT=\${RENKU_MOUNT_DIR}/.venv\n" >>  \${HOME}/.bashrc
+fi
 EOL
 
     cat >"${uv_cache_dir}.toml"<<EOL
