@@ -6,26 +6,27 @@ echo -e "=== ✨ \033[1mRenku Custom Frontend buildpack\033[0m ==="
 layers_dir="${CNB_LAYERS_DIR}"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
 
-if (which marimo); then
-    marimo_bin_dir="${layers_dir}/marimo/bin"
-    mkdir -p "${marimo_bin_dir}"
-    cp "${buildpack_dir}/bin/marimo-entrypoint.sh" "${marimo_bin_dir}"
-    echo  "Marimo detected - Adding entrypoint"
-    cat >"${layers_dir}/marimo.toml" <<EOL
+if [[ "${BP_RENKU_FRONTENDS}" =~ "infer" ]]; then
+    if (which marimo); then
+        marimo_bin_dir="${layers_dir}/marimo/bin"
+        mkdir -p "${marimo_bin_dir}"
+        cp "${buildpack_dir}/bin/marimo-entrypoint.sh" "${marimo_bin_dir}"
+        echo  "Marimo detected - Adding entrypoint"
+        cat >"${layers_dir}/marimo.toml" <<EOL
 [types]
 launch = true
 
 [metadata]
 description = "marimo frontend for renku"
 EOL
-    cat >"${layers_dir}/launch.toml" <<EOL
+        cat >"${layers_dir}/launch.toml" <<EOL
 [[processes]]
 type = "marimo"
 command = ["tini", "-g", "--"]
 args = ["bash", "${marimo_bin_dir}/marimo-entrypoint.sh"]
 default = true
 EOL
-else
-    echo  "No frontend will be implicitely included"
-    echo  "if you require something served ensure to launch it from the Procfile"
+    fi
 fi
+echo  "No frontend will be implicitely included"
+echo  "if you require something served ensure to launch it from the Procfile"

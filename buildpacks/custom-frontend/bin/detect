@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-if [[ "${BP_RENKU_FRONTENDS}" =~ "custom" ]]; then
+if [[ "${BP_RENKU_FRONTENDS}" =~ "infer" || "${BP_RENKU_FRONTENDS}" =~ "none" ]]; then
   echo "PASS: The BP_RENKU_FRONTENDS environment variable was found to contain 'custom'."
 else
   echo "SKIPPED: The BP_RENKU_FRONTENDS environment variable is not set or does not contain 'custom'."
