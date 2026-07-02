@@ -372,6 +372,16 @@ description = "CUDA enabled builder for Renku frontends and environments."
     version = "0.8.0"
     optional = true
 
+  [[order.group]]
+    id = "paketo-buildpacks/node-engine"
+    version = "8.1.1"
+    optional = true
+
+  [[order.group]]
+    id = "renku/coding-agent"
+    version = "0.8.0"
+    optional = true
+
 [[order]]
 
   [[order.group]]
@@ -458,6 +468,16 @@ description = "CUDA enabled builder for Renku frontends and environments."
 
   [[order.group]]
     id = "renku/init-scripts"
+    version = "0.8.0"
+    optional = true
+
+  [[order.group]]
+    id = "paketo-buildpacks/node-engine"
+    version = "8.1.1"
+    optional = true
+
+  [[order.group]]
+    id = "renku/coding-agent"
     version = "0.8.0"
     optional = true
 
