@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+if [[ "${BP_RENKU_FRONTENDS}" =~ "infer" || "${BP_RENKU_FRONTENDS}" =~ "none" ]]; then
+  echo "PASS: The BP_RENKU_FRONTENDS environment variable was found to contain either 'infer' or 'none'."
+else
+  echo "SKIPPED: The BP_RENKU_FRONTENDS environment variable is not set or does not contain 'infer' or 'none'."
+  exit 100
+fi
+
+plan_path=$2
+
+cat >>"${plan_path}" <<EOL
+[[provides]]
+  name = "custom"
+
+[[requires]]
+  name = "custom"
+
+[requires.metadata]
+  launch = true
+
+[[requires]]
+name = "renku-env"
+
+[requires.metadata]
+launch = true
+
+[[requires]]
+name = "site-packages"
+
+[requires.metadata]
+build = true
+launch = true
+
+[[or]]
+[[or.provides]]
+  name = "custom"
+
+[[or.requires]]
+  name = "custom"
+
+[or.requires.metadata]
+  launch = true
+
+[[or.requires]]
+name = "renku-env"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
+name = "conda-environment"
+
+[or.requires.metadata]
+build = true
+launch = true
+
+[[or]]
+[[or.provides]]
+  name = "custom"
+
+[[or.requires]]
+  name = "custom"
+
+[or.requires.metadata]
+  launch = true
+
+[[or.requires]]
+name = "renku-env"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
+name = "poetry-venv"
+
+[or.requires.metadata]
+build = true
+launch = true
+
+[[or]]
+[[or.provides]]
+  name = "custom"
+
+[[or.requires]]
+  name = "custom"
+
+[or.requires.metadata]
+  launch = true
+
+[[or.requires]]
+name = "renku-env"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
+name = "uv-environment"
+
+[or.requires.metadata]
+build = true
+launch = true
+
+
+[[or]]
+[[or.provides]]
+  name = "custom"
+
+[[or.requires]]
+  name = "custom"
+
+[or.requires.metadata]
+  launch = true
+
+[[or.requires]]
+name = "renku-env"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
+name = "r"
+
+[or.requires.metadata]
+launch = true
+build = true
+EOL
