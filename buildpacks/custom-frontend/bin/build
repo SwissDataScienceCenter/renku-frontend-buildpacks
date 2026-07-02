@@ -20,7 +20,7 @@ description = "marimo frontend for renku"
 EOL
     cat >"${layers_dir}/launch.toml" <<EOL
 [[processes]]
-type = "jupyterlab"
+type = "marimo"
 command = ["tini", "-g", "--"]
 args = ["bash", "${marimo_bin_dir}/marimo-entrypoint.sh"]
 default = true
