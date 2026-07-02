@@ -2,9 +2,9 @@
 set -eo pipefail
 
 if [[ "${BP_RENKU_FRONTENDS}" =~ "infer" || "${BP_RENKU_FRONTENDS}" =~ "none" ]]; then
-  echo "PASS: The BP_RENKU_FRONTENDS environment variable was found to contain 'custom'."
+  echo "PASS: The BP_RENKU_FRONTENDS environment variable was found to contain either 'infer' or 'none'."
 else
-  echo "SKIPPED: The BP_RENKU_FRONTENDS environment variable is not set or does not contain 'custom'."
+  echo "SKIPPED: The BP_RENKU_FRONTENDS environment variable is not set or does not contain 'infer' or 'none'."
   exit 100
 fi
 
