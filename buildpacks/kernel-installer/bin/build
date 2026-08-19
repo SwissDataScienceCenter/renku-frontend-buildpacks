@@ -4,6 +4,24 @@ set -eo pipefail
 echo -e "=== 🔧 \033[1mRenku kernel installer buildpack\033[0m ==="
 
 layers_dir="$1"
+
+if command -v pixi >/dev/null 2>&1; then
+  echo "Pixi project: installing ipykernel into the mutable pixi env at launch"
+  execd_dir="${layers_dir}"/kernel/exec.d
+  mkdir -p "${execd_dir}"
+  cp "${CNB_BUILDPACK_DIR}/bin/pixi-kernel-setup.sh" "${execd_dir}/setup.sh"
+  chmod +x "${execd_dir}/setup.sh"
+
+  cat >"${layers_dir}/kernel.toml" <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "register jupyter kernel from the mutable pixi env at launch"
+EOL
+  exit 0
+fi
+
 cache_layer_dir="${layers_dir}"/cache
 kernel_layer_dir="${layers_dir}"/kernel
 env_dir="${kernel_layer_dir}"/env
