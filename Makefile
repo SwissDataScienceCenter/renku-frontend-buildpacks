@@ -51,7 +51,7 @@ SHELLCHECK = $(LOCALBIN)/shellcheck
 SHELLCHECK_VERSION ?= "v0.10.0"
 
 GOLANG_CI_LINT = $(LOCALBIN)/golangci-lint
-GOLANG_CI_LINT_VERSION ?= "v2.1.5"
+GOLANG_CI_LINT_VERSION ?= "v2.13.0"
 
 .PHONY: shellcheck
 shellcheck: $(SHELLCHECK)
