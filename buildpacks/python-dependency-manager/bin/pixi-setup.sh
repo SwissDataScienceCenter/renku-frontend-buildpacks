@@ -59,11 +59,11 @@ if [ ! -w "$project_dir/.pixi" ]; then
 fi
 
 pixi install --environment "$env_name" || { warn "pixi install failed; using build-time env"; exit 0; }
-pixi shell-hook --environment "$env_name" > "$mount/.pixi/activation.sh" || { warn "pixi shell-hook failed"; exit 0; }
+pixi shell-hook --environment "$env_name" > "$project_dir/.pixi/activation.sh" || { warn "pixi shell-hook failed"; exit 0; }
 
-if ! grep -qF "source $mount/.pixi/activation.sh" "${HOME}/.bashrc" 2>/dev/null; then
-    printf "source %s/.pixi/activation.sh\n" "$mount" >> "${HOME}/.bashrc" || warn "failed to update .bashrc"
+if ! grep -qF "source $project_dir/.pixi/activation.sh" "${HOME}/.bashrc" 2>/dev/null; then
+    printf "source %s/.pixi/activation.sh\n" "$project_dir" >> "${HOME}/.bashrc" || warn "failed to update .bashrc"
 fi
 
 # shellcheck source=/dev/null
-source "$mount/.pixi/activation.sh" || warn "failed to source activation script"
+source "$project_dir/.pixi/activation.sh" || warn "failed to source activation script"
