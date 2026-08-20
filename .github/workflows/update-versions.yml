@@ -108,7 +108,7 @@ jobs:
         context: ./run-image
         file: ./run-image/Dockerfile
         platforms: linux/amd64,linux/arm64
-        build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
+        build-args: base_image=nvcr.io/nvidia/cuda-dl-base:26.07-cuda13.3-devel-ubuntu24.04
         target: run
         push: true
         tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-run-image:${{ github.event.inputs.version }}${{ github.event.inputs.test_mode == 'true' && '-test' || '' }}
@@ -124,7 +124,7 @@ jobs:
         context: ./run-image
         file: ./run-image/Dockerfile
         platforms: linux/amd64,linux/arm64
-        build-args: base_image=nvcr.io/nvidia/cuda-dl-base:25.10-cuda13.0-devel-ubuntu24.04
+        build-args: base_image=nvcr.io/nvidia/cuda-dl-base:26.07-cuda13.3-devel-ubuntu24.04
         target: build
         push: true
         tags: ghcr.io/${{ needs.validate-tag.outputs.repo_lower }}/cuda-build-image:${{ github.event.inputs.version }}${{ github.event.inputs.test_mode == 'true' && '-test' || '' }}
