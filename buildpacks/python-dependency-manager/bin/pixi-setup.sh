@@ -19,6 +19,7 @@ if ! flock -w 300 9; then
     warn "timed out waiting for .setup.lock; continuing without setup"
     exit 0
 fi
+rm "$mount/.setup.lock"
 
 mkdir -p "$mount/.pixi" "$mount/.pixi_cache"
 printf 'PIXI_CACHE_DIR = "%s/.pixi_cache"\n' "$mount" >&3
