@@ -5,47 +5,47 @@ create_tmux_config() {
     [[ -e "${tmux_config}" ]] || cat <<-EOF > "${tmux_config}"
 		# ── Fix extended-keys warning ─────────────────────────────────────────
 		set -g extended-keys on
-		
+
 		# ── General Settings ──────────────────────────────────────────────────
 		set -g default-terminal "tmux-256color"
 		set -g base-index 1
 		set -g pane-base-index 1
 		set -g renumber-windows on
 		set -g status-position bottom
-		
+
 		# ── Disable vi mode for copy/paste (use emacs-style) ─────────────────
 		set -g mode-keys vi
-		
+
 		# ── Key Bindings ──────────────────────────────────────────────────────
-		
+
 		# Use Ctrl+a as prefix (avoids conflict with pi's Ctrl+b)
 		set -g prefix C-a
 		bind C-a send-prefix
-		
+
 		# Better pane splitting (splits in current directory)
 		bind | split-window -h -c "#{pane_current_path}"
 		bind - split-window -v -c "#{pane_current_path}"
 		bind c new-window -c "#{pane_current_path}"
-		
+
 		# Vim-style pane navigation (Ctrl+a h/j/k/l)
 		bind h select-pane -L
 		bind j select-pane -D
 		bind k select-pane -U
 		bind l select-pane -R
-		
+
 		# Resize panes with Alt+arrows (easier than Shift+arrows)
 		bind -n C-S-Left resize-pane -L 5
 		bind -n C-S-Right resize-pane -R 5
 		bind -n C-S-Up resize-pane -U 5
 		bind -n C-S-Down resize-pane -D 5
-		
+
 		# Swap panes
 		bind -r H swap-pane -U
 		bind -r J swap-pane -D
-		
+
 		# ── Mouse Support ─────────────────────────────────────────────────────
 		set -g mouse off
-		
+
 		# ── Scrollback / Copy Mode ────────────────────────────────────────────
 		# Use Ctrl+b [ to enter copy mode, then use vim keys or mouse to select
 		# Press y to yank (copy) selection
@@ -78,11 +78,11 @@ main() {
                                 harness='codex'
                                 unset 'args[i]'
                                 ;;
-                        --new-session|-n)
+                        --new-session)
                                 unset 'args[i]'
                                 use_last_session=0
                                 ;;
-                        --session|-r)
+                        --resume|--session)
                                 use_last_session=0
                                 ;;
                         --start)
@@ -103,32 +103,33 @@ main() {
                 flock -x -w 5 4
                 trap 'tmux -S "'"${socket_name}"'" kill-server; exit 0' TERM INT
 
-                while true; do
-                        # Find the most recent harness session if any.
-                        if (( use_last_session == 1 )) && [[ "${harness}" == "pi" && -d "${PI_CODING_AGENT_DIR:-.}/sessions" ]] ; then
-                                while read -r s; do
-                                        if [[ "${s}" =~ ^.*_([0-9a-z-]+).jsonl$ ]]; then
-                                                args+=("--session" "${BASH_REMATCH[1]}")
-                                                                                                break
-                                        fi
-                                done < <(find "${PI_CODING_AGENT_DIR:-.}/sessions" -name '*.jsonl' -type f -printf '%f\n'|sort -r|head -1)
-                        fi
+                # Use the most recent harness session if any.
+                if (( use_last_session )); then
+                        case "${harness}" in
+                                pi|claude) args+=("--continue") ;;
+                                codex) args=("resume" "${args[@]}") ;;
+                        esac
+                fi
 
+                while true; do
                         # Create a new tmux session if one doesn't exist yet.
-                        if ! tmux -S "${socket_name}" has-session -t ${harness}-shell >& /dev/null; then
+                        if ! tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null; then
                                 create_tmux_config "${tmux_config}"
-                                tmux -f "${tmux_config}" -S "${socket_name}" new-session -d -s ${harness}-shell ${harness} "${args[@]}"
+                                tmux -f "${tmux_config}" -S "${socket_name}" new-session -d -s "${harness}-shell" "${harness}" "${args[@]}"
                         fi
 
                         # Pool until tmux session exits.
                         # Alternative is to start tmux with bash -lc "trap 'tmux wait-for -S pi-end' EXIT; exec pi \"${args[@]}\"
                         # and wait for the signal in the loop with tmux wait-for pi-end, however that wouldn't capture uncatchable signals
-                        while tmux -S "${socket_name}" has-session -t ${harness}-shell >& /dev/null; do
+                        while tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null; do
                                 sleep 1
                         done
                 done
         elif [[ -S "${socket_name}" ]]; then
-                tmux -S "${socket_name}" has-session -t ${harness}-shell >& /dev/null && exec tmux -S "${socket_name}" attach -t ${harness}-shell || echo "No session"
+                if [[ "${TMUX:-}" != "${socket_name}",* ]]; then
+                        unset TMUX
+                fi
+                tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null && exec tmux -S "${socket_name}" attach -t "${harness}-shell" || echo "No session"
         fi
 }
 
