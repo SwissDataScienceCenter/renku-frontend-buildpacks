@@ -3,20 +3,20 @@
 create_tmux_config() {
     local -r tmux_config="${1:-${HOME}/work/.tmux.conf}"
     [[ -e "${tmux_config}" ]] || cat <<-EOF > "${tmux_config}"
-		# ── Fix extended-keys warning ─────────────────────────────────────────
+		# -- Fix extended-keys warning -----------------------------------------
 		set -g extended-keys on
 
-		# ── General Settings ──────────────────────────────────────────────────
+		# -- General Settings --------------------------------------------------
 		set -g default-terminal "tmux-256color"
 		set -g base-index 1
 		set -g pane-base-index 1
 		set -g renumber-windows on
 		set -g status-position bottom
 
-		# ── Disable vi mode for copy/paste (use emacs-style) ─────────────────
+		# -- Disable vi mode for copy/paste (use emacs-style) -----------------
 		set -g mode-keys vi
 
-		# ── Key Bindings ──────────────────────────────────────────────────────
+		# -- Key Bindings ------------------------------------------------------
 
 		# Use Ctrl+a as prefix (avoids conflict with pi's Ctrl+b)
 		set -g prefix C-a
@@ -43,10 +43,10 @@ create_tmux_config() {
 		bind -r H swap-pane -U
 		bind -r J swap-pane -D
 
-		# ── Mouse Support ─────────────────────────────────────────────────────
+		# -- Mouse Support -----------------------------------------------------
 		set -g mouse off
 
-		# ── Scrollback / Copy Mode ────────────────────────────────────────────
+		# -- Scrollback / Copy Mode --------------------------------------------
 		# Use Ctrl+b [ to enter copy mode, then use vim keys or mouse to select
 		# Press y to yank (copy) selection
 		bind [ copy-mode \; send-keys -X end
