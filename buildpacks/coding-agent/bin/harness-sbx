@@ -103,19 +103,26 @@ main() {
                 flock -x -w 5 4
                 trap 'tmux -S "'"${socket_name}"'" kill-server; exit 0' TERM INT
 
-                # Use the most recent harness session if any.
+                # Try to use the most recent harness session if any.
                 if (( use_last_session )); then
                         case "${harness}" in
-                                pi|claude) args+=("--continue") ;;
-                                codex) args=("resume" "${args[@]}") ;;
+                                pi|claude) args_resume=("--continue" "${args[@]}") ;;
+                                codex) args_resume=("resume" "${args[@]}") ;;
                         esac
+                else
+                        args_resume=("${args[@]}")
                 fi
 
                 while true; do
-                        # Create a new tmux session if one doesn't exist yet.
+                        # Create a new tmux session if one doesn't exist yet
+                        # Try first to resume an existing conversation if there's one otherwise start a new one
                         if ! tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null; then
                                 create_tmux_config "${tmux_config}"
-                                tmux -f "${tmux_config}" -S "${socket_name}" new-session -d -s "${harness}-shell" "${harness}" "${args[@]}"
+                                tmux -f "${tmux_config}" -S "${socket_name}" new-session -d -s "${harness}-shell" "${harness}" "${args_resume[@]}"
+                                sleep 2
+								if (( use_last_session )) && ! tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null; then
+                                    tmux -f "${tmux_config}" -S "${socket_name}" new-session -d -s "${harness}-shell" "${harness}" "${args[@]}"
+                                fi
                         fi
 
                         # Pool until tmux session exits.
