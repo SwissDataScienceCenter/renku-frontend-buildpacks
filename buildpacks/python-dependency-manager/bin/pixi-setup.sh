@@ -2,6 +2,7 @@
 set -uo pipefail
 
 warn() { echo "Renku: $*" >&2; }
+bashrc_add() { grep -qF -- "$1" "$HOME/.bashrc" 2>/dev/null || printf '%s\n' "$1" >> "$HOME/.bashrc"; }
 
 mount="${RENKU_MOUNT_DIR:-}"
 work="${RENKU_WORKING_DIR:-${mount:-$PWD}}"
@@ -21,12 +22,18 @@ if ! flock -w 300 9; then
 fi
 rm "$mount/.setup.lock"
 
-mkdir -p "$mount/.pixi" "$mount/.pixi_cache"
+mkdir -p "$mount/.pixi_cache"
 printf 'PIXI_CACHE_DIR = "%s/.pixi_cache"\n' "$mount" >&3
 
 if [ -n "$cache_src" ] && [ -d "$cache_src" ]; then
     cp -ras --update=none "$cache_src/." "$mount/.pixi_cache" 2>/dev/null || warn "failed to seed pixi cache"
 fi
+
+# The mount holds several cloned repos and the one this image was built for
+# can be any of them. The pixi project name recorded at build time is the only
+# stable link between image and repo, so match pixi manifests/workspace root
+# and one level deep by name.
+manifest_name() { grep -m1 '^name = ' "$1" | sed 's/^name = "\(.*\)"$/\1/'; }
 
 project_dir=""
 if [ -n "$project_name" ]; then
@@ -35,8 +42,7 @@ if [ -n "$project_name" ]; then
         case "$candidate" in
             */pyproject.toml) grep -q '\[tool\.pixi' "$candidate" || continue ;;
         esac
-        candidate_name="$(grep -m1 '^name = ' "$candidate" | sed 's/^name = "\(.*\)"$/\1/')"
-        if [ "$candidate_name" = "$project_name" ]; then
+        if [ "$(manifest_name "$candidate")" = "$project_name" ]; then
             project_dir="$(dirname "$candidate")"
             break
         fi
@@ -62,9 +68,4 @@ fi
 pixi install --environment "$env_name" || { warn "pixi install failed; using build-time env"; exit 0; }
 pixi shell-hook --environment "$env_name" > "$project_dir/.pixi/activation.sh" || { warn "pixi shell-hook failed"; exit 0; }
 
-if ! grep -qF "source $project_dir/.pixi/activation.sh" "${HOME}/.bashrc" 2>/dev/null; then
-    printf "source %s/.pixi/activation.sh\n" "$project_dir" >> "${HOME}/.bashrc" || warn "failed to update .bashrc"
-fi
-
-# shellcheck source=/dev/null
-source "$project_dir/.pixi/activation.sh" || warn "failed to source activation script"
+bashrc_add "source $project_dir/.pixi/activation.sh"
