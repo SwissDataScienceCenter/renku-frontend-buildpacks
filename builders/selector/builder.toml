@@ -49,23 +49,23 @@ description = "Builder for Renku frontends and environments."
   version = "0.9.1"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/python:2.55.0"
-  version = "2.55.0"
+  uri = "docker://docker.io/paketobuildpacks/python:2.58.0"
+  version = "2.58.0"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.22"
+  uri = "docker://docker.io/paketobuildpacks/miniconda:0.11.37"
   id = "paketo-buildpacks/miniconda"
-  version = "0.11.22"
+  version = "0.11.37"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/node-engine:8.1.1"
+  uri = "docker://docker.io/paketobuildpacks/node-engine:8.5.2"
   id = "paketo-buildpacks/node-engine"
-  version = "8.1.1"
+  version = "8.5.2"
 
 [[buildpacks]]
-  uri = "docker://docker.io/heroku/buildpack-deb-packages:0.2.0"
+  uri = "docker://docker.io/heroku/buildpack-deb-packages:1.0.1"
   id = "heroku/deb-packages"
-  version = "0.2.0"
+  version = "1.0.1"
 
 [[buildpacks]]
   uri = "../../buildpacks/homebrew"
@@ -92,11 +92,11 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/miniconda"
-    version = "0.11.22"
+    version = "0.11.37"
 
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.55.0"
+    version = "2.58.0"
 
   [[order.group]]
     id = "renku/python-dependency-manager"
@@ -116,7 +116,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "heroku/deb-packages"
-    version = "0.2.0"
+    version = "1.0.1"
     optional = true
 
   [[order.group]]
@@ -131,7 +131,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/node-engine"
-    version = "8.1.1"
+    version = "8.5.2"
     optional = true
 
   [[order.group]]
@@ -148,7 +148,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.55.0"
+    version = "2.58.0"
 
   [[order.group]]
     id = "renku/python-dependency-manager"
@@ -164,7 +164,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "heroku/deb-packages"
-    version = "0.2.0"
+    version = "1.0.1"
     optional = true
 
   [[order.group]]
@@ -179,7 +179,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/node-engine"
-    version = "8.1.1"
+    version = "8.5.2"
     optional = true
 
   [[order.group]]
@@ -196,7 +196,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.55.0"
+    version = "2.58.0"
 
   [[order.group]]
     id = "renku/python-dependency-manager"
@@ -212,7 +212,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "heroku/deb-packages"
-    version = "0.2.0"
+    version = "1.0.1"
     optional = true
 
   [[order.group]]
@@ -227,7 +227,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/node-engine"
-    version = "8.1.1"
+    version = "8.5.2"
     optional = true
 
   [[order.group]]
@@ -244,7 +244,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/python"
-    version = "2.55.0"
+    version = "2.58.0"
 
   [[order.group]]
     id = "renku/python-dependency-manager"
@@ -260,7 +260,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "heroku/deb-packages"
-    version = "0.2.0"
+    version = "1.0.1"
     optional = true
 
   [[order.group]]
@@ -275,7 +275,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/node-engine"
-    version = "8.1.1"
+    version = "8.5.2"
     optional = true
 
   [[order.group]]
@@ -291,7 +291,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/miniconda"
-    version = "0.11.22"
+    version = "0.11.37"
 
   [[order.group]]
     id = "renku/r-conda"
@@ -311,7 +311,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "heroku/deb-packages"
-    version = "0.2.0"
+    version = "1.0.1"
     optional = true
 
   [[order.group]]
@@ -326,7 +326,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/node-engine"
-    version = "8.1.1"
+    version = "8.5.2"
     optional = true
 
   [[order.group]]
@@ -347,7 +347,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/miniconda"
-    version = "0.11.22"
+    version = "0.11.37"
 
   [[order.group]]
     id = "renku/r-dependency-manager-conda"
@@ -359,7 +359,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "heroku/deb-packages"
-    version = "0.2.0"
+    version = "1.0.1"
     optional = true
 
   [[order.group]]
@@ -374,7 +374,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/node-engine"
-    version = "8.1.1"
+    version = "8.5.2"
     optional = true
 
   [[order.group]]
@@ -390,7 +390,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/miniconda"
-    version = "0.11.22"
+    version = "0.11.37"
 
   [[order.group]]
     id = "renku/r-conda"
@@ -410,7 +410,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "heroku/deb-packages"
-    version = "0.2.0"
+    version = "1.0.1"
     optional = true
 
   [[order.group]]
@@ -425,7 +425,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/node-engine"
-    version = "8.1.1"
+    version = "8.5.2"
     optional = true
 
   [[order.group]]
@@ -446,7 +446,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/miniconda"
-    version = "0.11.22"
+    version = "0.11.37"
 
   [[order.group]]
     id = "renku/r-dependency-manager-conda"
@@ -458,7 +458,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "heroku/deb-packages"
-    version = "0.2.0"
+    version = "1.0.1"
     optional = true
 
   [[order.group]]
@@ -473,7 +473,7 @@ description = "Builder for Renku frontends and environments."
 
   [[order.group]]
     id = "paketo-buildpacks/node-engine"
-    version = "8.1.1"
+    version = "8.5.2"
     optional = true
 
   [[order.group]]
@@ -482,7 +482,7 @@ description = "Builder for Renku frontends and environments."
     optional = true
 
 [build]
-  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.38"
+  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.117"
 
   [[build.env]]
     name = "BP_RENKU_FRONTENDS"
@@ -495,7 +495,7 @@ description = "Builder for Renku frontends and environments."
     mirrors = []
 
 [lifecycle]
-  version = "0.20.19"
+  version = "0.21.17"
 
 [[targets]]
   arch = "amd64"
