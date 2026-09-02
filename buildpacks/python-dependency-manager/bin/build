@@ -1,60 +1,55 @@
 #!/usr/bin/env bash
-set -eou pipefail
+set -euo pipefail
 
 echo -e "=== 🔧 \033[1mRenku Python dependency manager buildpack\033[0m ==="
 
 layer_dir="${CNB_LAYERS_DIR}/deps"
-execd_dir="${layer_dir}"/exec.d
-mkdir -p "${execd_dir}"
+execd_dir="${layer_dir}/exec.d"
+env_dir="${layer_dir}/env"
+mkdir -p "${execd_dir}" "${env_dir}"
 
-cat >"${execd_dir}"/setup.sh <<EOL
-#!/usr/bin/env bash
-set -eo pipefail
-exec 9>\${RENKU_MOUNT_DIR}/.setup.lock
-if ! flock -w 10 9; then
-    echo "Timed out waiting for .setup.lock" >&2
-    exit 1
-fi
-if [ -d \${RENKU_MOUNT_DIR}/.venv ] && \
-   ([ "\$(readlink -e \${RENKU_MOUNT_DIR}/.venv/bin/python 2>/dev/null)" != "\$(readlink -e \$(which python 2>/dev/null) 2>/dev/null)" ] || \
-    [ "\$(grep "version = " \${RENKU_MOUNT_DIR}/.venv/pyvenv.cfg 2>/dev/null | cut -d' ' -f3)" != "\$(python --version 2>/dev/null | cut -d' ' -f2)" ]); then
-    echo "Virtualenv exists but has mismatch - recreating..."
-    rm -rf \${RENKU_MOUNT_DIR}/.venv
-fi
-python -m venv --system-site-packages \${RENKU_MOUNT_DIR}/.venv
-base_site_packages="\$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
-derived_site_packages="\$(\${RENKU_MOUNT_DIR}/.venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
-echo "\$base_site_packages" > "\$derived_site_packages"/_base_packages.pth
-if !(grep "source \${RENKU_MOUNT_DIR}/.venv/bin/activate" \${HOME}/.bashrc); then
-  printf "source \${RENKU_MOUNT_DIR}/.venv/bin/activate\n" >>  \${HOME}/.bashrc
-fi
-source \${RENKU_MOUNT_DIR}/.venv/bin/activate
-if python -c "import ipykernel" >/dev/null 2>&1;then
-  JUPYTER_DATA_DIR="\${RENKU_MOUNT_DIR}/.local/share/jupyter/" \
-    python -m ipykernel install --user --name Python3
-fi
+buildpack_dir="${CNB_BUILDPACK_DIR}"
+
+seed_cache() {
+    mkdir -p "$1"
+    [ -d "$2" ] || return 0
+    cp -r "$2/." "$1"
+    find "$1" -type d -exec chmod go+w {} +
+}
+
+if command -v pixi >/dev/null 2>&1; then
+    pixi_cache_dir="${CNB_LAYERS_DIR}/pixi_cache"
+    seed_cache "$pixi_cache_dir" "/layers/paketo-buildpacks_python-package-managers-run/pixi-env-cache"
+
+    pixi_project_name=""
+    if [ -f pixi.toml ]; then
+        pixi_project_name="$(grep -m1 '^name = ' pixi.toml | sed 's/^name = "\(.*\)"$/\1/')"
+    elif [ -f pyproject.toml ] && grep -q '\[tool\.pixi' pyproject.toml; then
+        pixi_project_name="$(grep -m1 '^name = ' pyproject.toml | sed 's/^name = "\(.*\)"$/\1/')"
+    fi
+    printf '%s' "${pixi_project_name}" >"${env_dir}/RENKU_PIXI_PROJECT_NAME.override"
+    printf '%s' "${pixi_cache_dir}" >"${env_dir}/RENKU_PIXI_CACHE_DIR.override"
+
+    cp "${buildpack_dir}/bin/pixi-setup.sh" "${execd_dir}/setup.sh"
+
+    cat >"${pixi_cache_dir}.toml"<<EOL
+[types]
+launch = true
+
+[metadata]
+description = "set pixi cache for in session use"
+version = "0.0.6"
 EOL
+else
+    cp "${buildpack_dir}/bin/venv-setup.sh" "${execd_dir}/setup.sh"
 
-if (which uv); then
-    uv_cache_dir="${CNB_LAYERS_DIR}/uv_cache"
-    ls -la /layers
-    cat /layers/*.toml
-    uv_cache_layer="/layers/paketo-buildpacks_python-package-managers-run/uv-env-cache"
-    cp -r "${uv_cache_layer}" "$uv_cache_dir"
-    chmod -R go+w "${uv_cache_dir}"
-    cat >>"${execd_dir}"/setup.sh <<EOL
-cp -ras --update=none "${uv_cache_dir}" "\${RENKU_MOUNT_DIR}/.uv_cache"
-export UV_CACHE_DIR="\${RENKU_MOUNT_DIR}/.uv_cache"
-if !(grep "UV_CACHE_DIR" \${HOME}/.bashrc); then
-  printf "export UV_CACHE_DIR=\${RENKU_MOUNT_DIR}/.uv_cache\n" >>  \${HOME}/.bashrc
-fi
-export UV_PROJECT_ENVIRONMENT="\${RENKU_WORKING_DIR}/.venv"
-if !(grep "UV_PROJECT_ENVIRONMENT" \${HOME}/.bashrc); then
-  printf "export UV_PROJECT_ENVIRONMENT=\${RENKU_MOUNT_DIR}/.venv\n" >>  \${HOME}/.bashrc
-fi
-EOL
+    if command -v uv >/dev/null 2>&1; then
+        uv_cache_dir="${CNB_LAYERS_DIR}/uv_cache"
+        seed_cache "$uv_cache_dir" "/layers/paketo-buildpacks_python-package-managers-run/uv-env-cache"
 
-    cat >"${uv_cache_dir}.toml"<<EOL
+        printf '%s' "${uv_cache_dir}" >"${env_dir}/RENKU_UV_CACHE_DIR.override"
+
+        cat >"${uv_cache_dir}.toml"<<EOL
 [types]
 launch = true
 
@@ -62,14 +57,14 @@ launch = true
 description = "set uv cache for in session use"
 version = "0.0.6"
 EOL
+    fi
 fi
 
-
-chmod +x "${execd_dir}"/setup.sh
+chmod +x "${execd_dir}/setup.sh"
 
 echo "Added launch script to ${execd_dir}/setup.sh"
 
-cat >"${layer_dir}".toml <<EOL
+cat >"${layer_dir}.toml" <<EOL
 [types]
 launch = true
 
@@ -77,6 +72,3 @@ launch = true
 description = "set dependency management for run sessions"
 version = "0.0.6"
 EOL
-
-ls -la "${CNB_LAYERS_DIR}"
-cat "${CNB_LAYERS_DIR}"/*toml
