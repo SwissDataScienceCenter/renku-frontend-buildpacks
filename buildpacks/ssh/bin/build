@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo -e "=== ✨ \033[1mRenku SSH buildpack\033[0m ==="
+
+echo "  Build configuration:"
+echo -e "    \$BP_RENKU_FRONTENDS\t${BP_RENKU_FRONTENDS}\tThe frontends to install"
+
+layers_dir="${CNB_LAYERS_DIR}"
+buildpack_dir="${CNB_BUILDPACK_DIR}"
+ssh_layer_dir="${layers_dir}"/ssh
+ssh_bin_dir="${ssh_layer_dir}"/bin
+ssh_www_dir="${ssh_layer_dir}"/www
+mkdir -p "${ssh_bin_dir}" "${ssh_www_dir}"
+
+DROPBEAR_VERSION="2026.94"
+DROPBEAR_URL="https://github.com/mkj/dropbear/archive/refs/tags/DROPBEAR_${DROPBEAR_VERSION}.tar.gz"
+DARKHTTPD_VERSION="1.17"
+DARKHTTPD_URL="https://github.com/emikulic/darkhttpd/archive/refs/tags/v${DARKHTTPD_VERSION}.tar.gz"
+
+build_tmp="$(mktemp -d)"
+trap 'rm -rf "${build_tmp}"' EXIT
+
+# dropbear: no upstream prebuilt binaries, compile from source (build image has build-essential)
+curl -sL -o "${build_tmp}/dropbear.tar.gz" "${DROPBEAR_URL}"
+tar -xzf "${build_tmp}/dropbear.tar.gz" -C "${build_tmp}"
+(
+  cd "${build_tmp}/dropbear-DROPBEAR_${DROPBEAR_VERSION}" &&
+  ./configure --disable-zlib >/dev/null &&
+  make -j"$(nproc)" PROGRAMS="dropbear dropbearkey" >/dev/null
+)
+cp "${build_tmp}/dropbear-DROPBEAR_${DROPBEAR_VERSION}/dropbear" "${ssh_bin_dir}/"
+cp "${build_tmp}/dropbear-DROPBEAR_${DROPBEAR_VERSION}/dropbearkey" "${ssh_bin_dir}/"
+
+# darkhttpd: single-file static web server for the placeholder page
+curl -sL -o "${build_tmp}/darkhttpd.tar.gz" "${DARKHTTPD_URL}"
+tar -xzf "${build_tmp}/darkhttpd.tar.gz" -C "${build_tmp}"
+cc -O2 -o "${ssh_bin_dir}/darkhttpd" "${build_tmp}/darkhttpd-${DARKHTTPD_VERSION}/darkhttpd.c"
+
+chmod 755 "${ssh_bin_dir}"/dropbear "${ssh_bin_dir}"/dropbearkey "${ssh_bin_dir}"/darkhttpd
+cp "${buildpack_dir}/bin/ssh-entrypoint.sh" "${ssh_bin_dir}/ssh-entrypoint.sh"
+chmod 755 "${ssh_bin_dir}"/ssh-entrypoint.sh
+
+cat >"${ssh_www_dir}/index.html" <<EOL
+<!DOCTYPE html>
+<html>
+  <head><title>Renku SSH session</title></head>
+  <body>
+    <h1>Renku SSH session</h1>
+    <p>This session is reachable over SSH on port 2222.</p>
+  </body>
+</html>
+EOL
+
+# Write layer metadata (CNB requirement)
+cat >"${layers_dir}/ssh.toml" <<EOL
+[types]
+launch = true
+
+[metadata]
+description = "SSH frontend for renku"
+version = "0.10.0"
+EOL
+
+# SET DEFAULT START COMMAND
+cat >"${layers_dir}/launch.toml" <<EOL
+[[processes]]
+type = "ssh"
+command = ["tini", "-g", "--"]
+args = ["bash", "${ssh_bin_dir}/ssh-entrypoint.sh"]
+default = true
+EOL
