@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -370,5 +372,91 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 			})
 		},
 		Entry("using coding-agent sample", "../../samples/coding-agent"),
+	)
+
+	DescribeTableSubtree(
+		"ssh",
+		func(source string) {
+			var image string
+			var container string
+			var webPort int
+			var sshPort int
+			var baseURL url.URL
+			var keyPath string
+			BeforeAll(func(ctx SpecContext) {
+				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
+				Expect(buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "ssh"})).To(Succeed())
+				webPort = getFreePortOrDie()
+				sshPort = getFreePortOrDie()
+				// because getFreePortOrDie releases its listener before returning,
+				// we fail loudly rather than silently collapsing the port bindings
+				Expect(sshPort).ToNot(Equal(webPort))
+				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", webPort)}
+				ports := map[int]int{webPort: webPort, sshPort: 2222}
+				container, err = runImage(ctx, client, image, envVars, ports)
+				Expect(err).ToNot(HaveOccurred())
+				baseURL = url.URL{
+					Host:   fmt.Sprintf("127.0.0.1:%d", webPort),
+					Scheme: "http",
+				}
+				keyDir := GinkgoT().TempDir()
+				keyPath = filepath.Join(keyDir, "id_ed25519")
+				Expect(exec.Command("ssh-keygen", "-t", "ed25519", "-N", "", "-q", "-f", keyPath).Run()).To(Succeed())
+				pub, err := os.ReadFile(keyPath + ".pub")
+				Expect(err).ToNot(HaveOccurred())
+				// runImage cannot mount volumes; dropbear reads ~/.ssh/authorized_keys
+				// per-login, so write the key the same way a secret mount would provide it
+				_, err = execInContainer(ctx, client, container, []string{"bash", "-c",
+					fmt.Sprintf("mkdir -p ~/.ssh && echo '%s' > ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys",
+						strings.TrimSpace(string(pub)))})
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			AfterAll(func(ctx SpecContext) {
+				if container != "" && client != nil {
+					log.Println("Cleaning up container")
+					err = removeContainer(ctx, client, container)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+				if image != "" && client != nil {
+					log.Println("Cleaning up image")
+					err = removeImage(ctx, client, image)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+			})
+
+			Context("when the container is running", func() {
+				It("placeholder page should respond with 200 on the session port", func(ctx SpecContext) {
+					req, err := http.NewRequestWithContext(ctx, "GET", baseURL.String(), nil)
+					Expect(err).ToNot(HaveOccurred())
+					Eventually(func(g Gomega) int {
+						res, err := httpClient.Do(req)
+						g.Expect(err).ToNot(HaveOccurred())
+						return res.StatusCode
+					}).WithTimeout(time.Minute * 1).WithOffset(1).Should(Equal(200))
+				})
+				It("should allow SSH login with the provided public key", func(ctx SpecContext) {
+					sshIntoSession := func(g Gomega) {
+						cmd := exec.CommandContext(ctx, "ssh",
+							"-i", keyPath,
+							"-p", fmt.Sprintf("%d", sshPort),
+							"-o", "StrictHostKeyChecking=no",
+							"-o", "UserKnownHostsFile=/dev/null",
+							"-o", "LogLevel=ERROR",
+							"-o", "BatchMode=yes",
+							"renku@127.0.0.1", "whoami")
+						out, err := cmd.CombinedOutput()
+						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
+						g.Expect(strings.TrimSpace(string(out))).To(Equal("renku"))
+					}
+					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+			})
+		},
+		Entry("using conda sample", "../../samples/conda"),
 	)
 })
