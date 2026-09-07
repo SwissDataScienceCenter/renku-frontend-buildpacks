@@ -1,0 +1,15 @@
+api = "0.11"
+
+[[targets]]
+  arch = "amd64"
+  os = "linux"
+
+[[targets]]
+  arch = "arm64"
+  os = "linux"
+
+[buildpack]
+  id = "renku/ssh"
+  name = "ssh frontend Buildpack"
+  version = "0.10.0"
+
