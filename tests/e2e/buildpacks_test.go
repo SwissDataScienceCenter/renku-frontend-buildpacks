@@ -393,7 +393,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 				// because getFreePortOrDie releases its listener before returning,
 				// we fail loudly rather than silently collapsing the port bindings
 				Expect(sshPort).ToNot(Equal(webPort))
-				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", webPort)}
+				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", webPort), "RENKU_WORKING_DIR=/workspace"}
 				ports := map[int]int{webPort: webPort, sshPort: 2222}
 				container, err = runImage(ctx, client, image, envVars, ports)
 				Expect(err).ToNot(HaveOccurred())
@@ -530,10 +530,28 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 					cmd := exec.CommandContext(ctx, "scp", args...)
 					out, err := cmd.CombinedOutput()
 					g.Expect(err).ToNot(HaveOccurred(), "scp output: %s", string(out))
-					content, err := execInContainer(ctx, client, container, []string{"cat", "/home/renku/hello_scp.txt"})
+					// relative remote targets resolve against the session working dir
+					content, err := execInContainer(ctx, client, container, []string{"cat", "/workspace/hello_scp.txt"})
 					g.Expect(err).ToNot(HaveOccurred())
 					g.Expect(content).To(ContainSubstring("hello scp"))
 				}
+				It("should start SSH sessions in the session working dir", func(ctx SpecContext) {
+					sshIntoSession := func(g Gomega) {
+						cmd := exec.CommandContext(ctx, "ssh",
+							"-i", keyPath,
+							"-p", fmt.Sprintf("%d", sshPort),
+							"-o", "StrictHostKeyChecking=no",
+							"-o", "UserKnownHostsFile=/dev/null",
+							"-o", "LogLevel=ERROR",
+							"-o", "BatchMode=yes",
+							"renku@127.0.0.1", "pwd")
+						out, err := cmd.CombinedOutput()
+						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
+						g.Expect(strings.TrimSpace(string(out))).To(Equal("/workspace"))
+					}
+					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+
 				It("should allow scp file upload via sftp protocol (modern scp default)", func(ctx SpecContext) {
 					Eventually(func(g Gomega) { scpIntoSession(ctx, g) }).
 						WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
