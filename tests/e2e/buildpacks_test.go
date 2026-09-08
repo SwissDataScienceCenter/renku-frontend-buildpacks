@@ -456,6 +456,24 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
 				})
 
+				It("should expose the CNB launch environment to SSH sessions", func(ctx SpecContext) {
+					sshIntoSession := func(g Gomega) {
+						cmd := exec.CommandContext(ctx, "ssh",
+							"-i", keyPath,
+							"-p", fmt.Sprintf("%d", sshPort),
+							"-o", "StrictHostKeyChecking=no",
+							"-o", "UserKnownHostsFile=/dev/null",
+							"-o", "LogLevel=ERROR",
+							"-o", "BatchMode=yes",
+							"renku@127.0.0.1", "printenv PATH")
+						out, err := cmd.CombinedOutput()
+						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
+						// the ssh layer's bin dir (prepended via env.launch) must survive
+						g.Expect(string(out)).To(ContainSubstring("/layers/renku_ssh/ssh/bin"))
+					}
+					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+
 				scpIntoSession := func(ctx SpecContext, g Gomega, extraArgs ...string) {
 					src := filepath.Join(GinkgoT().TempDir(), "hello_scp.txt")
 					Expect(os.WriteFile(src, []byte("hello scp\n"), 0o644)).To(Succeed())
