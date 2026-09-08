@@ -8,6 +8,13 @@ if [ -n "${SSH_ORIGINAL_COMMAND:-}" ]; then
   exec "${SHELL:-/bin/bash}" -c "${SSH_ORIGINAL_COMMAND}"
 fi
 # attach if a session exists, start a new one otherwise, so work survives disconnects.
-# the conda layer's LD_LIBRARY_PATH shadows system libs 
+# buildpacks export LD_LIBRARY_PATH into the launch env per the CNB spec (e.g. conda
+# layer libs); those shadow the system libs distro tmux links against and crash it.
+# Scrub it for the tmux binary and server only — panes still get the session env via
+# -e / set-environment -g (tmux >= 3.2), so user shells keep it intact.
+saved_ld_library_path="${LD_LIBRARY_PATH:-}"
 unset LD_LIBRARY_PATH
-tmux attach || exec tmux
+if [ -n "${saved_ld_library_path}" ] && tmux has-session 2>/dev/null; then
+  tmux set-environment -g LD_LIBRARY_PATH "${saved_ld_library_path}"
+fi
+exec tmux new -A -e LD_LIBRARY_PATH="${saved_ld_library_path}"
