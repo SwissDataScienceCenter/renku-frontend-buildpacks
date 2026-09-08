@@ -393,7 +393,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 				// because getFreePortOrDie releases its listener before returning,
 				// we fail loudly rather than silently collapsing the port bindings
 				Expect(sshPort).ToNot(Equal(webPort))
-				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", webPort), "RENKU_WORKING_DIR=/workspace"}
+				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", webPort), "RENKU_WORKING_DIR=/workspace", "LD_LIBRARY_PATH=/opt/conda-e2e-libs"}
 				ports := map[int]int{webPort: webPort, sshPort: 2222}
 				container, err = runImage(ctx, client, image, envVars, ports)
 				Expect(err).ToNot(HaveOccurred())
@@ -450,6 +450,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 							"-o", "UserKnownHostsFile=/dev/null",
 							"-o", "LogLevel=ERROR",
 							"-o", "BatchMode=yes",
+							"-o", "IdentitiesOnly=yes",
 							"renku@127.0.0.1", "whoami")
 						out, err := cmd.CombinedOutput()
 						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
@@ -467,6 +468,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 							"-o", "UserKnownHostsFile=/dev/null",
 							"-o", "LogLevel=ERROR",
 							"-o", "BatchMode=yes",
+							"-o", "IdentitiesOnly=yes",
 							"renku@127.0.0.1", "printenv PATH")
 						out, err := cmd.CombinedOutput()
 						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
@@ -488,6 +490,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 							"-o", "UserKnownHostsFile=/dev/null",
 							"-o", "LogLevel=ERROR",
 							"-o", "BatchMode=yes",
+							"-o", "IdentitiesOnly=yes",
 							"renku@127.0.0.1")
 						stdin, err := cmd.StdinPipe()
 						g.Expect(err).ToNot(HaveOccurred())
@@ -504,7 +507,9 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 							g.Expect(err).ToNot(HaveOccurred())
 						}).WithTimeout(time.Second * 30).WithPolling(time.Millisecond * 500).Should(Succeed())
 						time.Sleep(time.Second)
-						// a write error means ssh already died — cmd.Wait reports it with output
+						_, err = execInContainer(ctx, client, container, []string{"tmux", "send-keys",
+							"-t", "0", "printenv LD_LIBRARY_PATH > /tmp/pane_ld_library_path", "Enter"})
+						g.Expect(err).ToNot(HaveOccurred())
 						_, _ = stdin.Write([]byte{0x02, 'd'})
 						_ = stdin.Close()
 						g.Expect(cmd.Wait()).ToNot(HaveOccurred(), "ssh output: %s", out.String())
@@ -513,6 +518,17 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 						g.Expect(err).ToNot(HaveOccurred())
 					}
 					Eventually(sshIntoTmux).WithTimeout(time.Minute * 2).WithPolling(time.Second * 5).Should(Succeed())
+				})
+
+				It("should preserve LD_LIBRARY_PATH inside tmux panes", func(ctx SpecContext) {
+					Eventually(func(g Gomega) {
+						out, err := execInContainer(ctx, client, container, []string{"cat", "/tmp/pane_ld_library_path"})
+						g.Expect(err).ToNot(HaveOccurred())
+						// the pane env must carry the launch-env value exported by the
+						// conda buildpack AND the container-injected test value
+						g.Expect(out).To(ContainSubstring("paketo-buildpacks_conda-env-update/conda-env/lib"))
+						g.Expect(out).To(ContainSubstring("/opt/conda-e2e-libs"))
+					}).WithTimeout(time.Second * 30).WithPolling(time.Second).Should(Succeed())
 				})
 
 				scpIntoSession := func(ctx SpecContext, g Gomega, extraArgs ...string) {
@@ -525,6 +541,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 						"-o", "UserKnownHostsFile=/dev/null",
 						"-o", "LogLevel=ERROR",
 						"-o", "BatchMode=yes",
+						"-o", "IdentitiesOnly=yes",
 					}, extraArgs...)
 					args = append(args, src, "renku@127.0.0.1:")
 					cmd := exec.CommandContext(ctx, "scp", args...)
@@ -544,6 +561,7 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 							"-o", "UserKnownHostsFile=/dev/null",
 							"-o", "LogLevel=ERROR",
 							"-o", "BatchMode=yes",
+							"-o", "IdentitiesOnly=yes",
 							"renku@127.0.0.1", "pwd")
 						out, err := cmd.CombinedOutput()
 						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
