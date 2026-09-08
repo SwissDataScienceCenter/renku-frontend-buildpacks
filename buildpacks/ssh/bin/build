@@ -71,6 +71,8 @@ cc -O2 -o "${ssh_bin_dir}/darkhttpd" "${build_tmp}/darkhttpd-${DARKHTTPD_VERSION
 chmod 755 "${ssh_bin_dir}"/dropbear "${ssh_bin_dir}"/dropbearkey "${ssh_bin_dir}"/scp "${ssh_bin_dir}"/sftp-server "${ssh_bin_dir}"/darkhttpd
 cp "${buildpack_dir}/bin/ssh-entrypoint.sh" "${ssh_bin_dir}/ssh-entrypoint.sh"
 chmod 755 "${ssh_bin_dir}"/ssh-entrypoint.sh
+cp "${buildpack_dir}/bin/ssh-session.sh" "${ssh_bin_dir}/ssh-session.sh"
+chmod 755 "${ssh_bin_dir}"/ssh-session.sh
 
 # expose the ssh layer binaries (scp for legacy `scp -O`) to session shells;
 # launch layers don't get their bin dir on PATH automatically in CNB
