@@ -1,6 +1,8 @@
 package e2e
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -472,6 +474,45 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 						g.Expect(string(out)).To(ContainSubstring("/layers/renku_ssh/ssh/bin"))
 					}
 					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+
+				It("should wrap interactive SSH sessions in tmux", func(ctx SpecContext) {
+					sshIntoTmux := func(g Gomega) {
+						runCtx, cancel := context.WithTimeout(ctx, time.Minute)
+						defer cancel()
+						cmd := exec.CommandContext(runCtx, "ssh",
+							"-tt",
+							"-i", keyPath,
+							"-p", fmt.Sprintf("%d", sshPort),
+							"-o", "StrictHostKeyChecking=no",
+							"-o", "UserKnownHostsFile=/dev/null",
+							"-o", "LogLevel=ERROR",
+							"-o", "BatchMode=yes",
+							"renku@127.0.0.1")
+						stdin, err := cmd.StdinPipe()
+						g.Expect(err).ToNot(HaveOccurred())
+						var out bytes.Buffer
+						cmd.Stdout = &out
+						cmd.Stderr = &out
+						g.Expect(cmd.Start()).To(Succeed())
+						// wait for the tmux server to come up, give the client a beat to
+						// finish attaching (keys typed before the client sets raw mode are
+						// mangled by the pty's canonical-mode echo and reach the pane instead),
+						// then detach via tmux's prefix key (C-b d)
+						Eventually(func(g Gomega) {
+							_, err := execInContainer(ctx, client, container, []string{"tmux", "list-sessions"})
+							g.Expect(err).ToNot(HaveOccurred())
+						}).WithTimeout(time.Second * 30).WithPolling(time.Millisecond * 500).Should(Succeed())
+						time.Sleep(time.Second)
+						// a write error means ssh already died — cmd.Wait reports it with output
+						_, _ = stdin.Write([]byte{0x02, 'd'})
+						_ = stdin.Close()
+						g.Expect(cmd.Wait()).ToNot(HaveOccurred(), "ssh output: %s", out.String())
+						// the tmux server must have outlived the detached session
+						_, err = execInContainer(runCtx, client, container, []string{"tmux", "list-sessions"})
+						g.Expect(err).ToNot(HaveOccurred())
+					}
+					Eventually(sshIntoTmux).WithTimeout(time.Minute * 2).WithPolling(time.Second * 5).Should(Succeed())
 				})
 
 				scpIntoSession := func(ctx SpecContext, g Gomega, extraArgs ...string) {
