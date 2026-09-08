@@ -25,12 +25,24 @@ trap 'rm -rf "${build_tmp}"' EXIT
 # dropbear: no upstream prebuilt binaries, compile from source (build image has build-essential)
 # scp: legacy scp protocol (client `scp -O`) execs a remote scp binary; dropbear ships one
 # localoptions.h: dropbear has no native sftp, it execs SFTPSERVER_PATH; point it at the
-# sftp-server binary built below (no configure flag for this, compile-time define only)
+# sftp-server binary built below (no configure flag for this, compile-time define only).
 curl -sL -o "${build_tmp}/dropbear.tar.gz" "${DROPBEAR_URL}"
 tar -xzf "${build_tmp}/dropbear.tar.gz" -C "${build_tmp}"
+dropbear_src="${build_tmp}/dropbear-DROPBEAR_${DROPBEAR_VERSION}/src"
 cat >"${build_tmp}/dropbear-DROPBEAR_${DROPBEAR_VERSION}/localoptions.h" <<EOL
 #define SFTPSERVER_PATH "${ssh_bin_dir}/sftp-server"
 EOL
+# dropbear clears the environment and resets PATH to its compiled-in default for every
+# session; keep the launcher-provided PATH instead with dropbear -e (pass env through)
+# PATH is already the full CNB launch PATH, so only fall back to the default when unset
+sed -i \
+  -e 's|addnewvar("PATH", DEFAULT_ROOT_PATH);|if (!getenv("PATH")) addnewvar("PATH", DEFAULT_ROOT_PATH);|' \
+  -e 's|addnewvar("PATH", DEFAULT_PATH);|if (!getenv("PATH")) addnewvar("PATH", DEFAULT_PATH);|' \
+  "${dropbear_src}/svr-chansession.c"
+[[ "$(grep -c 'if (!getenv("PATH")) addnewvar("PATH"' "${dropbear_src}/svr-chansession.c")" == "2" ]] || {
+  echo "failed to patch dropbear session PATH handling" >&2
+  exit 1
+}
 (
   cd "${build_tmp}/dropbear-DROPBEAR_${DROPBEAR_VERSION}" &&
   ./configure --disable-zlib >/dev/null &&

@@ -18,6 +18,7 @@ if [[ ! -f "${DROPBEAR_HOST_KEY}" ]]; then
 fi
 
 # -s: public key auth only (password logins disabled)
+# -e: pass the launcher-provided environment (CNB launch env) to SSH sessions
 # web placeholder page in background; dropbear stays in foreground for tini
 "${ssh_bin_dir}/darkhttpd" "${ssh_www_dir}" --port "${RENKU_SESSION_PORT:-8000}" &
-exec "${ssh_bin_dir}/dropbear" -F -r "${DROPBEAR_HOST_KEY}" -s -p "${SSH_PORT}"
+exec "${ssh_bin_dir}/dropbear" -F -e -r "${DROPBEAR_HOST_KEY}" -s -p "${SSH_PORT}"
