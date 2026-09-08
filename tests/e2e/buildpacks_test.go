@@ -455,6 +455,34 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 					}
 					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
 				})
+
+				scpIntoSession := func(ctx SpecContext, g Gomega, extraArgs ...string) {
+					src := filepath.Join(GinkgoT().TempDir(), "hello_scp.txt")
+					Expect(os.WriteFile(src, []byte("hello scp\n"), 0o644)).To(Succeed())
+					args := append([]string{
+						"-i", keyPath,
+						"-P", fmt.Sprintf("%d", sshPort),
+						"-o", "StrictHostKeyChecking=no",
+						"-o", "UserKnownHostsFile=/dev/null",
+						"-o", "LogLevel=ERROR",
+						"-o", "BatchMode=yes",
+					}, extraArgs...)
+					args = append(args, src, "renku@127.0.0.1:")
+					cmd := exec.CommandContext(ctx, "scp", args...)
+					out, err := cmd.CombinedOutput()
+					g.Expect(err).ToNot(HaveOccurred(), "scp output: %s", string(out))
+					content, err := execInContainer(ctx, client, container, []string{"cat", "/home/renku/hello_scp.txt"})
+					g.Expect(err).ToNot(HaveOccurred())
+					g.Expect(content).To(ContainSubstring("hello scp"))
+				}
+				It("should allow scp file upload via sftp protocol (modern scp default)", func(ctx SpecContext) {
+					Eventually(func(g Gomega) { scpIntoSession(ctx, g) }).
+						WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+				It("should allow scp file upload via legacy protocol (scp -O)", func(ctx SpecContext) {
+					Eventually(func(g Gomega) { scpIntoSession(ctx, g, "-O") }).
+						WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
 			})
 		},
 		Entry("using conda sample", "../../samples/conda"),
