@@ -480,6 +480,8 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 
 				It("should wrap interactive SSH sessions in tmux", func(ctx SpecContext) {
 					sshIntoTmux := func(g Gomega) {
+						// self-contained attempt
+						_, _ = execInContainer(ctx, client, container, []string{"tmux", "kill-server"})
 						runCtx, cancel := context.WithTimeout(ctx, time.Minute)
 						defer cancel()
 						cmd := exec.CommandContext(runCtx, "ssh",
@@ -492,20 +494,38 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 							"-o", "BatchMode=yes",
 							"-o", "IdentitiesOnly=yes",
 							"renku@127.0.0.1")
+						// CI shells run without a tty, so TERM is unset or "dumb"; the
+						// tmux client then aborts before creating any session
+						// ("open terminal failed: terminal does not support clear").
+						// Interactive users always have a capable terminal, so fake one.
+						cmd.Env = append(os.Environ(), "TERM=xterm-256color")
 						stdin, err := cmd.StdinPipe()
 						g.Expect(err).ToNot(HaveOccurred())
 						var out bytes.Buffer
 						cmd.Stdout = &out
 						cmd.Stderr = &out
 						g.Expect(cmd.Start()).To(Succeed())
+						// a failed attempt must not leak its ssh client into the next retry
+						defer func() {
+							_ = stdin.Close()
+							_ = cmd.Process.Kill()
+							_ = cmd.Wait()
+						}()
 						// wait for the tmux server to come up, give the client a beat to
 						// finish attaching (keys typed before the client sets raw mode are
-						// mangled by the pty's canonical-mode echo and reach the pane instead),
-						// then detach via tmux's prefix key (C-b d)
-						Eventually(func(g Gomega) {
-							_, err := execInContainer(ctx, client, container, []string{"tmux", "list-sessions"})
-							g.Expect(err).ToNot(HaveOccurred())
-						}).WithTimeout(time.Second * 30).WithPolling(time.Millisecond * 500).Should(Succeed())
+						// mangled by the pty's canonical-mode echo).
+						// This must be a plain retried failure, NOT a nested Eventually:
+						// a nested Eventually's timeout aborts the spec instead of letting
+						// the outer Eventually establish a fresh connection.
+						clientAttached := false
+						for deadline := time.Now().Add(30 * time.Second); time.Now().Before(deadline); {
+							if _, err := execInContainer(ctx, client, container, []string{"tmux", "list-clients"}); err == nil {
+								clientAttached = true
+								break
+							}
+							time.Sleep(500 * time.Millisecond)
+						}
+						g.Expect(clientAttached).To(BeTrue(), "tmux client never attached; ssh output: %s", out.String())
 						time.Sleep(time.Second)
 						_, err = execInContainer(ctx, client, container, []string{"tmux", "send-keys",
 							"-t", "0", "printenv LD_LIBRARY_PATH > /tmp/pane_ld_library_path", "Enter"})
@@ -514,8 +534,8 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 						_ = stdin.Close()
 						g.Expect(cmd.Wait()).ToNot(HaveOccurred(), "ssh output: %s", out.String())
 						// the tmux server must have outlived the detached session
-						_, err = execInContainer(runCtx, client, container, []string{"tmux", "list-sessions"})
-						g.Expect(err).ToNot(HaveOccurred())
+						_, err = execInContainer(ctx, client, container, []string{"tmux", "list-sessions"})
+						g.Expect(err).ToNot(HaveOccurred(), "tmux server did not outlive detach; ssh output: %s", out.String())
 					}
 					Eventually(sshIntoTmux).WithTimeout(time.Minute * 2).WithPolling(time.Second * 5).Should(Succeed())
 				})
