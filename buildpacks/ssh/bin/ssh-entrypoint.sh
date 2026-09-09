@@ -17,10 +17,11 @@ if [[ ! -f "${DROPBEAR_HOST_KEY}" ]]; then
   "${ssh_bin_dir}/dropbearkey" -t ed25519 -f "${DROPBEAR_HOST_KEY}" >/dev/null
 fi
 
-# -s: public key auth only (password logins disabled)
+# -B: allow logins with no password (testing only — anyone with the port gets
+#     in; relies on the build-time dropbear patch below)
 # -e: pass the launcher-provided environment (CNB launch env) to SSH sessions
 # -c: run every session through ssh-session.sh (tmux for logins, passthrough for
 #     exec requests and the sftp subsystem)
 # web placeholder page in background; dropbear stays in foreground for tini
 "${ssh_bin_dir}/darkhttpd" "${ssh_www_dir}" --port "${RENKU_SESSION_PORT:-8000}" &
-exec "${ssh_bin_dir}/dropbear" -F -e -c "${ssh_bin_dir}/ssh-session.sh" -r "${DROPBEAR_HOST_KEY}" -s -p "${SSH_PORT}"
+exec "${ssh_bin_dir}/dropbear" -F -e -c "${ssh_bin_dir}/ssh-session.sh" -r "${DROPBEAR_HOST_KEY}" -B -p "${SSH_PORT}"
