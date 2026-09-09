@@ -45,6 +45,16 @@ sed -i \
   echo "failed to patch dropbear session PATH handling" >&2
   exit 1
 }
+# dropbear -B only allows blank-password logins when the account's password
+# field is empty; as a non-root dropbear it never is (shadow is unreadable so
+# the field is forced to "!!"). Drop that requirement so -B accepts passwordless
+# "none" auth for testing. Can't edit /etc/shadow at runtime: the session user
+# is unprivileged.
+sed -i "s|&& ses.authstate.pw_passwd\[0\] == '\\\\0')|)|" "${dropbear_src}/svr-auth.c"
+[[ "$(grep -c "pw_passwd\[0\]" "${dropbear_src}/svr-auth.c")" == "0" ]] || {
+  echo "failed to patch dropbear blank-password check" >&2
+  exit 1
+}
 (
   cd "${build_tmp}/dropbear-DROPBEAR_${DROPBEAR_VERSION}" &&
   ./configure --disable-zlib >/dev/null &&
