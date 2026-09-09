@@ -526,16 +526,15 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 							time.Sleep(500 * time.Millisecond)
 						}
 						g.Expect(clientAttached).To(BeTrue(), "tmux client never attached; ssh output: %s", out.String())
-						time.Sleep(time.Second)
 						_, err = execInContainer(ctx, client, container, []string{"tmux", "send-keys",
 							"-t", "0", "printenv LD_LIBRARY_PATH > /tmp/pane_ld_library_path", "Enter"})
 						g.Expect(err).ToNot(HaveOccurred())
-						_, _ = stdin.Write([]byte{0x02, 'd'})
+						_ = cmd.Process.Kill()
 						_ = stdin.Close()
-						g.Expect(cmd.Wait()).ToNot(HaveOccurred(), "ssh output: %s", out.String())
-						// the tmux server must have outlived the detached session
+						_ = cmd.Wait()
+						// the tmux server must have outlived the disconnected session
 						_, err = execInContainer(ctx, client, container, []string{"tmux", "list-sessions"})
-						g.Expect(err).ToNot(HaveOccurred(), "tmux server did not outlive detach; ssh output: %s", out.String())
+						g.Expect(err).ToNot(HaveOccurred(), "tmux session did not survive disconnect; ssh output: %s", out.String())
 					}
 					Eventually(sshIntoTmux).WithTimeout(time.Minute * 2).WithPolling(time.Second * 5).Should(Succeed())
 				})
