@@ -111,4 +111,7 @@ type = "ssh"
 command = ["tini", "-g", "--"]
 args = ["bash", "${ssh_bin_dir}/ssh-entrypoint.sh"]
 default = true
+[[labels]]
+key = "ch.datascience.renku.ssh"
+value = true
 EOL
