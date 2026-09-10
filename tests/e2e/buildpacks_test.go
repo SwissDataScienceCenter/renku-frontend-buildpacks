@@ -1,11 +1,15 @@
 package e2e
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -370,5 +374,231 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 			})
 		},
 		Entry("using coding-agent sample", "../../samples/coding-agent"),
+	)
+
+	DescribeTableSubtree(
+		"ssh",
+		func(source string) {
+			var image string
+			var container string
+			var webPort int
+			var sshPort int
+			var baseURL url.URL
+			var keyPath string
+			BeforeAll(func(ctx SpecContext) {
+				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
+				Expect(buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "ssh"})).To(Succeed())
+				webPort = getFreePortOrDie()
+				sshPort = getFreePortOrDie()
+				// because getFreePortOrDie releases its listener before returning,
+				// we fail loudly rather than silently collapsing the port bindings
+				Expect(sshPort).ToNot(Equal(webPort))
+				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", webPort), "RENKU_WORKING_DIR=/workspace", "LD_LIBRARY_PATH=/opt/conda-e2e-libs"}
+				ports := map[int]int{webPort: webPort, sshPort: 2222}
+				container, err = runImage(ctx, client, image, envVars, ports)
+				Expect(err).ToNot(HaveOccurred())
+				baseURL = url.URL{
+					Host:   fmt.Sprintf("127.0.0.1:%d", webPort),
+					Scheme: "http",
+				}
+				keyDir := GinkgoT().TempDir()
+				keyPath = filepath.Join(keyDir, "id_ed25519")
+				Expect(exec.Command("ssh-keygen", "-t", "ed25519", "-N", "", "-q", "-f", keyPath).Run()).To(Succeed())
+				pub, err := os.ReadFile(keyPath + ".pub")
+				Expect(err).ToNot(HaveOccurred())
+				// runImage cannot mount volumes; dropbear reads ~/.ssh/authorized_keys
+				// per-login, so write the key the same way a secret mount would provide it
+				_, err = execInContainer(ctx, client, container, []string{"bash", "-c",
+					fmt.Sprintf("mkdir -p ~/.ssh && echo '%s' > ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys",
+						strings.TrimSpace(string(pub)))})
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			AfterAll(func(ctx SpecContext) {
+				if container != "" && client != nil {
+					log.Println("Cleaning up container")
+					err = removeContainer(ctx, client, container)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+				if image != "" && client != nil {
+					log.Println("Cleaning up image")
+					err = removeImage(ctx, client, image)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+			})
+
+			Context("when the container is running", func() {
+				It("placeholder page should respond with 200 on the session port", func(ctx SpecContext) {
+					req, err := http.NewRequestWithContext(ctx, "GET", baseURL.String(), nil)
+					Expect(err).ToNot(HaveOccurred())
+					Eventually(func(g Gomega) int {
+						res, err := httpClient.Do(req)
+						g.Expect(err).ToNot(HaveOccurred())
+						return res.StatusCode
+					}).WithTimeout(time.Minute * 1).WithOffset(1).Should(Equal(200))
+				})
+				It("should allow SSH login with the provided public key", func(ctx SpecContext) {
+					sshIntoSession := func(g Gomega) {
+						cmd := exec.CommandContext(ctx, "ssh",
+							"-i", keyPath,
+							"-p", fmt.Sprintf("%d", sshPort),
+							"-o", "StrictHostKeyChecking=no",
+							"-o", "UserKnownHostsFile=/dev/null",
+							"-o", "LogLevel=ERROR",
+							"-o", "BatchMode=yes",
+							"-o", "IdentitiesOnly=yes",
+							"renku@127.0.0.1", "whoami")
+						out, err := cmd.CombinedOutput()
+						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
+						g.Expect(strings.TrimSpace(string(out))).To(Equal("renku"))
+					}
+					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+
+				It("should expose the CNB launch environment to SSH sessions", func(ctx SpecContext) {
+					sshIntoSession := func(g Gomega) {
+						cmd := exec.CommandContext(ctx, "ssh",
+							"-i", keyPath,
+							"-p", fmt.Sprintf("%d", sshPort),
+							"-o", "StrictHostKeyChecking=no",
+							"-o", "UserKnownHostsFile=/dev/null",
+							"-o", "LogLevel=ERROR",
+							"-o", "BatchMode=yes",
+							"-o", "IdentitiesOnly=yes",
+							"renku@127.0.0.1", "printenv PATH")
+						out, err := cmd.CombinedOutput()
+						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
+						// the ssh layer's bin dir (prepended via env.launch) must survive
+						g.Expect(string(out)).To(ContainSubstring("/layers/renku_ssh/ssh/bin"))
+					}
+					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+
+				It("should wrap interactive SSH sessions in tmux", func(ctx SpecContext) {
+					sshIntoTmux := func(g Gomega) {
+						// self-contained attempt
+						_, _ = execInContainer(ctx, client, container, []string{"tmux", "kill-server"})
+						runCtx, cancel := context.WithTimeout(ctx, time.Minute)
+						defer cancel()
+						cmd := exec.CommandContext(runCtx, "ssh",
+							"-tt",
+							"-i", keyPath,
+							"-p", fmt.Sprintf("%d", sshPort),
+							"-o", "StrictHostKeyChecking=no",
+							"-o", "UserKnownHostsFile=/dev/null",
+							"-o", "LogLevel=ERROR",
+							"-o", "BatchMode=yes",
+							"-o", "IdentitiesOnly=yes",
+							"renku@127.0.0.1")
+						// CI shells run without a tty, so TERM is unset or "dumb"; the
+						// tmux client then aborts before creating any session
+						// ("open terminal failed: terminal does not support clear").
+						// Interactive users always have a capable terminal, so fake one.
+						cmd.Env = append(os.Environ(), "TERM=xterm-256color")
+						stdin, err := cmd.StdinPipe()
+						g.Expect(err).ToNot(HaveOccurred())
+						var out bytes.Buffer
+						cmd.Stdout = &out
+						cmd.Stderr = &out
+						g.Expect(cmd.Start()).To(Succeed())
+						// a failed attempt must not leak its ssh client into the next retry
+						defer func() {
+							_ = stdin.Close()
+							_ = cmd.Process.Kill()
+							_ = cmd.Wait()
+						}()
+						// wait for the tmux server to come up, give the client a beat to
+						// finish attaching (keys typed before the client sets raw mode are
+						// mangled by the pty's canonical-mode echo).
+						// This must be a plain retried failure, NOT a nested Eventually:
+						// a nested Eventually's timeout aborts the spec instead of letting
+						// the outer Eventually establish a fresh connection.
+						clientAttached := false
+						for deadline := time.Now().Add(30 * time.Second); time.Now().Before(deadline); {
+							if _, err := execInContainer(ctx, client, container, []string{"tmux", "list-clients"}); err == nil {
+								clientAttached = true
+								break
+							}
+							time.Sleep(500 * time.Millisecond)
+						}
+						g.Expect(clientAttached).To(BeTrue(), "tmux client never attached; ssh output: %s", out.String())
+						_, err = execInContainer(ctx, client, container, []string{"tmux", "send-keys",
+							"-t", "0", "printenv LD_LIBRARY_PATH > /tmp/pane_ld_library_path", "Enter"})
+						g.Expect(err).ToNot(HaveOccurred())
+						_ = cmd.Process.Kill()
+						_ = stdin.Close()
+						_ = cmd.Wait()
+						// the tmux server must have outlived the disconnected session
+						_, err = execInContainer(ctx, client, container, []string{"tmux", "list-sessions"})
+						g.Expect(err).ToNot(HaveOccurred(), "tmux session did not survive disconnect; ssh output: %s", out.String())
+					}
+					Eventually(sshIntoTmux).WithTimeout(time.Minute * 2).WithPolling(time.Second * 5).Should(Succeed())
+				})
+
+				It("should preserve LD_LIBRARY_PATH inside tmux panes", func(ctx SpecContext) {
+					Eventually(func(g Gomega) {
+						out, err := execInContainer(ctx, client, container, []string{"cat", "/tmp/pane_ld_library_path"})
+						g.Expect(err).ToNot(HaveOccurred())
+						// the pane env must carry the launch-env value exported by the
+						// conda buildpack AND the container-injected test value
+						g.Expect(out).To(ContainSubstring("paketo-buildpacks_conda-env-update/conda-env/lib"))
+						g.Expect(out).To(ContainSubstring("/opt/conda-e2e-libs"))
+					}).WithTimeout(time.Second * 30).WithPolling(time.Second).Should(Succeed())
+				})
+
+				scpIntoSession := func(ctx SpecContext, g Gomega, extraArgs ...string) {
+					src := filepath.Join(GinkgoT().TempDir(), "hello_scp.txt")
+					Expect(os.WriteFile(src, []byte("hello scp\n"), 0o644)).To(Succeed())
+					args := append([]string{
+						"-i", keyPath,
+						"-P", fmt.Sprintf("%d", sshPort),
+						"-o", "StrictHostKeyChecking=no",
+						"-o", "UserKnownHostsFile=/dev/null",
+						"-o", "LogLevel=ERROR",
+						"-o", "BatchMode=yes",
+						"-o", "IdentitiesOnly=yes",
+					}, extraArgs...)
+					args = append(args, src, "renku@127.0.0.1:")
+					cmd := exec.CommandContext(ctx, "scp", args...)
+					out, err := cmd.CombinedOutput()
+					g.Expect(err).ToNot(HaveOccurred(), "scp output: %s", string(out))
+					// relative remote targets resolve against the session working dir
+					content, err := execInContainer(ctx, client, container, []string{"cat", "/workspace/hello_scp.txt"})
+					g.Expect(err).ToNot(HaveOccurred())
+					g.Expect(content).To(ContainSubstring("hello scp"))
+				}
+				It("should start SSH sessions in the session working dir", func(ctx SpecContext) {
+					sshIntoSession := func(g Gomega) {
+						cmd := exec.CommandContext(ctx, "ssh",
+							"-i", keyPath,
+							"-p", fmt.Sprintf("%d", sshPort),
+							"-o", "StrictHostKeyChecking=no",
+							"-o", "UserKnownHostsFile=/dev/null",
+							"-o", "LogLevel=ERROR",
+							"-o", "BatchMode=yes",
+							"-o", "IdentitiesOnly=yes",
+							"renku@127.0.0.1", "pwd")
+						out, err := cmd.CombinedOutput()
+						g.Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
+						g.Expect(strings.TrimSpace(string(out))).To(Equal("/workspace"))
+					}
+					Eventually(sshIntoSession).WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+
+				It("should allow scp file upload via sftp protocol (modern scp default)", func(ctx SpecContext) {
+					Eventually(func(g Gomega) { scpIntoSession(ctx, g) }).
+						WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+				It("should allow scp file upload via legacy protocol (scp -O)", func(ctx SpecContext) {
+					Eventually(func(g Gomega) { scpIntoSession(ctx, g, "-O") }).
+						WithTimeout(time.Minute * 1).WithPolling(time.Second * 5).Should(Succeed())
+				})
+			})
+		},
+		Entry("using conda sample", "../../samples/conda"),
 	)
 })
