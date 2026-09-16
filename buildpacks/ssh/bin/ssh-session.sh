@@ -7,6 +7,12 @@ cd "${RENKU_WORKING_DIR:-${HOME}}" 2>/dev/null || true
 if [ -n "${SSH_ORIGINAL_COMMAND:-}" ]; then
   exec "${SHELL:-/bin/bash}" -c "${SSH_ORIGINAL_COMMAND}"
 fi
+# tmux needs a terminal. Non-tty clients (VS Code Remote-SSH opens its control
+# connection with `ssh -T -D <port>` and bootstraps the server over stdin) must
+# get a plain shell: it reads the bootstrap script and keeps the channel alive.
+if [ ! -t 0 ]; then
+  exec "${SHELL:-/bin/bash}"
+fi
 # attach if a session exists, start a new one otherwise, so work survives disconnects.
 # buildpacks export LD_LIBRARY_PATH into the launch env per the CNB spec (e.g. conda
 # layer libs); those shadow the system libs distro tmux links against and crash it.

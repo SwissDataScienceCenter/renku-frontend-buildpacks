@@ -550,6 +550,32 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 					}).WithTimeout(time.Second * 30).WithPolling(time.Second).Should(Succeed())
 				})
 
+				It("should not start tmux for non-tty connections (VS Code Remote-SSH)", func(ctx SpecContext) {
+					// VS Code Remote-SSH opens its control connection as
+					// `ssh -T [-D <port>]` with no remote command and bootstraps
+					// the server over stdin; tmux must not hijack that channel.
+					_, _ = execInContainer(ctx, client, container, []string{"tmux", "kill-server"})
+					runCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+					defer cancel()
+					cmd := exec.CommandContext(runCtx, "ssh",
+						"-T",
+						"-i", keyPath,
+						"-p", fmt.Sprintf("%d", sshPort),
+						"-o", "StrictHostKeyChecking=no",
+						"-o", "UserKnownHostsFile=/dev/null",
+						"-o", "LogLevel=ERROR",
+						"-o", "BatchMode=yes",
+						"-o", "IdentitiesOnly=yes",
+						"renku@127.0.0.1")
+					cmd.Stdin = strings.NewReader("echo READY; exit\n")
+					out, err := cmd.CombinedOutput()
+					Expect(err).ToNot(HaveOccurred(), "ssh output: %s", string(out))
+					Expect(string(out)).To(ContainSubstring("READY"), "ssh output: %s", string(out))
+					Expect(string(out)).ToNot(ContainSubstring("not a terminal"), "ssh output: %s", string(out))
+					_, err = execInContainer(ctx, client, container, []string{"tmux", "list-sessions"})
+					Expect(err).To(HaveOccurred(), "tmux session should not be created for a non-tty connection")
+				})
+
 				scpIntoSession := func(ctx SpecContext, g Gomega, extraArgs ...string) {
 					src := filepath.Join(GinkgoT().TempDir(), "hello_scp.txt")
 					Expect(os.WriteFile(src, []byte("hello scp\n"), 0o644)).To(Succeed())
