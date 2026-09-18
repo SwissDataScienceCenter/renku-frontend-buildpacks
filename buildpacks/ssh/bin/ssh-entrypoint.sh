@@ -17,6 +17,15 @@ if [[ ! -f "${DROPBEAR_HOST_KEY}" ]]; then
   "${ssh_bin_dir}/dropbearkey" -t ed25519 -f "${DROPBEAR_HOST_KEY}" >/dev/null
 fi
 
+# accept only the proxy's proxy-to-session public key (mounted by data-services)
+PROXY_AUTH_PUB="${RENKU_MOUNT_DIR}/.ssh/proxy_auth_key.pub"
+if [[ -f "${PROXY_AUTH_PUB}" ]]; then
+  mkdir -p "${HOME}/.ssh"
+  chmod 700 "${HOME}/.ssh"
+  cp "${PROXY_AUTH_PUB}" "${HOME}/.ssh/authorized_keys"
+  chmod 600 "${HOME}/.ssh/authorized_keys"
+fi
+
 # -s: public key auth only (password logins disabled)
 # -e: pass the launcher-provided environment (CNB launch env) to SSH sessions
 # -c: run every session through ssh-session.sh (tmux for logins, passthrough for
