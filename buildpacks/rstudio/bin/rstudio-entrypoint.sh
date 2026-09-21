@@ -33,6 +33,7 @@ EOL
 cat > "${RENKU_MOUNT_DIR}/.rstudio/rsession.conf" <<EOF
 session-default-working-dir=${RENKU_WORKING_DIR}
 session-default-new-project-dir=${RENKU_WORKING_DIR}
+copilot-enabled=1
 EOF
 
 if [ -z "${USER}" ]; then
