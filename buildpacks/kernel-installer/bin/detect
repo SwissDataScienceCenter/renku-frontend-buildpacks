@@ -76,4 +76,19 @@ name = "uv"
 [or.requires.metadata]
 build = true
 launch = true
+
+[[or]]
+[[or.requires]]
+name = "jupyterlab"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
+name = "pixi-environment"
+
+[or.requires.metadata]
+build = true
+launch = true
+
 EOL

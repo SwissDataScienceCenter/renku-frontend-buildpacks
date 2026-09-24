@@ -35,6 +35,19 @@ launch = true
 
 [[or]]
 [[or.requires]]
+name = "pixi-environment"
+
+[or.requires.metadata]
+launch = true
+
+[[or.requires]]
+name = "pixi"
+
+[or.requires.metadata]
+launch = true
+
+[[or]]
+[[or.requires]]
 name = "uv-environment"
 
 [or.requires.metadata]
