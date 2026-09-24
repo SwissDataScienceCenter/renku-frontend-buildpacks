@@ -41,6 +41,7 @@ automatically detect and configure your Renku environment based on your project'
     *   **python-dependency-manager**: Buildpack for setting up a virtual environment at launch.
     *   **renku-variables**: Buildpack for setting up `RENKU_` environment variables at launch.
     *   **rstudio**: Buildpack for the RStudio frontend.
+    *   **ssh**: Buildpack for the SSH frontend (dropbear on port 2222, pubkey auth via a key mounted at `~/.ssh/authorized_keys`).
     *   **ttyd**: Buildpack for the TTYD frontend.
     *   **vscodium**: Buildpack for the VSCodium frontend.
 *   **samples**: Contains sample applications for different frontend frameworks. These samples can
