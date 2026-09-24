@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+
+create_tmux_config() {
+    local -r tmux_config="${1:-${HOME}/work/.tmux.conf}"
+    [[ -e "${tmux_config}" ]] || cat <<-EOF > "${tmux_config}"
+		# -- Fix extended-keys warning -----------------------------------------
+		set -g extended-keys on
+
+		# -- General Settings --------------------------------------------------
+		set -g default-terminal "tmux-256color"
+		set -g base-index 1
+		set -g pane-base-index 1
+		set -g renumber-windows on
+		set -g status-position bottom
+
+		# -- Disable vi mode for copy/paste (use emacs-style) -----------------
+		set -g mode-keys vi
+
+		# -- Key Bindings ------------------------------------------------------
+
+		# Use Ctrl+a as prefix (avoids conflict with pi's Ctrl+b)
+		set -g prefix C-a
+		bind C-a send-prefix
+
+		# Better pane splitting (splits in current directory)
+		bind | split-window -h -c "#{pane_current_path}"
+		bind - split-window -v -c "#{pane_current_path}"
+		bind c new-window -c "#{pane_current_path}"
+
+		# Vim-style pane navigation (Ctrl+a h/j/k/l)
+		bind h select-pane -L
+		bind j select-pane -D
+		bind k select-pane -U
+		bind l select-pane -R
+
+		# Resize panes with Alt+arrows (easier than Shift+arrows)
+		bind -n C-S-Left resize-pane -L 5
+		bind -n C-S-Right resize-pane -R 5
+		bind -n C-S-Up resize-pane -U 5
+		bind -n C-S-Down resize-pane -D 5
+
+		# Swap panes
+		bind -r H swap-pane -U
+		bind -r J swap-pane -D
+
+		# -- Mouse Support -----------------------------------------------------
+		set -g mouse off
+
+		# -- Scrollback / Copy Mode --------------------------------------------
+		# Use Ctrl+b [ to enter copy mode, then use vim keys or mouse to select
+		# Press y to yank (copy) selection
+		bind [ copy-mode \; send-keys -X end
+		bind -T copy-mode-vi PageUp send-keys -X page-up
+		bind -T copy-mode-vi PageDown send-keys -X page-down
+		bind -T copy-mode-vi v send-keys -X begin-selection
+		bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+	EOF
+}
+
+main() {
+        set -eu
+        local -a args=("$@")
+        local -i use_last_session=1
+        local -i attach=1
+        local    harness=pi
+
+        for i in "${!args[@]}"; do
+                case "${args[i]}" in
+                        --pi)
+                                harness='pi'
+                                unset 'args[i]'
+                                ;;
+                        --claude)
+                                harness='claude'
+                                unset 'args[i]'
+                                ;;
+                        --codex)
+                                harness='codex'
+                                unset 'args[i]'
+                                ;;
+                        --new-session)
+                                unset 'args[i]'
+                                use_last_session=0
+                                ;;
+                        --resume|--session)
+                                use_last_session=0
+                                ;;
+                        --start)
+                                unset 'args[i]'
+                                attach=0
+                                ;;
+                esac
+        done
+
+        local -r socket_name="${HOME}/work/.${harness}/tmux/mux.socket"
+        local -r tmux_lock="${HOME}/work/.${harness}/tmux/mux.lock"
+        local -r tmux_config="${HOME}/work/.tmux.conf"
+
+        if (( attach == 0 )); then
+                cd -- "${HOME}/work"
+                mkdir -p -- "$(dirname "${tmux_lock}")"
+                exec 4<>"${tmux_lock}"
+                flock -x -w 5 4
+                trap 'tmux -S "'"${socket_name}"'" kill-server; exit 0' TERM INT
+
+                # Try to use the most recent harness session if any.
+                if (( use_last_session )); then
+                        case "${harness}" in
+                                pi|claude) args_resume=("--continue" "${args[@]}") ;;
+                                codex) args_resume=("resume" "${args[@]}") ;;
+                        esac
+                else
+                        args_resume=("${args[@]}")
+                fi
+
+                while true; do
+                        # Create a new tmux session if one doesn't exist yet
+                        # Try first to resume an existing conversation if there's one otherwise start a new one
+                        if ! tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null; then
+                                create_tmux_config "${tmux_config}"
+                                tmux -f "${tmux_config}" -S "${socket_name}" new-session -d -s "${harness}-shell" "${harness}" "${args_resume[@]}"
+                                sleep 2
+								if (( use_last_session )) && ! tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null; then
+                                    tmux -f "${tmux_config}" -S "${socket_name}" new-session -d -s "${harness}-shell" "${harness}" "${args[@]}"
+                                fi
+                        fi
+
+                        # Pool until tmux session exits.
+                        # Alternative is to start tmux with bash -lc "trap 'tmux wait-for -S pi-end' EXIT; exec pi \"${args[@]}\"
+                        # and wait for the signal in the loop with tmux wait-for pi-end, however that wouldn't capture uncatchable signals
+                        while tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null; do
+                                sleep 1
+                        done
+                done
+        elif [[ -S "${socket_name}" ]]; then
+                if [[ "${TMUX:-}" != "${socket_name}",* ]]; then
+                        unset TMUX
+                fi
+                tmux -S "${socket_name}" has-session -t "${harness}-shell" >& /dev/null && exec tmux -S "${socket_name}" attach -t "${harness}-shell" || echo "No session"
+        fi
+}
+
+main "$@"
