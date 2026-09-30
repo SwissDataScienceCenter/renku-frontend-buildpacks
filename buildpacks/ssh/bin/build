@@ -12,14 +12,11 @@ layers_dir="${CNB_LAYERS_DIR}"
 buildpack_dir="${CNB_BUILDPACK_DIR}"
 ssh_layer_dir="${layers_dir}"/ssh
 ssh_bin_dir="${ssh_layer_dir}"/bin
-ssh_www_dir="${ssh_layer_dir}"/www
-mkdir -p "${ssh_bin_dir}" "${ssh_www_dir}"
+mkdir -p "${ssh_bin_dir}"
 
 DROPBEAR_VERSION="2026.94"
 DROPBEAR_URL="https://github.com/mkj/dropbear/archive/refs/tags/DROPBEAR_${DROPBEAR_VERSION}.tar.gz"
 OPENSSH_URL="https://github.com/openssh/openssh-portable/archive/refs/tags/V_10_0_P2.tar.gz"
-DARKHTTPD_VERSION="1.17"
-DARKHTTPD_URL="https://github.com/emikulic/darkhttpd/archive/refs/tags/v${DARKHTTPD_VERSION}.tar.gz"
 
 build_tmp="$(mktemp -d)"
 trap 'rm -rf "${build_tmp}"' EXIT
@@ -65,12 +62,7 @@ tar -xzf "${build_tmp}/openssh.tar.gz" -C "${build_tmp}"
 )
 cp "${build_tmp}/openssh-portable-V_10_0_P2/sftp-server" "${ssh_bin_dir}/"
 
-# darkhttpd: single-file static web server for the placeholder page
-curl -sL -o "${build_tmp}/darkhttpd.tar.gz" "${DARKHTTPD_URL}"
-tar -xzf "${build_tmp}/darkhttpd.tar.gz" -C "${build_tmp}"
-cc -O2 -o "${ssh_bin_dir}/darkhttpd" "${build_tmp}/darkhttpd-${DARKHTTPD_VERSION}/darkhttpd.c"
-
-chmod 755 "${ssh_bin_dir}"/dropbear "${ssh_bin_dir}"/dropbearkey "${ssh_bin_dir}"/scp "${ssh_bin_dir}"/sftp-server "${ssh_bin_dir}"/darkhttpd
+chmod 755 "${ssh_bin_dir}"/dropbear "${ssh_bin_dir}"/dropbearkey "${ssh_bin_dir}"/scp "${ssh_bin_dir}"/sftp-server
 cp "${buildpack_dir}/bin/ssh-entrypoint.sh" "${ssh_bin_dir}/ssh-entrypoint.sh"
 chmod 755 "${ssh_bin_dir}"/ssh-entrypoint.sh
 cp "${buildpack_dir}/bin/ssh-session.sh" "${ssh_bin_dir}/ssh-session.sh"
@@ -82,17 +74,6 @@ env_dir="${ssh_layer_dir}/env.launch"
 mkdir -p "${env_dir}"
 printf "%s" ":" >"${env_dir}/PATH.delim"
 printf "%s" "${ssh_bin_dir}" >"${env_dir}/PATH.prepend"
-
-cat >"${ssh_www_dir}/index.html" <<EOL
-<!DOCTYPE html>
-<html>
-  <head><title>Renku SSH session</title></head>
-  <body>
-    <h1>Renku SSH session</h1>
-    <p>This session is reachable over SSH on port 2222.</p>
-  </body>
-</html>
-EOL
 
 # Write layer metadata (CNB requirement)
 cat >"${layers_dir}/ssh.toml" <<EOL
