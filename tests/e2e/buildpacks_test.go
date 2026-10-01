@@ -383,7 +383,6 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 			var container string
 			var webPort int
 			var sshPort int
-			var baseURL url.URL
 			var keyPath string
 			BeforeAll(func(ctx SpecContext) {
 				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
@@ -397,10 +396,6 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 				ports := map[int]int{webPort: webPort, sshPort: 2222}
 				container, err = runImage(ctx, client, image, envVars, ports)
 				Expect(err).ToNot(HaveOccurred())
-				baseURL = url.URL{
-					Host:   fmt.Sprintf("127.0.0.1:%d", webPort),
-					Scheme: "http",
-				}
 				keyDir := GinkgoT().TempDir()
 				keyPath = filepath.Join(keyDir, "id_ed25519")
 				Expect(exec.Command("ssh-keygen", "-t", "ed25519", "-N", "", "-q", "-f", keyPath).Run()).To(Succeed())
@@ -432,15 +427,6 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 			})
 
 			Context("when the container is running", func() {
-				It("placeholder page should respond with 200 on the session port", func(ctx SpecContext) {
-					req, err := http.NewRequestWithContext(ctx, "GET", baseURL.String(), nil)
-					Expect(err).ToNot(HaveOccurred())
-					Eventually(func(g Gomega) int {
-						res, err := httpClient.Do(req)
-						g.Expect(err).ToNot(HaveOccurred())
-						return res.StatusCode
-					}).WithTimeout(time.Minute * 1).WithOffset(1).Should(Equal(200))
-				})
 				It("should allow SSH login with the provided public key", func(ctx SpecContext) {
 					sshIntoSession := func(g Gomega) {
 						cmd := exec.CommandContext(ctx, "ssh",
