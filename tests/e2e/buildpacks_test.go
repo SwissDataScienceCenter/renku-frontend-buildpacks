@@ -381,19 +381,21 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 		func(source string) {
 			var image string
 			var container string
-			var webPort int
+			var sessionPort int
 			var sshPort int
 			var keyPath string
 			BeforeAll(func(ctx SpecContext) {
 				image = strings.ToLower(fmt.Sprintf("test-image-%s", getULID()))
 				Expect(buildImage(ctx, builderImg, source, image, map[string]string{"BP_RENKU_FRONTENDS": "ssh"})).To(Succeed())
-				webPort = getFreePortOrDie()
+				sessionPort = getFreePortOrDie()
 				sshPort = getFreePortOrDie()
 				// because getFreePortOrDie releases its listener before returning,
 				// we fail loudly rather than silently collapsing the port bindings
-				Expect(sshPort).ToNot(Equal(webPort))
-				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", webPort), "RENKU_WORKING_DIR=/workspace", "LD_LIBRARY_PATH=/opt/conda-e2e-libs"}
-				ports := map[int]int{webPort: webPort, sshPort: 2222}
+				Expect(sshPort).ToNot(Equal(sessionPort))
+				// dropbear is the only frontend and listens on the session port the
+				// proxy reaches, so map the host ssh port onto it
+				envVars := []string{fmt.Sprintf("RENKU_SESSION_PORT=%d", sessionPort), "RENKU_WORKING_DIR=/workspace", "LD_LIBRARY_PATH=/opt/conda-e2e-libs"}
+				ports := map[int]int{sshPort: sessionPort}
 				container, err = runImage(ctx, client, image, envVars, ports)
 				Expect(err).ToNot(HaveOccurred())
 				keyDir := GinkgoT().TempDir()
