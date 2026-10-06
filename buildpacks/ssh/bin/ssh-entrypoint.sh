@@ -24,6 +24,10 @@ if [[ -f "${PROXY_AUTH_PUB}" ]]; then
   chmod 600 "${HOME}/.ssh/authorized_keys"
 fi
 
+if [[ ! -s "${HOME}/.ssh/authorized_keys" ]]; then
+  echo "WARNING: no usable SSH authorized keys in ${HOME}/.ssh/authorized_keys (source: ${PROXY_AUTH_PUB}); all SSH logins will be rejected" >&2
+fi
+
 # -s: public key auth only (password logins disabled)
 # -e: pass the launcher-provided environment (CNB launch env) to SSH sessions
 # -c: run every session through ssh-session.sh (tmux for logins, passthrough for
