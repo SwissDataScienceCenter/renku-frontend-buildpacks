@@ -1,4 +1,4 @@
-ARG base_image=index.docker.io/paketobuildpacks/ubuntu-noble-run:0.0.117
+ARG base_image=index.docker.io/paketobuildpacks/ubuntu-noble-run:0.0.148
 FROM ${base_image} AS base
 
 ARG cnb_run_uid=1000
