@@ -633,7 +633,7 @@ description = "Builder for Renku frontends and environments."
     optional = true
 
 [build]
-  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.117"
+  image = "index.docker.io/paketobuildpacks/ubuntu-noble-build:0.0.148"
 
   [[build.env]]
     name = "BP_RENKU_FRONTENDS"
