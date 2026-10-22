@@ -2,8 +2,7 @@ version: 2
 enable-beta-ecosystems: true
 updates:
   - package-ecosystem: "conda"
-    directories:
-      - "buildpacks/jupyterlab/bin"
+    directory: "/buildpacks/jupyterlab/bin"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"

@@ -28,7 +28,7 @@ case "${ARCH}" in
   "amd64") ARCH="x64" ;;
 esac
 
-VSCODIUM_DEFAULT_VERSION="1.104.36664"
+VSCODIUM_DEFAULT_VERSION="1.140.06880"
 BP_VSCODIUM_VERSION="${BP_VSCODIUM_VERSION:-${VSCODIUM_DEFAULT_VERSION}}"
 VSCODIUM_ARCHIVE="vscodium-reh-web-linux-${ARCH}-${BP_VSCODIUM_VERSION}.tar.gz"
 VSCODIUM_URL="https://github.com/VSCodium/vscodium/releases/download/${BP_VSCODIUM_VERSION}/${VSCODIUM_ARCHIVE}"
@@ -44,7 +44,7 @@ chmod 755 "${vscodium_bin_dir}"/vscodium-entrypoint.sh
 VSCODIUM_EXTENSIONS="${DEFAULT_VSCODIUM_EXTENSIONS}"
 if [ -f "${vscodium_extensions_file}" ]; then
   set +eo pipefail
-  NODE_JS_VERSION="24.11.1"
+  NODE_JS_VERSION="24.22.1"
   NODE_JS_ARCHIVE="node-v${NODE_JS_VERSION}-linux-${ARCH}.tar.xz"
   NODE_JS_URL="https://nodejs.org/dist/v${NODE_JS_VERSION}/node-v${NODE_JS_VERSION}-linux-${ARCH}.tar.xz"
   mkdir -p "${cache_layer_dir}/node"

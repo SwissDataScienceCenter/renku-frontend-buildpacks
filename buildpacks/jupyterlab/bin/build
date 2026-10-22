@@ -18,7 +18,7 @@ mkdir -p "${cache_layer_dir}"
 unset PYTHONPATH
 conda config --remove channels defaults
 conda config --add pkgs_dirs "${cache_layer_dir}"
-conda env create -y -p "${jupyter_environment_dir}" -f "${buildpack_dir}/bin/jupyter-environment.yml"
+conda env create -y -p "${jupyter_environment_dir}" -f "${buildpack_dir}/bin/environment.yml"
 # shellcheck source=/dev/null
 . "$(dirname "$(dirname "$(which conda)")")"/etc/profile.d/conda.sh
 conda activate "${jupyter_environment_dir}"
