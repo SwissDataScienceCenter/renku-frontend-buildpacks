@@ -67,11 +67,11 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get upgrade -yq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    wget -q https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -P /tmp && \
+    wget -q https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-linux-"$(dpkg --print-architecture)"-v3.8.0.tar.gz -P /tmp && \
     wget -q  https://github.com/justjanne/powerline-go/releases/download/v1.24/powerline-go-linux-"$(dpkg --print-architecture)" -O /usr/local/bin/powerline-shell && \
     chmod a+x /usr/local/bin/powerline-shell && \
-    tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -C /tmp && \
-    /tmp/git-lfs-3.3.0/install.sh && \
+    tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.8.0.tar.gz -C /tmp && \
+    /tmp/git-lfs-3.8.0/install.sh && \
     rm -rf /tmp/git-lfs* && \
     (userdel $(getent passwd ${cnb_run_uid}|cut -d: -f1) || true) && \
     (groupdel $(getent group ${cnb_run_uid}|cut -d: -f1) || true) && \
