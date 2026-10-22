@@ -20,6 +20,7 @@ SHELL [ "/bin/bash", "-c", "-o", "pipefail" ]
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && apt-get install -yq --no-install-recommends \
     build-essential \
+    ca-certificates \
     curl \
     gdb \
     git \
@@ -63,6 +64,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     vim \
     wget \
     zlib1g-dev && \
+    apt-get upgrade && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     wget -q https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -P /tmp && \
