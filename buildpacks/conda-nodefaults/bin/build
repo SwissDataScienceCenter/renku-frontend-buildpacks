@@ -23,7 +23,7 @@ OS="${CNB_TARGET_OS:-unknown}"
 ARCH="${CNB_TARGET_ARCH:-unknown}"
 
 YQ_FILENAME="yq_${OS}_${ARCH}"
-YQ_VERSION=v4.47.1
+YQ_VERSION=v4.54.1
 YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_FILENAME}"
 YQ_BIN="${cache_layer_dir}/yq"
 

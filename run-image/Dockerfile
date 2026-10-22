@@ -1,4 +1,4 @@
-ARG base_image=index.docker.io/paketobuildpacks/ubuntu-noble-run:0.0.117
+ARG base_image=index.docker.io/paketobuildpacks/ubuntu-noble-run:0.0.148
 FROM ${base_image} AS base
 
 ARG cnb_run_uid=1000
@@ -20,6 +20,7 @@ SHELL [ "/bin/bash", "-c", "-o", "pipefail" ]
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && apt-get install -yq --no-install-recommends \
     build-essential \
+    ca-certificates \
     curl \
     gdb \
     git \
@@ -63,13 +64,14 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     vim \
     wget \
     zlib1g-dev && \
+    apt-get upgrade -yq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    wget -q https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -P /tmp && \
+    wget -q https://github.com/git-lfs/git-lfs/releases/download/v3.8.0/git-lfs-linux-"$(dpkg --print-architecture)"-v3.8.0.tar.gz -P /tmp && \
     wget -q  https://github.com/justjanne/powerline-go/releases/download/v1.24/powerline-go-linux-"$(dpkg --print-architecture)" -O /usr/local/bin/powerline-shell && \
     chmod a+x /usr/local/bin/powerline-shell && \
-    tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.3.0.tar.gz -C /tmp && \
-    /tmp/git-lfs-3.3.0/install.sh && \
+    tar -zxvf /tmp/git-lfs-linux-"$(dpkg --print-architecture)"-v3.8.0.tar.gz -C /tmp && \
+    /tmp/git-lfs-3.8.0/install.sh && \
     rm -rf /tmp/git-lfs* && \
     (userdel $(getent passwd ${cnb_run_uid}|cut -d: -f1) || true) && \
     (groupdel $(getent group ${cnb_run_uid}|cut -d: -f1) || true) && \
