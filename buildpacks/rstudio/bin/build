@@ -13,7 +13,7 @@ rstudio_layer_dir="${layers_dir}"/rstudio
 mkdir -p "${rstudio_layer_dir}"/bin
 mkdir -p "${cache_layer_dir}"
 
-RSTUDIO_VERSION="2026.01.0-392"
+RSTUDIO_VERSION="2026.10.0-233"
 OS_CODENAME=jammy # https://posit.co/download/rstudio-server gives jammy regardless of ubuntu version
 FNAME="rstudio-$RSTUDIO_VERSION.deb"
 
