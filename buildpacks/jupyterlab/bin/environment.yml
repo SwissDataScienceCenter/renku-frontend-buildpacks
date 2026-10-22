@@ -13,7 +13,7 @@ dependencies:
   - jupyter_server==2.21.1
   - mistune>=3.4.0
   - papermill~=2.7.0
-  - requests>=2.34.0
+  - requests>=2.34.2
   - setuptools>=84.2.0
   - virtualenv>=21.14.12
   - ipython>=9.17.1
