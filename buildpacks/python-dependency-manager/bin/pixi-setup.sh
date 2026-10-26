@@ -26,13 +26,17 @@ mkdir -p "$mount/.pixi_cache"
 printf 'PIXI_CACHE_DIR = "%s/.pixi_cache"\n' "$mount" >&3
 
 if [ -n "$cache_src" ] && [ -d "$cache_src" ]; then
-    cp -ras --update=none "$cache_src/." "$mount/.pixi_cache" 2>/dev/null || warn "failed to seed pixi cache"
+    # Copy, do not symlink: pixi writes into its cache and the build-time layer
+    # is read-only for the session user.
+    cp -r --update=none "$cache_src/." "$mount/.pixi_cache" 2>/dev/null || warn "failed to seed pixi cache"
 fi
 
 # The mount holds several cloned repos and the one this image was built for
 # can be any of them. The pixi project name recorded at build time is the only
 # stable link between image and repo, so match pixi manifests/workspace root
-# and one level deep by name.
+# and one level deep by name. The name only locates the project: `pixi install`
+# always resolves from the checked-out manifest, so another branch (or another
+# lock) gets its own environment instead of reusing the build-time one.
 manifest_name() { grep -m1 '^name = ' "$1" | sed 's/^name = "\(.*\)"$/\1/'; }
 
 project_dir=""

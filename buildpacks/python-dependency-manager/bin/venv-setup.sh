@@ -44,7 +44,9 @@ fi
 uv_cache_src="${RENKU_UV_CACHE_DIR:-}"
 if [ -n "$uv_cache_src" ] && [ -d "$uv_cache_src" ]; then
     mkdir -p "$mount/.uv_cache"
-    cp -ras --update=none "$uv_cache_src/." "$mount/.uv_cache" 2>/dev/null || warn "failed to seed uv cache"
+    # Copy, do not symlink: uv writes into its cache and the build-time layer
+    # is read-only for the session user.
+    cp -r --update=none "$uv_cache_src/." "$mount/.uv_cache" 2>/dev/null || warn "failed to seed uv cache"
     printf 'UV_CACHE_DIR = "%s/.uv_cache"\n' "$mount" >&3
     bashrc_add "export UV_CACHE_DIR=$mount/.uv_cache"
     printf 'UV_PROJECT_ENVIRONMENT = "%s"\n' "$venv_dir" >&3
