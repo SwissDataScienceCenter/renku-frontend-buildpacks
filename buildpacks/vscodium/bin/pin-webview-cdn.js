@@ -13,17 +13,13 @@
 // appears, to that copy for the release being installed. This is the same fix as
 // https://github.com/VSCodium/vscodium/pull/3085, applied to the built release.
 //
+// Needs NODE_USE_ENV_PROXY=1 to honor HTTPS_PROXY for the fetch below.
+//
 // Usage: node pin-webview-cdn.js <vscodium-server-dir> <vscodium-version>
 "use strict";
 
 const fs = require("fs");
 const path = require("path");
-
-const [serverDir, version] = process.argv.slice(2);
-if (!serverDir || !version) {
-  console.error("Usage: node pin-webview-cdn.js <vscodium-server-dir> <vscodium-version>");
-  process.exit(2);
-}
 
 // The URL is baked into several bundles, not only product.json.
 const cdnPath = /vscode-cdn\.net\/insider\/[0-9a-f]{40}\//g;
@@ -39,7 +35,7 @@ function* sourceFiles(dir) {
   }
 }
 
-async function microsoftCommit() {
+async function microsoftCommit(version) {
   // VSCodium records the Microsoft commit each release is built from.
   const url = `https://raw.githubusercontent.com/VSCodium/vscodium/${version}/upstream/stable.json`;
   const response = await fetch(url);
@@ -54,7 +50,13 @@ async function microsoftCommit() {
 }
 
 async function main() {
-  const replacement = `vscode-cdn.net/stable/${await microsoftCommit()}/`;
+  const [serverDir, version] = process.argv.slice(2);
+  if (!serverDir || !version) {
+    console.error("Usage: node pin-webview-cdn.js <vscodium-server-dir> <vscodium-version>");
+    process.exit(2);
+  }
+
+  const replacement = `vscode-cdn.net/stable/${await microsoftCommit(version)}/`;
   let patched = 0;
   for (const file of sourceFiles(serverDir)) {
     const content = fs.readFileSync(file, "utf8");
@@ -63,11 +65,16 @@ async function main() {
     fs.writeFileSync(file, content.replace(cdnPath, replacement));
     patched++;
   }
-  if (patched === 0) {
-    console.log("VSCodium webview CDN url already up to date or not found");
-    return;
+  if (patched > 0) {
+    console.log(`Pointed ${patched} files at ${replacement}`);
   }
-  console.log(`Pointed ${patched} files at ${replacement}`);
+
+  // Fail loudly if the broken url is still there, e.g. because the regex above no
+  // longer matches. If upstream fixed the url this passes silently.
+  const productJson = path.join(serverDir, "product.json");
+  if (fs.readFileSync(productJson, "utf8").includes("vscode-cdn.net/insider/")) {
+    throw new Error(`${productJson} still points at the outdated webview CDN build`);
+  }
 }
 
 main().catch((error) => {
