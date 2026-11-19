@@ -38,6 +38,10 @@ echo "Installing VSCodium version: ${BP_VSCODIUM_VERSION} on ${ARCH}"
 
 curl -sSLo "${cache_layer_dir}/${VSCODIUM_ARCHIVE}" -C - "${VSCODIUM_URL}"
 tar -xzf "${cache_layer_dir}/${VSCODIUM_ARCHIVE}" -C "${vscodium_layer_dir}"
+# The webview host in product.json points at an outdated build on Microsoft's CDN,
+# see pin-webview-cdn.js for details.
+NODE_USE_ENV_PROXY=1 "${vscodium_layer_dir}/node" "${buildpack_dir}/bin/pin-webview-cdn.js" "${vscodium_layer_dir}" "${BP_VSCODIUM_VERSION}" || \
+  >&2 echo "WARNING: Failed to update the VSCodium webview CDN url, notebook output will not render!"
 cp "${buildpack_dir}/bin/vscodium-entrypoint.sh" "${vscodium_bin_dir}/vscodium-entrypoint.sh"
 chmod 755 "${vscodium_bin_dir}"/vscodium-entrypoint.sh
 
