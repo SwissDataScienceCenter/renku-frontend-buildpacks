@@ -171,6 +171,30 @@ for agent in ${BP_RENKU_AI_AGENTS:-}; do
 		EOL
 		chmod a+x "${AI_LAYER}/exec.d/init-codex.sh"
 		;;
+	copilot)
+		log "Install Copilot agent [${version:-latest}]"
+		npm install --prefix "${AI_LAYER}" -g "@github/copilot${version:+@$version}"
+		if [[ -d "./.${name}" ]]; then
+			cp -RpP "./.${name}" "${AI_LAYER_CACHE}/agentic/${name}"
+			tar -C "${AI_LAYER_CACHE}/agentic/${name}" -czf "${AI_LAYER}/agentic/${name}.tgz" .
+		fi
+		printf '/home/renku/work/.copilot' >   "${ENV_LAUNCH}/COPILOT_HOME.override"
+		printf 'false' >                       "${ENV_LAUNCH}/COPILOT_AUTO_UPDATE.override"
+		mkdir -p "${AI_LAYER}/exec.d/"
+		cat > "${AI_LAYER}/exec.d/init-copilot.sh" <<- EOL
+			#!/usr/bin/env bash
+			if [[ -z "\${COPILOT_HOME:-}" ]]; then
+			  exit 0
+			elif ! mkdir -p "\${COPILOT_HOME}" 2>/dev/null; then
+			  echo "${name} disabled: cannot create dir \${COPILOT_HOME}" >&2
+			  exit 0
+			fi
+			if [[ -f "${AI_LAYER}/agentic/${name}.tgz" ]]; then
+			  tar -C "\${COPILOT_HOME}" -xzf "${AI_LAYER}/agentic/${name}.tgz"
+			fi
+		EOL
+		chmod a+x "${AI_LAYER}/exec.d/init-copilot.sh"
+		;;
 	esac
 done
 

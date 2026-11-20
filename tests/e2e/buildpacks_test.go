@@ -371,6 +371,10 @@ var _ = Describe("Testing samples", Label("samples"), Ordered, func() {
 					_, err := execInContainer(ctx, client, container, []string{"launcher", "codex", "--version"})
 					Expect(err).ToNot(HaveOccurred())
 				})
+				It("copilot should exist as a command in the container", func(ctx SpecContext) {
+					_, err := execInContainer(ctx, client, container, []string{"launcher", "copilot", "--version"})
+					Expect(err).ToNot(HaveOccurred())
+				})
 			})
 		},
 		Entry("using coding-agent sample", "../../samples/coding-agent"),
