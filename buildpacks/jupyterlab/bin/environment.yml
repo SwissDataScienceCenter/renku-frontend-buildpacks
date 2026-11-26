@@ -15,7 +15,7 @@ dependencies:
   - papermill~=2.7.0
   - requests>=2.34.0
   - setuptools>=84.2.1
-  - virtualenv>=21.15.8
+  - virtualenv>=21.15.13
   - ipython>=9.18.1
   - tornado>=6.6.1
   - packaging>=26.3
